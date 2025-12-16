@@ -1,0 +1,50 @@
+package com.nexus.common.storage;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+
+import java.net.URI;
+
+@Configuration
+@ConditionalOnProperty(name = "app.storage.type", havingValue = "s3", matchIfMissing = false)
+public class S3Config {
+    
+    @Value("${app.storage.s3.access-key:}")
+    private String accessKey;
+    
+    @Value("${app.storage.s3.secret-key:}")
+    private String secretKey;
+    
+    @Value("${app.storage.s3.region:us-east-1}")
+    private String region;
+    
+    @Value("${app.storage.s3.endpoint:}")
+    private String endpoint; // For MinIO or custom S3-compatible storage
+    
+    @Bean
+    public S3Client s3Client() {
+        var builder = S3Client.builder()
+                .region(Region.of(region));
+        
+        // If credentials are provided, use them
+        if (accessKey != null && !accessKey.isEmpty() && 
+            secretKey != null && !secretKey.isEmpty()) {
+            builder.credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(accessKey, secretKey)));
+        }
+        
+        // If endpoint is provided (for MinIO), use it
+        if (endpoint != null && !endpoint.isEmpty()) {
+            builder.endpointOverride(URI.create(endpoint));
+        }
+        
+        return builder.build();
+    }
+    
+}

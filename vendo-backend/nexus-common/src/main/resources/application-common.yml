@@ -1,0 +1,44 @@
+# Common Configuration for all services
+
+# Caching Configuration
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=10m,expireAfterAccess=5m
+    cache-names: users,products,orders,categories
+
+# Storage Configuration
+app:
+  storage:
+    type: ${STORAGE_TYPE:s3} # s3 or minio
+    s3:
+      bucket: ${S3_BUCKET:nexus-uploads}
+      region: ${S3_REGION:us-east-1}
+      access-key: ${S3_ACCESS_KEY:}
+      secret-key: ${S3_SECRET_KEY:}
+      endpoint: ${S3_ENDPOINT:} # For MinIO: http://localhost:9000
+
+# SMS Configuration
+app:
+  sms:
+    enabled: ${SMS_ENABLED:false}
+    provider: ${SMS_PROVIDER:twilio} # twilio or aws-sns
+    twilio:
+      account-sid: ${TWILIO_ACCOUNT_SID:}
+      auth-token: ${TWILIO_AUTH_TOKEN:}
+      from-number: ${TWILIO_FROM_NUMBER:}
+    aws-sns:
+      region: ${AWS_SNS_REGION:us-east-1}
+      access-key: ${AWS_ACCESS_KEY:}
+      secret-key: ${AWS_SECRET_KEY:}
+
+# Notification Configuration
+app:
+  notification:
+    email:
+      enabled: true
+    sms:
+      enabled: ${SMS_ENABLED:false}
+    push:
+      enabled: ${PUSH_ENABLED:false}

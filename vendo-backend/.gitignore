@@ -1,0 +1,60 @@
+HELP.md
+.gradle
+build/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### macOS ###
+.DS_Store
+**/.DS_Store
+
+### Environment ###
+.env
+.env.local
+*.log
+
+### Build artifacts ###
+*.zip
+*.jar
+*.war
+*.ear
+*.class
+!gradle/wrapper/gradle-wrapper.jar
+
+### Old Maven projects ###
+**/pom.xml
+**/mvnw
+**/mvnw.cmd
+**/.mvn/
