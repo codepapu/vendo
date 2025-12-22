@@ -7,7 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+package-lock.json
+
+# Build output
 dist
 dist-ssr
 *.local
@@ -28,3 +32,13 @@ dist-ssr
 .env.local
 .env.production
 .env.development
+
+# Old Laravel files (should be deleted)
+storage/
+resources/
+public/vendor/
+public/storage/
+public/themes/
+public/docs/
+public/.htaccess
+public/web.config
