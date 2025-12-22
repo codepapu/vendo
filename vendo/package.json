@@ -1,0 +1,29 @@
+{
+  "name": "vendo-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vendo E-commerce Platform - Monorepo",
+  "workspaces": [
+    "packages/*",
+    "vendo-frontend",
+    "vendo-mobile"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=vendo-frontend",
+    "dev:mobile": "npm run start --workspace=vendo-mobile",
+    "build:frontend": "npm run build --workspace=vendo-frontend",
+    "build:mobile": "npm run build --workspace=vendo-mobile",
+    "lint": "npm run lint --workspaces",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "prepare": "husky install || true"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

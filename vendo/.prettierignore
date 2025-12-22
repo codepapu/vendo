@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+.next
+coverage
+*.log
+*.lock
+.DS_Store
+.vscode
+.idea
+*.min.js
+*.min.css
