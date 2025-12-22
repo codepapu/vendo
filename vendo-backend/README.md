@@ -1,36 +1,35 @@
-# Nexus E-commerce Platform
+# Vendo E-commerce Platform
 
 **Author:** code.papu@gmail.com  
 **Version:** 1.0.0-SNAPSHOT  
-**Framework:** Spring Boot 3.3.0
+**Framework:** Spring Boot 3.4.0
 
 ---
 
 ## Overview
 
-Nexus is a modern, microservices-based e-commerce platform built with Spring Boot. It provides a complete solution for online retail, marketplace, and multi-vendor commerce.
+Vendo is a modern, monolithic e-commerce platform built with Spring Boot. It provides a complete solution for online retail, marketplace, and multi-vendor commerce.
 
 ---
 
 ## Architecture
 
-### Microservices
+This is a **monolithic Spring Boot application** that consolidates all e-commerce functionality into a single deployable application.
 
-- **nexus-discovery-service** - Service Discovery (Eureka)
-- **nexus-config-service** - Configuration Server
-- **nexus-auth-service** - OAuth2 Authorization Server
-- **nexus-api-gateway** - API Gateway
-- **nexus-user-service** - User Management & Authentication
-- **nexus-product-service** - Product Catalog Management
-- **nexus-order-service** - Order Processing
-- **nexus-payment-service** - Payment Processing
-- **nexus-cart-service** - Shopping Cart Management
-- **nexus-marketplace-service** - Multi-vendor Marketplace
-- **nexus-content-service** - Content Management (Blog, Media)
-- **nexus-notification-service** - Multi-channel Notifications
-- **nexus-analytics-service** - Analytics & Reporting
-- **nexus-admin-service** - Admin Dashboard & Management
-- **nexus-common** - Shared Common Module
+### Features
+
+- ✅ User Management & Authentication (JWT, OAuth2, Social Login)
+- ✅ Product Catalog with Categories, Variations, Attributes
+- ✅ Shopping Cart & Checkout
+- ✅ Order Management & Tracking
+- ✅ Payment Processing (Multiple Gateways)
+- ✅ Multi-vendor Marketplace
+- ✅ Content Management (Blog, Pages, Media)
+- ✅ Multi-channel Notifications (Email, SMS, Push, WebSocket)
+- ✅ Analytics & Reporting
+- ✅ Admin Dashboard
+- ✅ Event-Driven Architecture (Kafka)
+- ✅ Saga Pattern for Distributed Transactions
 
 ---
 
@@ -40,8 +39,8 @@ Nexus is a modern, microservices-based e-commerce platform built with Spring Boo
 
 - Java 21+
 - PostgreSQL 16+ (localhost:5432)
-- Redis (localhost:6379)
-- Kafka (localhost:9092) - Optional but recommended
+- Redis (localhost:6379) - Optional but recommended
+- Kafka (localhost:9092) - Optional for async processing
 - Gradle (or use Gradle wrapper)
 
 ### Installation
@@ -70,101 +69,124 @@ Nexus is a modern, microservices-based e-commerce platform built with Spring Boo
    ./scripts/init-databases.sh
    ```
 
-3. **Start All Services:**
+3. **Build and Run:**
    ```bash
-   ./scripts/start-all.sh
+   ./gradlew build
+   ./gradlew bootRun
+   ```
+
+   Or use the Gradle wrapper:
+   ```bash
+   ./gradlew bootRun
    ```
 
 ---
 
-## Service URLs
+## Application URLs
 
-- **API Gateway:** http://localhost:8080
-- **Discovery Service:** http://localhost:8761
+- **Application:** http://localhost:8080
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
-- **User Service:** http://localhost:8081
-- **Product Service:** http://localhost:8082
-- **Order Service:** http://localhost:8083
-- **Payment Service:** http://localhost:8084
-- **Content Service:** http://localhost:8085
-- **Notification Service:** http://localhost:8086
-- **Analytics Service:** http://localhost:8087
-- **Admin Service:** http://localhost:8088
-- **Cart Service:** http://localhost:8089
-- **Marketplace Service:** http://localhost:8090
-
----
-
-## Features
-
-- ✅ User Management & Authentication (JWT, OAuth2, Social Login)
-- ✅ Product Catalog with Categories, Variations, Attributes
-- ✅ Shopping Cart & Checkout
-- ✅ Order Management & Tracking
-- ✅ Payment Processing (Multiple Gateways)
-- ✅ Multi-vendor Marketplace
-- ✅ Content Management (Blog, Pages, Media)
-- ✅ Multi-channel Notifications (Email, SMS, Push, WebSocket)
-- ✅ Analytics & Reporting
-- ✅ Admin Dashboard
-- ✅ Event-Driven Architecture (Kafka)
-- ✅ Saga Pattern for Distributed Transactions
+- **API Docs:** http://localhost:8080/api-docs
+- **Health Check:** http://localhost:8080/actuator/health
 
 ---
 
 ## Technology Stack
 
-- **Framework:** Spring Boot 3.3.0
+- **Framework:** Spring Boot 3.4.0
 - **Language:** Java 21
 - **Build Tool:** Gradle
 - **Database:** PostgreSQL 16
-- **Cache:** Redis
-- **Message Broker:** Apache Kafka
-- **Service Discovery:** Netflix Eureka
-- **API Gateway:** Spring Cloud Gateway
+- **Cache:** Redis, Caffeine
+- **Message Broker:** Apache Kafka (optional)
 - **Security:** Spring Security, OAuth2, JWT
 - **Documentation:** OpenAPI/Swagger
+- **Migration:** Flyway
 
 ---
 
 ## Project Structure
 
 ```
-nexus-spring-boot/
-├── nexus-common/              # Shared common module
-├── nexus-discovery-service/    # Service discovery
-├── nexus-config-service/       # Configuration server
-├── nexus-auth-service/         # OAuth2 server
-├── nexus-api-gateway/          # API gateway
-├── nexus-user-service/         # User management
-├── nexus-product-service/      # Product catalog
-├── nexus-order-service/        # Order processing
-├── nexus-payment-service/      # Payment processing
-├── nexus-cart-service/         # Shopping cart
-├── nexus-marketplace-service/  # Marketplace
-├── nexus-content-service/      # Content management
-├── nexus-notification-service/ # Notifications
-├── nexus-analytics-service/    # Analytics
-└── nexus-admin-service/        # Admin dashboard
+vendo-backend/
+├── src/
+│   ├── main/
+│   │   ├── java/com/vendo/
+│   │   │   ├── user/          # User management
+│   │   │   ├── product/       # Product catalog
+│   │   │   ├── order/         # Order processing
+│   │   │   ├── payment/       # Payment processing
+│   │   │   ├── cart/          # Shopping cart
+│   │   │   ├── marketplace/   # Marketplace features
+│   │   │   ├── content/       # Content management
+│   │   │   ├── notification/  # Notifications
+│   │   │   ├── analytics/     # Analytics
+│   │   │   ├── admin/         # Admin dashboard
+│   │   │   └── common/        # Shared utilities
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       └── db/migration/  # Flyway migrations
+│   └── test/
+├── build.gradle.kts
+├── settings.gradle.kts
+└── scripts/
 ```
 
 ---
 
 ## Configuration
 
-All services are configured to use local services:
+All services are configured in `src/main/resources/application.yml`:
 
 - **PostgreSQL:** `localhost:5432`
-- **Database:** `nexus_db`
+- **Database:** `vendo_db`
 - **Redis:** `localhost:6379`
-- **Kafka:** `localhost:9092`
+- **Kafka:** `localhost:9092` (optional)
+
+### Environment Variables
+
+Key environment variables you can override:
+
+- `JWT_SECRET`: JWT signing secret
+- `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD`: Email configuration
+- `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`: S3 storage configuration
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Google OAuth
+- `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET`: Facebook OAuth
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`: GitHub OAuth
+
+---
+
+## Migration from Microservices
+
+If you're migrating from the microservices version, see `MONOLITHIC_MIGRATION.md` for detailed instructions.
+
+---
+
+## Development
+
+### Running Tests
+
+```bash
+./gradlew test
+```
+
+### Building
+
+```bash
+./gradlew build
+```
+
+### Running
+
+```bash
+./gradlew bootRun
+```
 
 ---
 
 ## Documentation
 
-- **PROJECT_RENAME_COMPLETE.md** - Rename documentation
-- **LOCAL_SETUP_GUIDE.md** - Local setup instructions (if exists)
+- **MONOLITHIC_MIGRATION.md** - Migration guide from microservices
 - **API Documentation:** http://localhost:8080/swagger-ui.html
 
 ---
@@ -181,4 +203,4 @@ Proprietary - All rights reserved
 
 ---
 
-**Nexus E-commerce Platform** - Modern, scalable, microservices-based e-commerce solution.
+**Vendo E-commerce Platform** - Modern, scalable, monolithic e-commerce solution.

@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Database Initialization Script
-# This script initializes PostgreSQL databases and users for Nexus E-commerce Platform
+# This script initializes PostgreSQL databases and users for Vendo E-commerce Platform
 # Requires local PostgreSQL installation
 
 set -e
 
 echo "=========================================="
-echo "Nexus Database Initialization"
+echo "Vendo Database Initialization"
 echo "=========================================="
 
 # Check if PostgreSQL is running locally
@@ -40,11 +40,11 @@ echo "Database initialization completed!"
 echo "=========================================="
 echo ""
 echo "Databases created:"
-echo "  - nexus_db (main database)"
+echo "  - vendo_db (main database)"
 echo ""
 echo "Users created:"
-echo "  - nexus_app (application user)"
-echo "  - nexus_readonly (read-only user for reporting)"
+echo "  - vendo_app (application user)"
+echo "  - vendo_readonly (read-only user for reporting)"
 echo ""
 echo "Next steps:"
 echo "  1. Start Spring Boot services to run Flyway migrations"
