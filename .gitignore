@@ -40,6 +40,8 @@ vendo-frontend/.env.production
 *.sqlite
 *.sqlite3
 *.sql
+# Allow migration files
+!vendo-backend/src/main/resources/db/migration/*.sql
 
 # Logs
 *.log
