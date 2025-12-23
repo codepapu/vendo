@@ -22,6 +22,13 @@ const Settings = lazy(() => import('@/pages/profile/settings').then((m) => ({ de
 const OrderConfirmation = lazy(() => import('@/pages/checkout/confirmation').then((m) => ({ default: m.OrderConfirmation })));
 const OrderDetail = lazy(() => import('@/pages/orders/[id]').then((m) => ({ default: m.OrderDetail })));
 const GuestCheckout = lazy(() => import('@/pages/checkout/guest').then((m) => ({ default: m.GuestCheckout })));
+const BlogIndex = lazy(() => import('@/pages/blog/index').then((m) => ({ default: m.BlogIndex })));
+const BlogPostDetail = lazy(() => import('@/pages/blog/[slug]').then((m) => ({ default: m.BlogPostDetail })));
+const DynamicPage = lazy(() => import('@/pages/pages/[slug]').then((m) => ({ default: m.DynamicPage })));
+const AdminBlogPosts = lazy(() => import('@/pages/admin/content/blog').then((m) => ({ default: m.AdminBlogPosts })));
+const AdminBlogPostEditor = lazy(() => import('@/pages/admin/content/blog/[id]').then((m) => ({ default: m.AdminBlogPostEditor })));
+const AdminPages = lazy(() => import('@/pages/admin/content/pages').then((m) => ({ default: m.AdminPages })));
+const AdminPageEditor = lazy(() => import('@/pages/admin/content/pages/[id]').then((m) => ({ default: m.AdminPageEditor })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -114,6 +121,43 @@ function App() {
               <Route
                 path="/checkout/guest"
                 element={<GuestCheckout />}
+              />
+              {/* Content Management Routes */}
+              <Route path="/blog" element={<BlogIndex />} />
+              <Route path="/blog/:slug" element={<BlogPostDetail />} />
+              <Route path="/pages/:slug" element={<DynamicPage />} />
+              {/* Admin Content Routes */}
+              <Route
+                path="/admin/content/blog"
+                element={
+                  <ProtectedRoute>
+                    <AdminBlogPosts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/content/blog/:id"
+                element={
+                  <ProtectedRoute>
+                    <AdminBlogPostEditor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/content/pages"
+                element={
+                  <ProtectedRoute>
+                    <AdminPages />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/content/pages/:id"
+                element={
+                  <ProtectedRoute>
+                    <AdminPageEditor />
+                  </ProtectedRoute>
+                }
               />
             </Routes>
           </Suspense>
