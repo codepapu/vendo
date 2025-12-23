@@ -14,6 +14,7 @@ export { orderApi } from './order-api';
 export { cartApi } from './cart-api';
 export { couponApi } from './coupon-api';
 export { shippingApi } from './shipping-api';
+export { guestCheckoutApi } from './guest-checkout-api';
 
 // Re-export default exports
 export { default as authApiDefault } from './auth-api';
@@ -26,3 +27,4 @@ export { default as orderApiDefault } from './order-api';
 export { default as cartApiDefault } from './cart-api';
 export { default as couponApiDefault } from './coupon-api';
 export { default as shippingApiDefault } from './shipping-api';
+export { default as guestCheckoutApiDefault } from './guest-checkout-api';

@@ -648,16 +648,9 @@ export function Checkout() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => {
-                  // Allow guest checkout by temporarily bypassing auth
-                  // In production, you'd implement proper guest checkout
-                  toast({
-                    title: 'Guest Checkout',
-                    description: 'Please login or create an account to continue. Guest checkout coming soon!',
-                  });
-                }}
+                asChild
               >
-                Continue as Guest
+                <Link to="/checkout/guest">Continue as Guest</Link>
               </Button>
             </CardContent>
           </Card>

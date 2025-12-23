@@ -1,22 +1,31 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Package, Loader2, Home, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Package, Loader2, Home, ShoppingBag, UserPlus } from 'lucide-react';
 import { orderApi } from '@/services/order-api';
+import { guestCheckoutApi } from '@/services/guest-checkout-api';
 import { formatPrice } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import type { OrderResponse } from '@/types';
 
 export function OrderConfirmation() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const orderId = searchParams.get('orderId');
   const orderCode = searchParams.get('orderCode');
+  const isGuest = searchParams.get('guest') === 'true';
+  const sessionToken = localStorage.getItem('guestSessionToken');
 
   const { data: order, isLoading } = useQuery({
-    queryKey: ['order', orderId],
-    queryFn: () => {
+    queryKey: ['order', orderId, isGuest],
+    queryFn: async () => {
+      if (isGuest && sessionToken) {
+        return guestCheckoutApi.getGuestOrderByToken(sessionToken);
+      }
       if (orderId) {
         return orderApi.getOrderById(Number(orderId));
       }
@@ -25,7 +34,7 @@ export function OrderConfirmation() {
       }
       return null;
     },
-    enabled: !!(orderId || orderCode),
+    enabled: !!(orderId || orderCode || (isGuest && sessionToken)),
   });
 
   const formatDate = (dateString: string) => {
@@ -191,6 +200,40 @@ export function OrderConfirmation() {
           </CardContent>
         </Card>
 
+        {/* Guest Account Creation Prompt */}
+        {isGuest && (
+          <Card className="border-primary">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Create an Account
+              </CardTitle>
+              <CardDescription>
+                Create an account to track your orders and enjoy faster checkout next time!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  You can create an account using the email address used for this order.
+                </p>
+                <div className="flex gap-4">
+                  <Button asChild>
+                    <Link to={`/register?email=${order?.shippingAddress?.email || ''}&redirect=/profile/orders`}>
+                      Create Account
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link to="/">
+                      Continue as Guest
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Actions */}
         <div className="flex gap-4 justify-center">
           <Button variant="outline" asChild>
@@ -199,12 +242,14 @@ export function OrderConfirmation() {
               Back to Home
             </Link>
           </Button>
-          <Button asChild>
-            <Link to="/profile/orders">
-              <ShoppingBag className="h-4 w-4 mr-2" />
-              View All Orders
-            </Link>
-          </Button>
+          {!isGuest && (
+            <Button asChild>
+              <Link to="/profile/orders">
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                View All Orders
+              </Link>
+            </Button>
+          )}
         </div>
       </motion.div>
     </div>

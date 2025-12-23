@@ -98,4 +98,20 @@ public class EmailService {
             // Don't throw exception for welcome email
         }
     }
+    
+    public void sendOrderConfirmationEmail(String email, String subject, String message, Object orderDetails) {
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setFrom(fromEmail);
+            mailMessage.setTo(email);
+            mailMessage.setSubject(subject);
+            mailMessage.setText(message);
+            
+            mailSender.send(mailMessage);
+            log.info("Order confirmation email sent to: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send order confirmation email to: {}", email, e);
+            // Don't throw exception - order is still created
+        }
+    }
 }

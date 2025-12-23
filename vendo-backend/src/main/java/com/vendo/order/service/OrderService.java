@@ -32,6 +32,7 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final OrderAddressRepository orderAddressRepository;
     private final OrderHistoryRepository orderHistoryRepository;
+    private final com.vendo.user.repository.UserRepository userRepository;
     private final EventPublisher eventPublisher;
     
     @Transactional(readOnly = true)
@@ -67,6 +68,9 @@ public class OrderService {
         return mapToResponse(order);
     }
     
+    /**
+     * Create order for authenticated user
+     */
     @Transactional
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
         // Generate unique order code
@@ -82,20 +86,25 @@ public class OrderService {
         BigDecimal discountAmount = BigDecimal.ZERO; // Would calculate from coupon
         BigDecimal total = subTotal.add(taxAmount).add(shippingAmount).subtract(discountAmount);
         
+        // Get user entity if userId is provided
+        com.vendo.user.entity.User user = userId != null 
+            ? userRepository.findById(userId).orElse(null)
+            : null;
+        
         Order order = Order.builder()
-                .code(orderCode)
-                .userId(userId)
-                .status("pending")
-                .amount(total)
-                .subTotal(subTotal)
+                .orderNumber(orderCode)
+                .user(user)
+                .orderType("B2C")
+                .status("PENDING")
+                .subtotal(subTotal)
                 .taxAmount(taxAmount)
                 .shippingAmount(shippingAmount)
                 .discountAmount(discountAmount)
-                .shippingMethod(request.getShippingMethod() != null ? request.getShippingMethod() : "default")
-                .couponCode(request.getCouponCode())
-                .description(request.getNotes())
-                .isConfirmed(false)
-                .isFinished(false)
+                .totalAmount(total)
+                .currency("USD")
+                .notes((request.getNotes() != null ? request.getNotes() + " | " : "") +
+                       (request.getShippingMethod() != null ? "Shipping Method: " + request.getShippingMethod() + " | " : "") +
+                       (request.getCouponCode() != null ? "Coupon Code: " + request.getCouponCode() : ""))
                 .build();
         
         // Create order products
@@ -298,7 +307,102 @@ public class OrderService {
         return mapToResponse(updatedOrder);
     }
     
-    private OrderResponse mapToResponse(Order order) {
+    /**
+     * Create order for guest (nullable userId)
+     */
+    @Transactional
+    public OrderResponse createGuestOrder(CreateOrderRequest request, String guestEmail) {
+        // Generate unique order code
+        String orderCode = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        
+        // Calculate totals (simplified - in production, would fetch product prices)
+        BigDecimal subTotal = request.getItems().stream()
+                .map(item -> BigDecimal.valueOf(item.getQuantity()).multiply(BigDecimal.valueOf(100))) // Placeholder price
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        BigDecimal taxAmount = subTotal.multiply(BigDecimal.valueOf(0.1)); // 10% tax (placeholder)
+        BigDecimal shippingAmount = BigDecimal.valueOf(10); // Placeholder shipping
+        BigDecimal discountAmount = BigDecimal.ZERO; // Would calculate from coupon
+        BigDecimal total = subTotal.add(taxAmount).add(shippingAmount).subtract(discountAmount);
+        
+        Order order = Order.builder()
+                .orderNumber(orderCode)
+                .user(null) // Guest order - no user
+                .orderType("B2C")
+                .status("PENDING")
+                .subtotal(subTotal)
+                .taxAmount(taxAmount)
+                .shippingAmount(shippingAmount)
+                .discountAmount(discountAmount)
+                .totalAmount(total)
+                .currency("USD")
+                .notes((request.getNotes() != null ? request.getNotes() + " | " : "") + 
+                       "Guest Order - Email: " + guestEmail + 
+                       (request.getShippingMethod() != null ? " | Shipping Method: " + request.getShippingMethod() : "") +
+                       (request.getCouponCode() != null ? " | Coupon Code: " + request.getCouponCode() : ""))
+                .build();
+        
+        // Create order products (using OrderProduct for backward compatibility)
+        List<OrderProduct> orderProducts = request.getItems().stream()
+                .map(item -> {
+                    OrderProduct op = new OrderProduct();
+                    op.setOrder(order);
+                    op.setProductId(item.getProductId());
+                    op.setQty(item.getQuantity());
+                    op.setPrice(BigDecimal.valueOf(100)); // Placeholder - would fetch from product service
+                    op.setProductName("Product " + item.getProductId()); // Would fetch from product service
+                    return op;
+                })
+                .toList();
+        order.setOrderProducts(orderProducts);
+        
+        // Create addresses
+        OrderAddress shippingAddress = OrderAddress.builder()
+                .order(order)
+                .type("shipping_address")
+                .name(request.getShippingAddress().getName())
+                .phone(request.getShippingAddress().getPhone())
+                .email(request.getShippingAddress().getEmail())
+                .address(request.getShippingAddress().getAddress())
+                .city(request.getShippingAddress().getCity())
+                .state(request.getShippingAddress().getState())
+                .zipCode(request.getShippingAddress().getZipCode())
+                .country(request.getShippingAddress().getCountry())
+                .build();
+        
+        OrderAddress billingAddress = OrderAddress.builder()
+                .order(order)
+                .type("billing_address")
+                .name(request.getBillingAddress().getName())
+                .phone(request.getBillingAddress().getPhone())
+                .email(request.getBillingAddress().getEmail())
+                .address(request.getBillingAddress().getAddress())
+                .city(request.getBillingAddress().getCity())
+                .state(request.getBillingAddress().getState())
+                .zipCode(request.getBillingAddress().getZipCode())
+                .country(request.getBillingAddress().getCountry())
+                .build();
+        
+        order.setAddresses(List.of(shippingAddress, billingAddress));
+        
+        // Create initial order history
+        OrderHistory history = OrderHistory.builder()
+                .order(order)
+                .status("PENDING")
+                .description("Guest order created")
+                .build();
+        order.setHistories(List.of(history));
+        
+        Order savedOrder = orderRepository.save(order);
+        log.info("Guest order created with ID: {} and code: {}", savedOrder.getId(), savedOrder.getOrderNumber());
+        
+        return mapToResponse(savedOrder);
+    }
+    
+    /**
+     * Map Order entity to OrderResponse DTO
+     */
+    public OrderResponse mapToResponse(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
                 .code(order.getCode())
@@ -309,13 +413,13 @@ public class OrderService {
                 .taxAmount(order.getTaxAmount())
                 .shippingAmount(order.getShippingAmount())
                 .discountAmount(order.getDiscountAmount())
-                .paymentFee(order.getPaymentFee())
-                .shippingMethod(order.getShippingMethod())
-                .couponCode(order.getCouponCode())
-                .description(order.getDescription())
-                .isConfirmed(order.getIsConfirmed())
-                .isFinished(order.getIsFinished())
-                .completedAt(order.getCompletedAt())
+                .paymentFee(BigDecimal.ZERO) // Order entity doesn't have this field
+                .shippingMethod(extractShippingMethodFromNotes(order.getNotes()))
+                .couponCode(extractCouponCodeFromNotes(order.getNotes()))
+                .description(order.getNotes()) // Use notes as description
+                .isConfirmed(false) // Order entity doesn't have this field
+                .isFinished(false) // Order entity doesn't have this field
+                .completedAt(null) // Order entity doesn't have this field
                 .items(order.getOrderProducts() != null ?
                         order.getOrderProducts().stream()
                                 .map(op -> OrderItemResponse.builder()
@@ -361,5 +465,39 @@ public class OrderService {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();
+    }
+    
+    /**
+     * Extract shipping method from order notes
+     */
+    private String extractShippingMethodFromNotes(String notes) {
+        if (notes == null) {
+            return null;
+        }
+        if (notes.contains("Shipping Method: ")) {
+            String[] parts = notes.split("Shipping Method: ");
+            if (parts.length > 1) {
+                String method = parts[1].split(" | ")[0].trim();
+                return method.isEmpty() ? null : method;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Extract coupon code from order notes
+     */
+    private String extractCouponCodeFromNotes(String notes) {
+        if (notes == null) {
+            return null;
+        }
+        if (notes.contains("Coupon Code: ")) {
+            String[] parts = notes.split("Coupon Code: ");
+            if (parts.length > 1) {
+                String code = parts[1].split(" | ")[0].trim();
+                return code.isEmpty() ? null : code;
+            }
+        }
+        return null;
     }
 }

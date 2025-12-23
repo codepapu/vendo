@@ -21,6 +21,7 @@ const Orders = lazy(() => import('@/pages/profile/orders').then((m) => ({ defaul
 const Settings = lazy(() => import('@/pages/profile/settings').then((m) => ({ default: m.Settings })));
 const OrderConfirmation = lazy(() => import('@/pages/checkout/confirmation').then((m) => ({ default: m.OrderConfirmation })));
 const OrderDetail = lazy(() => import('@/pages/orders/[id]').then((m) => ({ default: m.OrderDetail })));
+const GuestCheckout = lazy(() => import('@/pages/checkout/guest').then((m) => ({ default: m.GuestCheckout })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -109,6 +110,10 @@ function App() {
                     <OrderDetail />
                   </ProtectedRoute>
                 }
+              />
+              <Route
+                path="/checkout/guest"
+                element={<GuestCheckout />}
               />
             </Routes>
           </Suspense>
