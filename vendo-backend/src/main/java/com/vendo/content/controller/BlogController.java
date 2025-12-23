@@ -67,6 +67,13 @@ public class BlogController {
         return ResponseEntity.ok(ApiResponse.success("Blog post updated successfully", post));
     }
     
+    @PutMapping("/{id}/publish")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AUTHOR')")
+    public ResponseEntity<ApiResponse<BlogPostResponse>> publishPost(@PathVariable Long id) {
+        BlogPostResponse post = blogService.publishPost(id);
+        return ResponseEntity.ok(ApiResponse.success("Blog post published successfully", post));
+    }
+    
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long id) {

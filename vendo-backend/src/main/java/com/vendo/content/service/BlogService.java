@@ -29,6 +29,11 @@ public class BlogService {
     private final BlogTagRepository blogTagRepository;
     
     @Transactional(readOnly = true)
+    public Page<BlogPostResponse> getPosts(String status, Long categoryId, String keyword, Pageable pageable) {
+        return getAllPosts(status, categoryId, keyword, pageable);
+    }
+    
+    @Transactional(readOnly = true)
     public Page<BlogPostResponse> getAllPosts(String status, Long categoryId, String keyword, Pageable pageable) {
         Page<BlogPost> posts;
         
@@ -172,6 +177,26 @@ public class BlogService {
         
         blogPostRepository.delete(post);
         log.info("Blog post deleted: ID={}", id);
+    }
+    
+    @Transactional
+    public BlogPostResponse publishPost(Long id) {
+        BlogPost post = blogPostRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Blog post", "id", id));
+        
+        if ("published".equals(post.getStatus())) {
+            throw new BadRequestException("Blog post is already published");
+        }
+        
+        post.setStatus("published");
+        if (post.getPublishedAt() == null) {
+            post.setPublishedAt(LocalDateTime.now());
+        }
+        
+        BlogPost updatedPost = blogPostRepository.save(post);
+        log.info("Blog post published: ID={}", id);
+        
+        return mapToResponse(updatedPost);
     }
     
     @Transactional

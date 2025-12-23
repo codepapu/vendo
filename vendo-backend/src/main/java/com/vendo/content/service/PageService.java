@@ -8,6 +8,8 @@ import com.vendo.content.entity.Page;
 import com.vendo.content.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,35 @@ import org.springframework.transaction.annotation.Transactional;
 public class PageService {
     
     private final PageRepository pageRepository;
+    
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<PageResponse> getAllPages(String status, String keyword, Pageable pageable) {
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findAll(pageable);
+        
+        // Filter by status and keyword in memory
+        // In production, add proper repository methods with @Query for better performance
+        java.util.List<Page> filteredPages = pages.getContent().stream()
+                .filter(page -> {
+                    if (status != null && !status.isEmpty() && !page.getStatus().equals(status)) {
+                        return false;
+                    }
+                    if (keyword != null && !keyword.isEmpty()) {
+                        String lowerKeyword = keyword.toLowerCase();
+                        return (page.getTitle() != null && page.getTitle().toLowerCase().contains(lowerKeyword)) ||
+                               (page.getSlug() != null && page.getSlug().toLowerCase().contains(lowerKeyword)) ||
+                               (page.getContent() != null && page.getContent().toLowerCase().contains(lowerKeyword));
+                    }
+                    return true;
+                })
+                .collect(java.util.stream.Collectors.toList());
+        
+        // Create a new Page with filtered content
+        return new org.springframework.data.domain.PageImpl<>(
+                filteredPages.stream().map(this::mapToResponse).collect(java.util.stream.Collectors.toList()),
+                pageable,
+                filteredPages.size()
+        );
+    }
     
     @Transactional(readOnly = true)
     public PageResponse getPageBySlug(String slug) {

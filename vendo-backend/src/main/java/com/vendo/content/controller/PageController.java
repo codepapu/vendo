@@ -6,6 +6,9 @@ import com.vendo.content.dto.response.PageResponse;
 import com.vendo.content.service.PageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +20,17 @@ import org.springframework.web.bind.annotation.*;
 public class PageController {
     
     private final PageService pageService;
+    
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<PageResponse>>> getAllPages(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PageResponse> pages = pageService.getAllPages(status, keyword, pageable);
+        return ResponseEntity.ok(ApiResponse.success(pages));
+    }
     
     @GetMapping("/slug/{slug}")
     public ResponseEntity<ApiResponse<PageResponse>> getPageBySlug(@PathVariable String slug) {
