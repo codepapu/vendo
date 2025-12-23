@@ -18,7 +18,7 @@ export function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await login(emailOrUsername, password);
+      await login({ emailOrUsername, password });
       toast({
         title: 'Welcome back!',
         description: 'You have successfully logged in.',

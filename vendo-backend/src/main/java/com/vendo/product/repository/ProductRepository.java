@@ -58,4 +58,35 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     @Query("SELECT COUNT(p) FROM Product p WHERE p.status = :status AND p.isVariation = false")
     Long countByStatus(@Param("status") String status);
+    
+    @Query("SELECT p FROM Product p WHERE p.status = :status AND p.isVariation = false AND " +
+           "(:categoryId IS NULL OR EXISTS (SELECT 1 FROM p.categories c WHERE c.id = :categoryId)) AND " +
+           "(:brandId IS NULL OR p.brand.id = :brandId) AND " +
+           "(:minPrice IS NULL OR COALESCE(p.salePrice, p.price) >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR COALESCE(p.salePrice, p.price) <= :maxPrice) AND " +
+           "(:minRating IS NULL OR (SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.id = p.id AND r.isApproved = true) >= :minRating)")
+    Page<Product> findProductsWithFilters(@Param("status") String status,
+                                          @Param("categoryId") Long categoryId,
+                                          @Param("brandId") Long brandId,
+                                          @Param("minPrice") BigDecimal minPrice,
+                                          @Param("maxPrice") BigDecimal maxPrice,
+                                          @Param("minRating") Double minRating,
+                                          Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE p.status = :status AND p.isVariation = false AND " +
+           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:categoryId IS NULL OR EXISTS (SELECT 1 FROM p.categories c WHERE c.id = :categoryId)) AND " +
+           "(:brandId IS NULL OR p.brand.id = :brandId) AND " +
+           "(:minPrice IS NULL OR COALESCE(p.salePrice, p.price) >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR COALESCE(p.salePrice, p.price) <= :maxPrice) AND " +
+           "(:minRating IS NULL OR (SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.id = p.id AND r.isApproved = true) >= :minRating)")
+    Page<Product> searchProductsWithFilters(@Param("status") String status,
+                                            @Param("keyword") String keyword,
+                                            @Param("categoryId") Long categoryId,
+                                            @Param("brandId") Long brandId,
+                                            @Param("minPrice") BigDecimal minPrice,
+                                            @Param("maxPrice") BigDecimal maxPrice,
+                                            @Param("minRating") Double minRating,
+                                            Pageable pageable);
 }

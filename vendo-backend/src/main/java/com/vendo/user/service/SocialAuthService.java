@@ -66,9 +66,18 @@ public class SocialAuthService {
             );
             eventPublisher.publish(userCreatedEvent, "user-created");
         } else {
+            // Link social account to existing user
             // Update last login
             user.setLastLogin(LocalDateTime.now());
+            
+            // If email is not verified, mark as verified for OAuth users
+            if (!user.getIsVerified() && user.getEmailVerifiedAt() == null) {
+                user.setIsVerified(true);
+                user.setEmailVerifiedAt(LocalDateTime.now());
+            }
+            
             user = userRepository.save(user);
+            log.info("Linked social account {} to existing user: {}", registrationId, email);
         }
         
         // Generate JWT tokens
@@ -87,6 +96,10 @@ public class SocialAuthService {
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
                         .superUser(user.getSuperUser())
+                        .isVerified(user.getIsVerified())
+                        .emailVerifiedAt(user.getEmailVerifiedAt())
+                        .isActive(user.getIsActive())
+                        .userType(user.getUserType())
                         .build())
                 .build();
     }
@@ -99,12 +112,25 @@ public class SocialAuthService {
         // Generate random password for OAuth users
         String randomPassword = UUID.randomUUID().toString();
         
+        // Generate unique username
+        String baseUsername = email.split("@")[0] + "_" + provider;
+        String username = baseUsername;
+        int counter = 1;
+        while (userRepository.existsByUsername(username)) {
+            username = baseUsername + counter;
+            counter++;
+        }
+        
         User user = User.builder()
                 .email(email)
                 .password(passwordEncoder.encode(randomPassword))
                 .firstName(firstName)
                 .lastName(lastName)
-                .username(email.split("@")[0] + "_" + provider)
+                .username(username)
+                .userType("CUSTOMER")
+                .isActive(true)
+                .isVerified(true) // OAuth users are considered verified
+                .emailVerifiedAt(LocalDateTime.now())
                 .superUser(false)
                 .manageSupers(false)
                 .build();
@@ -117,8 +143,30 @@ public class SocialAuthService {
         
         return switch (registrationId.toLowerCase()) {
             case "google" -> (String) attributes.get("email");
-            case "facebook" -> (String) attributes.get("email");
-            case "github" -> (String) attributes.get("email");
+            case "facebook" -> {
+                // Facebook email might be null if user hasn't granted email permission
+                String email = (String) attributes.get("email");
+                if (email == null) {
+                    // Try to get from id (not ideal, but fallback)
+                    String id = (String) attributes.get("id");
+                    if (id != null) {
+                        email = id + "@facebook.com";
+                    }
+                }
+                yield email;
+            }
+            case "github" -> {
+                // GitHub email might be null or require additional API call
+                String email = (String) attributes.get("email");
+                if (email == null) {
+                    // Try login as fallback (GitHub username)
+                    String login = (String) attributes.get("login");
+                    if (login != null) {
+                        email = login + "@users.noreply.github.com";
+                    }
+                }
+                yield email;
+            }
             default -> (String) attributes.get("email");
         };
     }
@@ -129,8 +177,59 @@ public class SocialAuthService {
         return switch (registrationId.toLowerCase()) {
             case "google" -> (String) attributes.get("name");
             case "facebook" -> (String) attributes.get("name");
-            case "github" -> (String) attributes.get("name");
+            case "github" -> {
+                // GitHub uses 'name' or 'login' as fallback
+                String name = (String) attributes.get("name");
+                if (name == null || name.isEmpty()) {
+                    name = (String) attributes.get("login");
+                }
+                yield name;
+            }
             default -> (String) attributes.get("name");
         };
+    }
+    
+    /**
+     * Link social account to existing user.
+     * This method allows linking a social account to an already registered user.
+     */
+    @Transactional
+    public AuthResponse linkSocialAccount(String email, String provider, OAuth2User oAuth2User) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
+        
+        // Update last login
+        user.setLastLogin(LocalDateTime.now());
+        
+        // If email is not verified, mark as verified for OAuth users
+        if (!user.getIsVerified() && user.getEmailVerifiedAt() == null) {
+            user.setIsVerified(true);
+            user.setEmailVerifiedAt(LocalDateTime.now());
+        }
+        
+        user = userRepository.save(user);
+        
+        // Generate JWT tokens
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresAt(LocalDateTime.now().plusHours(24))
+                .user(AuthResponse.UserDto.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .superUser(user.getSuperUser())
+                        .isVerified(user.getIsVerified())
+                        .emailVerifiedAt(user.getEmailVerifiedAt())
+                        .isActive(user.getIsActive())
+                        .userType(user.getUserType())
+                        .build())
+                .build();
     }
 }

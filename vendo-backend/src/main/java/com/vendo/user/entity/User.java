@@ -1,6 +1,10 @@
 package com.vendo.user.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +18,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users", indexes = {
     @Index(name = "idx_users_email", columnList = "email"),
-    @Index(name = "idx_users_username", columnList = "username")
+    @Index(name = "idx_users_username", columnList = "username"),
+    @Index(name = "idx_users_user_type", columnList = "user_type"),
+    @Index(name = "idx_users_is_active", columnList = "is_active")
 })
 @Data
 @Builder
@@ -27,29 +33,53 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, unique = true, length = 191)
+    @Column(nullable = false, unique = true, length = 255)
+    @NotBlank
+    @Email
+    @Size(max = 255)
     private String email;
     
     @Column(length = 20)
+    @Size(max = 20)
     private String phone;
     
     @Column(name = "email_verified_at")
     private LocalDateTime emailVerifiedAt;
     
-    @Column(length = 120)
+    @Column(name = "password_hash", nullable = false, length = 255)
+    @NotBlank
+    @Size(max = 255)
     private String password;
     
     @Column(name = "remember_token", length = 100)
     private String rememberToken;
     
-    @Column(name = "first_name", length = 120)
+    @Column(name = "first_name", length = 100)
+    @Size(max = 100)
     private String firstName;
     
-    @Column(name = "last_name", length = 120)
+    @Column(name = "last_name", length = 100)
+    @Size(max = 100)
     private String lastName;
     
-    @Column(unique = true, length = 60)
+    @Column(nullable = false, unique = true, length = 100)
+    @NotBlank
+    @Size(max = 100)
     private String username;
+    
+    @Column(name = "user_type", nullable = false, length = 20)
+    @NotBlank
+    @Size(max = 20)
+    @Builder.Default
+    private String userType = "CUSTOMER";
+    
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
+    
+    @Column(name = "is_verified", nullable = false)
+    @Builder.Default
+    private Boolean isVerified = false;
     
     @Column(name = "avatar_id")
     private Long avatarId;
@@ -88,6 +118,22 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private java.util.List<Activation> activations = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<Address> addresses = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.order.entity.Order> orders = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.product.entity.ProductReview> reviews = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.product.entity.Wishlist> wishlists = new java.util.ArrayList<>();
     
     // Helper methods
     public boolean isActivated() {

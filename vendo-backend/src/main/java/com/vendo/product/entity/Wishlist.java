@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ec_wish_lists", indexes = {
+@Table(name = "wishlists", indexes = {
     @Index(name = "idx_wishlists_product_customer", columnList = "product_id,customer_id"),
     @Index(name = "idx_wishlists_customer_id", columnList = "customer_id")
 })
@@ -36,12 +36,16 @@ public class Wishlist {
     @JoinColumn(name = "product_id", nullable = false, insertable = false, updatable = false)
     private Product product;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false, insertable = false, updatable = false)
+    private com.vendo.user.entity.User customer;
+    
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @LastModifiedDate
-    @Column(nullable = false)
+    @org.springframework.data.annotation.LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
     @Data

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "ec_product_variations", indexes = {
+@Table(name = "product_variations", indexes = {
     @Index(name = "idx_product_variations_product_configurable", columnList = "product_id,configurable_product_id"),
     @Index(name = "idx_product_variations_configurable_product_id", columnList = "configurable_product_id")
 }, uniqueConstraints = {

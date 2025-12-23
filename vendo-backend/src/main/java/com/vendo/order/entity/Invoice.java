@@ -10,15 +10,19 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "ec_invoices", indexes = {
-    @Index(name = "idx_invoices_code", columnList = "code"),
-    @Index(name = "idx_invoices_reference", columnList = "reference_type,reference_id"),
-    @Index(name = "idx_invoices_status", columnList = "status")
+@Table(name = "invoices", indexes = {
+    @Index(name = "idx_invoices_order_id", columnList = "order_id"),
+    @Index(name = "idx_invoices_business_account_id", columnList = "business_account_id"),
+    @Index(name = "idx_invoices_status", columnList = "status"),
+    @Index(name = "idx_invoices_invoice_number", columnList = "invoice_number")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_invoices_invoice_number", columnNames = {"invoice_number"})
 })
 @Data
 @Builder
@@ -31,104 +35,55 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, length = 191)
-    private String referenceType;
+    @Column(name = "invoice_number", nullable = false, unique = true, length = 50)
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Size(max = 50)
+    private String invoiceNumber;
     
-    @Column(nullable = false)
-    private Long referenceId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
     
-    @Column(nullable = false, length = 191, unique = true)
-    private String code;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_account_id")
+    private com.vendo.b2b.entity.BusinessAccount businessAccount;
     
-    @Column(length = 191)
-    private String customerName;
+    @Column(name = "issue_date", nullable = false)
+    @jakarta.validation.constraints.NotNull
+    private LocalDate issueDate;
     
-    @Column(length = 191)
-    private String companyName;
+    @Column(name = "due_date", nullable = false)
+    @jakarta.validation.constraints.NotNull
+    private LocalDate dueDate;
     
-    @Column(length = 191)
-    private String companyLogo;
-    
-    @Column(length = 191)
-    private String customerEmail;
-    
-    @Column(length = 191)
-    private String customerPhone;
-    
-    @Column(length = 191)
-    private String customerAddress;
-    
-    @Column(length = 191)
-    private String customerCountry;
-    
-    @Column(length = 191)
-    private String customerState;
-    
-    @Column(length = 191)
-    private String customerCity;
-    
-    @Column(length = 191)
-    private String customerZipCode;
-    
-    @Column(length = 191)
-    private String customerAddressLine;
-    
-    @Column(length = 191)
-    private String customerTaxId;
+    @Column(nullable = false, length = 50)
+    @Builder.Default
+    private String status = "PENDING"; // PENDING, PAID, OVERDUE, CANCELLED
     
     @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal subTotal;
+    @jakarta.validation.constraints.NotNull
+    private BigDecimal subtotal;
     
-    @Column(precision = 15, scale = 2)
+    @Column(name = "tax_amount", precision = 15, scale = 2)
     @Builder.Default
     private BigDecimal taxAmount = BigDecimal.ZERO;
     
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
+    @jakarta.validation.constraints.NotNull
+    private BigDecimal totalAmount;
+    
+    @Column(name = "paid_amount", precision = 15, scale = 2)
     @Builder.Default
-    private BigDecimal shippingAmount = BigDecimal.ZERO;
+    private BigDecimal paidAmount = BigDecimal.ZERO;
     
-    @Column(precision = 15, scale = 2)
-    @Builder.Default
-    private BigDecimal paymentFee = BigDecimal.ZERO;
-    
-    @Column(nullable = false, precision = 15, scale = 2)
-    @Builder.Default
-    private BigDecimal discountAmount = BigDecimal.ZERO;
-    
-    @Column(length = 60)
-    private String shippingOption;
-    
-    @Column(nullable = false, length = 60)
-    @Builder.Default
-    private String shippingMethod = "default";
-    
-    @Column(length = 120)
-    private String couponCode;
-    
-    @Column(length = 191)
-    private String discountDescription;
-    
-    @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal amount;
-    
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    
-    private Long paymentId;
-    
-    @Column(nullable = false, length = 191)
-    @Builder.Default
-    private String status = "pending";
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
     
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-    
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<InvoiceItem> invoiceItems = new ArrayList<>();
 }

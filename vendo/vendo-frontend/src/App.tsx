@@ -15,6 +15,10 @@ const Cart = lazy(() => import('@/pages/cart').then((m) => ({ default: m.Cart })
 const Checkout = lazy(() => import('@/pages/checkout').then((m) => ({ default: m.Checkout })));
 const Login = lazy(() => import('@/pages/login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('@/pages/register').then((m) => ({ default: m.Register })));
+const Profile = lazy(() => import('@/pages/profile').then((m) => ({ default: m.Profile })));
+const Addresses = lazy(() => import('@/pages/profile/addresses').then((m) => ({ default: m.Addresses })));
+const Orders = lazy(() => import('@/pages/profile/orders').then((m) => ({ default: m.Orders })));
+const Settings = lazy(() => import('@/pages/profile/settings').then((m) => ({ default: m.Settings })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +64,38 @@ function App() {
               />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/addresses"
+                element={
+                  <ProtectedRoute>
+                    <Addresses />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Suspense>
         </Layout>

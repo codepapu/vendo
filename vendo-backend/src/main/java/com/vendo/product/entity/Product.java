@@ -1,6 +1,9 @@
 package com.vendo.product.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,18 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "ec_products", indexes = {
-    @Index(name = "idx_products_brand_status_variation", columnList = "brand_id,status,is_variation,created_at"),
-    @Index(name = "idx_products_sale_type", columnList = "sale_type"),
-    @Index(name = "idx_products_start_date", columnList = "start_date"),
-    @Index(name = "idx_products_end_date", columnList = "end_date"),
-    @Index(name = "idx_products_sale_price", columnList = "sale_price"),
-    @Index(name = "idx_products_is_variation", columnList = "is_variation"),
-    @Index(name = "idx_products_sku", columnList = "sku"),
-    @Index(name = "idx_products_store_variation_status", columnList = "store_id,is_variation,status"),
-    @Index(name = "idx_products_variation_name_id", columnList = "is_variation,name,id"),
+@Table(name = "products", indexes = {
+    @Index(name = "idx_products_slug", columnList = "slug"),
     @Index(name = "idx_products_status", columnList = "status"),
+    @Index(name = "idx_products_sku", columnList = "sku"),
     @Index(name = "idx_products_is_featured", columnList = "is_featured")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_products_slug", columnNames = {"slug"}),
+    @UniqueConstraint(name = "uk_products_sku", columnNames = {"sku"})
 })
 @Data
 @Builder
@@ -39,8 +38,15 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, length = 191)
+    @Column(nullable = false, length = 255)
+    @NotBlank
+    @Size(max = 255)
     private String name;
+    
+    @Column(nullable = false, unique = true, length = 255)
+    @NotBlank
+    @Size(max = 255)
+    private String slug;
     
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -58,30 +64,33 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String videoMedia;
     
-    @Column(length = 191, unique = true)
+    @Column(nullable = false, unique = true, length = 100)
+    @NotBlank
+    @Size(max = 100)
     private String sku;
     
-    @Column(name = "order", nullable = false)
+    @Column(length = 100)
+    @Size(max = 100)
+    private String barcode;
+    
+    @Column(name = "product_type", length = 50)
+    @Size(max = 50)
     @Builder.Default
-    private Integer order = 0;
+    private String productType = "SIMPLE";
     
-    private Integer quantity;
-    
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @Builder.Default
-    private Boolean allowCheckoutWhenOutOfStock = false;
+    private String status = "DRAFT";
     
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean withStorehouseManagement = false;
-    
-    @Column(length = 191)
-    @Builder.Default
-    private String stockStatus = "in_stock";
-    
-    @Column(nullable = false)
+    @Column(name = "is_featured", nullable = false)
     @Builder.Default
     private Boolean isFeatured = false;
+    
+    @Column(precision = 10, scale = 2)
+    private BigDecimal weight;
+    
+    @Column(columnDefinition = "JSONB")
+    private String dimensions; // JSON: {length, width, height, unit}
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
@@ -179,7 +188,7 @@ public class Product {
     
     @ManyToMany
     @JoinTable(
-        name = "ec_product_category_product",
+        name = "product_category_product",
         joinColumns = @JoinColumn(name = "product_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
@@ -203,9 +212,25 @@ public class Product {
     @Builder.Default
     private List<ProductVariation> configurableVariations = new ArrayList<>();
     
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<ProductReview> reviews = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ProductAttribute> attributes = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ProductRetailer> productRetailers = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<B2BPricingTier> b2bPricingTiers = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<VolumeDiscount> volumeDiscounts = new ArrayList<>();
     
     @ManyToMany(mappedBy = "products")
     @Builder.Default

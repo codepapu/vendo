@@ -1,6 +1,7 @@
 package com.vendo.cart.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,50 +11,54 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Cart entity for persistent cart storage
- * Note: In production, cart is typically stored in Redis for better performance
- * This entity is for persistent cart storage if needed
- */
 @Entity
-@Table(name = "ec_cart", indexes = {
-    @Index(name = "idx_cart_identifier", columnList = "identifier"),
-    @Index(name = "idx_cart_instance", columnList = "instance")
+@Table(name = "carts", indexes = {
+    @Index(name = "idx_carts_user_id", columnList = "user_id"),
+    @Index(name = "idx_carts_business_account_id", columnList = "business_account_id"),
+    @Index(name = "idx_carts_session_id", columnList = "session_id")
 })
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@IdClass(Cart.CartId.class)
 public class Cart {
     
     @Id
-    @Column(name = "identifier", nullable = false, length = 60)
-    private String identifier;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @Id
-    @Column(name = "instance", nullable = false, length = 60)
-    private String instance;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private com.vendo.user.entity.User user;
     
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Column(name = "business_account_id")
+    private Long businessAccountId;
+    
+    @Column(name = "session_id", length = 255)
+    @Size(max = 255)
+    private String sessionId; // For guest carts
+    
+    @Column(name = "cart_type", nullable = false, length = 20)
+    @Builder.Default
+    private String cartType = "B2C"; // B2C, B2B
+    
+    @Column(nullable = false, length = 3)
+    @Builder.Default
+    private String currency = "USD";
     
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CartId implements java.io.Serializable {
-        private String identifier;
-        private String instance;
-    }
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CartItem> items = new ArrayList<>();
 }

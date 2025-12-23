@@ -12,10 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ec_product_attributes", indexes = {
-    @Index(name = "idx_product_attributes_attribute_set_id", columnList = "attribute_set_id"),
-    @Index(name = "idx_product_attributes_set_order_id", columnList = "attribute_set_id,order,id")
-})
+@Table(name = "product_attributes")
 @Data
 @Builder
 @NoArgsConstructor
@@ -28,34 +25,23 @@ public class ProductAttribute {
     private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attribute_set_id", nullable = false)
-    private ProductAttributeSet attributeSet;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
     
-    @Column(nullable = false, length = 120)
-    private String title;
+    @Column(name = "attribute_name", nullable = false, length = 100)
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Size(max = 100)
+    private String attributeName;
     
-    @Column(length = 120)
-    private String slug;
-    
-    @Column(length = 120)
-    private String color;
-    
-    @Column(length = 191)
-    private String image;
-    
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isDefault = false;
-    
-    @Column(name = "order", nullable = false)
-    @Builder.Default
-    private Integer order = 0;
+    @Column(name = "attribute_value", nullable = false, columnDefinition = "TEXT")
+    @jakarta.validation.constraints.NotBlank
+    private String attributeValue;
     
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "attribute", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<ProductVariationItem> variationItems = new java.util.ArrayList<>();
 }

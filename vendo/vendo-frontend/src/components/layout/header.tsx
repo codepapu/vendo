@@ -42,6 +42,13 @@ export function Header() {
                 <ShoppingCart className="h-4 w-4" />
                 Cart
               </Link>
+              <Link
+                to="/profile"
+                className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1"
+              >
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">{user?.firstName}</span>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -101,6 +108,14 @@ export function Header() {
                   >
                     <ShoppingCart className="h-4 w-4" />
                     Cart
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="block text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
                   </Link>
                   <div className="pt-4 border-t space-y-2">
                     <p className="text-sm text-muted-foreground">{user?.email}</p>

@@ -29,5 +29,9 @@ public class AuthResponse {
         private String firstName;
         private String lastName;
         private Boolean superUser;
+        private Boolean isVerified;
+        private LocalDateTime emailVerifiedAt;
+        private Boolean isActive;
+        private String userType;
     }
 }

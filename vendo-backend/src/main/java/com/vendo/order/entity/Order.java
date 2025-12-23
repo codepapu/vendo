@@ -15,11 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "ec_orders", indexes = {
-    @Index(name = "idx_orders_user_status_created", columnList = "user_id,status,created_at"),
-    @Index(name = "idx_orders_code", columnList = "code"),
+@Table(name = "orders", indexes = {
+    @Index(name = "idx_orders_user_id", columnList = "user_id"),
+    @Index(name = "idx_orders_business_account_id", columnList = "business_account_id"),
     @Index(name = "idx_orders_status", columnList = "status"),
-    @Index(name = "idx_orders_store_id", columnList = "store_id")
+    @Index(name = "idx_orders_created_at", columnList = "created_at"),
+    @Index(name = "idx_orders_order_number", columnList = "order_number")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_orders_order_number", columnNames = {"order_number"})
 })
 @Data
 @Builder
@@ -32,91 +35,116 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(length = 191, unique = true)
-    private String code;
+    @Column(name = "order_number", nullable = false, unique = true, length = 50)
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Size(max = 50)
+    private String orderNumber;
     
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private com.vendo.user.entity.User user;
     
-    @Column(length = 60)
-    private String shippingOption;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_account_id")
+    private com.vendo.b2b.entity.BusinessAccount businessAccount;
     
-    @Column(nullable = false, length = 60)
+    @Column(name = "order_type", nullable = false, length = 20)
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Size(max = 20)
     @Builder.Default
-    private String shippingMethod = "default";
+    private String orderType = "B2C"; // B2C, B2B, RETAILER
     
-    @Column(nullable = false, length = 120)
+    @Column(nullable = false, length = 50)
     @Builder.Default
-    private String status = "pending";
+    private String status = "PENDING"; // PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED, REFUNDED
+    
+    @Column(name = "payment_status", length = 50)
+    @jakarta.validation.constraints.Size(max = 50)
+    private String paymentStatus; // PENDING, PAID, PARTIAL, REFUNDED, FAILED
+    
+    @Column(name = "payment_method", length = 50)
+    @jakarta.validation.constraints.Size(max = 50)
+    private String paymentMethod;
     
     @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal amount;
+    @jakarta.validation.constraints.NotNull
+    private BigDecimal subtotal;
     
-    @Column(precision = 15, scale = 2)
+    @Column(name = "tax_amount", precision = 15, scale = 2)
     @Builder.Default
     private BigDecimal taxAmount = BigDecimal.ZERO;
     
-    @Column(precision = 15, scale = 2)
-    private BigDecimal shippingAmount;
-    
-    @Column(precision = 15, scale = 2)
+    @Column(name = "shipping_amount", precision = 15, scale = 2)
     @Builder.Default
-    private BigDecimal paymentFee = BigDecimal.ZERO;
+    private BigDecimal shippingAmount = BigDecimal.ZERO;
+    
+    @Column(name = "discount_amount", precision = 15, scale = 2)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+    
+    @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
+    @jakarta.validation.constraints.NotNull
+    private BigDecimal totalAmount;
+    
+    @Column(nullable = false, length = 3)
+    @Builder.Default
+    private String currency = "USD";
     
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String notes;
     
-    @Column(length = 120)
-    private String couponCode;
-    
-    @Column(precision = 15, scale = 2)
-    private BigDecimal discountAmount;
-    
-    @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal subTotal;
-    
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isConfirmed = false;
-    
-    @Column(length = 191)
-    private String discountDescription;
-    
-    @Builder.Default
-    private Boolean isFinished = false;
-    
-    @Column(length = 191)
+    @Column(name = "cancellation_reason", columnDefinition = "TEXT")
     private String cancellationReason;
     
-    @Column(length = 191)
-    private String cancellationReasonDescription;
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
     
-    private LocalDateTime completedAt;
+    // Helper method to get userId from user relationship
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
     
-    @Column(length = 120)
-    private String token;
+    // Helper method for code compatibility (returns orderNumber)
+    public String getCode() {
+        return orderNumber;
+    }
     
-    private Long paymentId;
-    
-    private Long storeId;
-    
-    @Column(length = 191)
-    private String proofFile;
-    
-    @Column(columnDefinition = "TEXT")
-    private String privateNotes;
+    // Helper method for amount compatibility (returns totalAmount)
+    public BigDecimal getAmount() {
+        return totalAmount;
+    }
     
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private List<OrderProduct> orderProducts = new ArrayList<>();
+    private List<OrderItem> orderItems = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<OrderProduct> orderProducts = new ArrayList<>(); // Keep for backward compatibility
+    
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Invoice> invoices = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<com.vendo.product.entity.ProductReview> productReviews = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<com.vendo.product.entity.RetailerReview> retailerReviews = new ArrayList<>();
     
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

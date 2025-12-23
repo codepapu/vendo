@@ -1,12 +1,13 @@
 package com.vendo.product.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,9 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, length = 191)
+    @Column(nullable = false, length = 255)
+    @NotBlank
+    @Size(max = 255)
     private String name;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,24 +51,25 @@ public class Category {
     @Builder.Default
     private String status = "published";
     
-    @Column(nullable = false)
+    @Column(name = "sort_order", nullable = false)
     @Builder.Default
-    private Integer order = 0;
+    private Integer sortOrder = 0;
     
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     @Builder.Default
-    private Boolean isFeatured = false;
+    private Boolean isActive = true;
     
-    @Column(length = 191)
-    private String image;
+    @Column(name = "image_url", length = 500)
+    @Size(max = 500)
+    private String imageUrl;
+    
+    @Column(unique = true, length = 255)
+    @Size(max = 255)
+    private String slug;
     
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
     
     @ManyToMany(mappedBy = "categories")
     @Builder.Default

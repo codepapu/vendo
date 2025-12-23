@@ -48,6 +48,8 @@ public class ProductResponse {
     private List<String> tagNames;
     private List<Long> collectionIds;
     private List<String> collectionNames;
+    private Double averageRating;
+    private Long reviewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

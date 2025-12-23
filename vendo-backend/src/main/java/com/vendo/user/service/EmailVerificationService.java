@@ -49,8 +49,6 @@ public class EmailVerificationService {
         
         tokenRepository.save(verificationToken);
         
-        tokenRepository.save(verificationToken);
-        
         // Send email
         emailService.sendVerificationEmail(user.getEmail(), token);
     }
@@ -72,10 +70,12 @@ public class EmailVerificationService {
         // Verify the email
         User user = verificationToken.getUser();
         
-        user.setEmailVerifiedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        user.setEmailVerifiedAt(now);
+        user.setIsVerified(true);
         userRepository.save(user);
         
-        verificationToken.setVerifiedAt(LocalDateTime.now());
+        verificationToken.setVerifiedAt(now);
         tokenRepository.save(verificationToken);
         
         log.info("Email verified for user: {}", user.getEmail());

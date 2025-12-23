@@ -34,6 +34,7 @@ public class ProductService {
     private final ProductTagRepository productTagRepository;
     private final ProductCollectionRepository productCollectionRepository;
     private final TaxRepository taxRepository;
+    private final ProductReviewRepository productReviewRepository;
     private final EventPublisher eventPublisher;
     
     @Transactional(readOnly = true)
@@ -360,6 +361,10 @@ public class ProductService {
     }
     
     private ProductResponse mapToResponse(Product product) {
+        // Get rating information
+        Double averageRating = productReviewRepository.calculateAverageRating(product.getId());
+        Long reviewCount = productReviewRepository.countByProductId(product.getId());
+        
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -400,6 +405,8 @@ public class ProductService {
                         product.getCollections().stream().map(ProductCollection::getId).collect(Collectors.toList()) : null)
                 .collectionNames(product.getCollections() != null ? 
                         product.getCollections().stream().map(ProductCollection::getName).collect(Collectors.toList()) : null)
+                .averageRating(averageRating != null ? averageRating : 0.0)
+                .reviewCount(reviewCount != null ? reviewCount : 0L)
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();

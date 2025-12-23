@@ -16,18 +16,18 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     
     List<ProductReview> findByProductId(Long productId);
     
-    List<ProductReview> findByProductIdAndStatus(Long productId, String status);
+    List<ProductReview> findByProductIdAndIsApproved(Long productId, Boolean isApproved);
     
-    Page<ProductReview> findByProductIdAndStatus(Long productId, String status, Pageable pageable);
+    Page<ProductReview> findByProductIdAndIsApproved(Long productId, Boolean isApproved, Pageable pageable);
     
-    Optional<ProductReview> findByProductIdAndCustomerId(Long productId, Long customerId);
+    Optional<ProductReview> findByProductIdAndUserId(Long productId, Long userId);
     
-    @Query("SELECT AVG(r.star) FROM ProductReview r WHERE r.product.id = :productId AND r.status = 'published'")
+    @Query("SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.id = :productId AND r.isApproved = true")
     Double calculateAverageRating(@Param("productId") Long productId);
     
-    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.id = :productId AND r.status = 'published'")
+    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.id = :productId AND r.isApproved = true")
     Long countByProductId(@Param("productId") Long productId);
     
-    @Query("SELECT r FROM ProductReview r WHERE r.product.id = :productId AND r.status = 'published' ORDER BY r.createdAt DESC")
+    @Query("SELECT r FROM ProductReview r WHERE r.product.id = :productId AND r.isApproved = true ORDER BY r.createdAt DESC")
     List<ProductReview> findPublishedReviewsByProductId(@Param("productId") Long productId);
 }

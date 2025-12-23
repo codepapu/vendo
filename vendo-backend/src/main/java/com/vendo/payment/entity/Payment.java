@@ -14,10 +14,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments", indexes = {
-    @Index(name = "idx_payments_user_id", columnList = "user_id"),
     @Index(name = "idx_payments_order_id", columnList = "order_id"),
-    @Index(name = "idx_payments_status", columnList = "status"),
-    @Index(name = "idx_payments_charge_id", columnList = "charge_id")
+    @Index(name = "idx_payments_invoice_id", columnList = "invoice_id"),
+    @Index(name = "idx_payments_status", columnList = "status")
 })
 @Data
 @Builder
@@ -30,54 +29,41 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(length = 120)
-    private String currency;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private com.vendo.order.entity.Order order;
     
-    @Column(name = "user_id", nullable = false)
-    @Builder.Default
-    private Long userId = 0L;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private com.vendo.order.entity.Invoice invoice;
     
-    @Column(length = 191)
-    private String chargeId;
+    @Column(name = "payment_method", nullable = false, length = 50)
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Size(max = 50)
+    private String paymentMethod;
     
-    @Column(length = 60)
-    private String paymentChannel;
+    @Column(name = "payment_gateway", length = 50)
+    @jakarta.validation.constraints.Size(max = 50)
+    private String paymentGateway;
     
-    @Column(length = 400)
-    private String description;
+    @Column(name = "transaction_id", length = 255)
+    @jakarta.validation.constraints.Size(max = 255)
+    private String transactionId;
     
     @Column(nullable = false, precision = 15, scale = 2)
+    @jakarta.validation.constraints.NotNull
     private BigDecimal amount;
     
-    @Column(precision = 15, scale = 2)
+    @Column(nullable = false, length = 3)
     @Builder.Default
-    private BigDecimal paymentFee = BigDecimal.ZERO;
+    private String currency = "USD";
     
-    @Column(name = "order_id")
-    private Long orderId;
-    
-    @Column(length = 60)
+    @Column(nullable = false, length = 50)
     @Builder.Default
-    private String status = "pending";
+    private String status = "PENDING"; // PENDING, COMPLETED, FAILED, REFUNDED
     
-    @Column(length = 191)
-    @Builder.Default
-    private String paymentType = "confirm";
-    
-    @Column(name = "customer_id")
-    private Long customerId;
-    
-    @Column(precision = 15, scale = 2)
-    private BigDecimal refundedAmount;
-    
-    @Column(length = 191)
-    private String refundNote;
-    
-    @Column(length = 191)
-    private String customerType;
-    
-    @Column(columnDefinition = "TEXT")
-    private String metadata;
+    @Column(name = "gateway_response", columnDefinition = "JSONB")
+    private String gatewayResponse;
     
     @CreatedDate
     @Column(nullable = false, updatable = false)
