@@ -135,6 +135,26 @@ public class User {
     @Builder.Default
     private java.util.List<com.vendo.product.entity.Wishlist> wishlists = new java.util.ArrayList<>();
     
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.b2b.entity.BusinessAccount> businessAccounts = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.b2b.entity.BusinessContact> businessContacts = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "requestedBy", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.order.entity.PurchaseOrder> requestedPurchaseOrders = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "approvedBy", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.order.entity.PurchaseOrder> approvedPurchaseOrders = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "approvedBy", fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<com.vendo.b2b.entity.BusinessAccount> approvedBusinessAccounts = new java.util.ArrayList<>();
+    
     // Helper methods
     public boolean isActivated() {
         return activations.stream()

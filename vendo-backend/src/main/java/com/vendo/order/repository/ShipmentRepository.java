@@ -14,10 +14,20 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     
     List<Shipment> findByOrderId(Long orderId);
     
-    Optional<Shipment> findByTrackingId(String trackingId);
-    
     List<Shipment> findByStatus(String status);
     
     @Query("SELECT s FROM Shipment s WHERE s.order.id = :orderId ORDER BY s.createdAt DESC")
     List<Shipment> findShipmentsByOrderId(@Param("orderId") Long orderId);
+    
+    // Enhanced shipment tracking queries
+    Optional<Shipment> findByTrackingNumber(String trackingNumber);
+    
+    List<Shipment> findByCarrier(String carrier);
+    
+    @Query("SELECT s FROM Shipment s WHERE s.trackingNumber = :trackingNumber AND s.carrier = :carrier")
+    Optional<Shipment> findByTrackingNumberAndCarrier(@Param("trackingNumber") String trackingNumber, 
+                                                       @Param("carrier") String carrier);
+    
+    @Query("SELECT s FROM Shipment s WHERE s.order.id = :orderId AND s.status = :status")
+    List<Shipment> findByOrderIdAndStatus(@Param("orderId") Long orderId, @Param("status") String status);
 }

@@ -1,6 +1,8 @@
 package com.vendo.product.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,20 +45,25 @@ public class ProductRetailer {
     
     @Column(nullable = false, precision = 10, scale = 2)
     @NotNull
+    @DecimalMin(value = "0.0", message = "Price must be non-negative")
     private BigDecimal price;
     
     @Column(name = "compare_at_price", precision = 10, scale = 2)
+    @DecimalMin(value = "0.0", message = "Compare at price must be non-negative")
     private BigDecimal compareAtPrice;
     
     @Column(name = "cost_price", precision = 10, scale = 2)
+    @DecimalMin(value = "0.0", message = "Cost price must be non-negative")
     private BigDecimal costPrice;
     
     @Column(name = "stock_quantity", nullable = false)
     @Builder.Default
+    @Min(value = 0, message = "Stock quantity must be non-negative")
     private Integer stockQuantity = 0;
     
     @Column(name = "low_stock_threshold", nullable = false)
     @Builder.Default
+    @Min(value = 0, message = "Low stock threshold must be non-negative")
     private Integer lowStockThreshold = 10;
     
     @Column(name = "is_active", nullable = false)

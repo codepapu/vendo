@@ -463,11 +463,13 @@ export interface OrderItem {
 export interface OrderItemResponse {
   id: number;
   productId: number;
+  retailerId?: number; // For marketplace orders
   productName: string;
   productSku: string;
   quantity: number;
   price: number;
   total: number;
+  commissionAmount?: number; // Platform commission for marketplace orders
 }
 
 /**
@@ -477,7 +479,11 @@ export interface OrderResponse {
   id: number;
   code: string; // orderNumber
   userId?: number;
+  businessAccountId?: number; // For B2B orders
+  orderType?: OrderType; // B2C, B2B, RETAILER
   status: string;
+  paymentStatus?: string; // PENDING, PAID, PARTIAL, REFUNDED, FAILED
+  paymentMethod?: string;
   amount: number; // totalAmount
   subTotal: number;
   taxAmount: number;
@@ -498,8 +504,6 @@ export interface OrderResponse {
   // Optional tracking fields (may come from shipment data)
   trackingNumber?: string;
   estimatedDeliveryDate?: string; // ISO date string
-  paymentStatus?: string;
-  paymentMethod?: string;
 }
 
 // ============================================================================

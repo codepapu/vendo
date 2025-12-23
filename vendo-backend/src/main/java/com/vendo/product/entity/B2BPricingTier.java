@@ -1,6 +1,8 @@
 package com.vendo.product.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,7 +19,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "b2b_pricing_tiers", indexes = {
     @Index(name = "idx_b2b_pricing_tiers_product_id", columnList = "product_id"),
-    @Index(name = "idx_b2b_pricing_tiers_business_type", columnList = "business_type")
+    @Index(name = "idx_b2b_pricing_tiers_business_type", columnList = "business_type"),
+    @Index(name = "idx_b2b_pricing_tiers_is_active", columnList = "is_active"),
+    @Index(name = "idx_b2b_pricing_tiers_product_business_type", columnList = "product_id, business_type")
 })
 @Data
 @Builder
@@ -45,13 +49,16 @@ public class B2BPricingTier {
     private Integer minQuantity;
     
     @Column(name = "max_quantity")
-    private Integer maxQuantity;
+    private Integer maxQuantity; // Optional - if provided, should be >= minQuantity (enforced by DB constraint)
     
     @Column(nullable = false, precision = 10, scale = 2)
     @NotNull
+    @DecimalMin(value = "0.0", message = "Price must be non-negative")
     private BigDecimal price;
     
     @Column(name = "discount_percentage", precision = 5, scale = 2)
+    @jakarta.validation.constraints.DecimalMin(value = "0.0", message = "Discount percentage must be non-negative")
+    @jakarta.validation.constraints.DecimalMax(value = "100.0", message = "Discount percentage cannot exceed 100")
     private BigDecimal discountPercentage;
     
     @Column(name = "is_active", nullable = false)

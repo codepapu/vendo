@@ -15,10 +15,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "purchase_orders", indexes = {
+    @Index(name = "idx_purchase_orders_po_number", columnList = "po_number"),
     @Index(name = "idx_purchase_orders_business_account_id", columnList = "business_account_id"),
     @Index(name = "idx_purchase_orders_order_id", columnList = "order_id"),
     @Index(name = "idx_purchase_orders_status", columnList = "status"),
-    @Index(name = "idx_purchase_orders_po_number", columnList = "po_number")
+    @Index(name = "idx_purchase_orders_requested_by", columnList = "requested_by"),
+    @Index(name = "idx_purchase_orders_approved_by", columnList = "approved_by"),
+    @Index(name = "idx_purchase_orders_created_at", columnList = "created_at")
 }, uniqueConstraints = {
     @UniqueConstraint(name = "uk_purchase_orders_po_number", columnNames = {"po_number"})
 })

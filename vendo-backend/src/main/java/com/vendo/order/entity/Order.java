@@ -114,6 +114,11 @@ public class Order {
         return totalAmount;
     }
     
+    // Helper method for subtotal compatibility
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+    
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -41,4 +41,27 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Double sumAmountByStatusAndDateRange(@Param("status") String status, 
                                          @Param("startDate") LocalDateTime startDate, 
                                          @Param("endDate") LocalDateTime endDate);
+    
+    // Enhanced order queries for B2B, B2C, and Retailer orders
+    Page<Order> findByBusinessAccountId(Long businessAccountId, Pageable pageable);
+    
+    Page<Order> findByOrderType(String orderType, Pageable pageable);
+    
+    Page<Order> findByPaymentStatus(String paymentStatus, Pageable pageable);
+    
+    @Query("SELECT o FROM Order o WHERE o.businessAccount.id = :businessAccountId AND o.orderType = :orderType")
+    Page<Order> findByBusinessAccountIdAndOrderType(@Param("businessAccountId") Long businessAccountId, 
+                                                     @Param("orderType") String orderType, 
+                                                     Pageable pageable);
+    
+    @Query("SELECT o FROM Order o WHERE o.orderType = :orderType AND o.status = :status")
+    Page<Order> findByOrderTypeAndStatus(@Param("orderType") String orderType, 
+                                          @Param("status") String status, 
+                                          Pageable pageable);
+    
+    @Query("SELECT o FROM Order o WHERE o.businessAccount.id = :businessAccountId AND o.orderType = :orderType AND o.status = :status")
+    Page<Order> findByBusinessAccountIdAndOrderTypeAndStatus(@Param("businessAccountId") Long businessAccountId,
+                                                              @Param("orderType") String orderType,
+                                                              @Param("status") String status,
+                                                              Pageable pageable);
 }

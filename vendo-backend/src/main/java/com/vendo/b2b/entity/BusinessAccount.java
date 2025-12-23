@@ -20,7 +20,10 @@ import java.util.List;
 @Entity
 @Table(name = "business_accounts", indexes = {
     @Index(name = "idx_business_accounts_user_id", columnList = "user_id"),
-    @Index(name = "idx_business_accounts_status", columnList = "status")
+    @Index(name = "idx_business_accounts_status", columnList = "status"),
+    @Index(name = "idx_business_accounts_business_type", columnList = "business_type"),
+    @Index(name = "idx_business_accounts_approved_by", columnList = "approved_by"),
+    @Index(name = "idx_business_accounts_created_at", columnList = "created_at")
 })
 @Data
 @Builder
@@ -56,10 +59,12 @@ public class BusinessAccount {
     
     @Column(name = "credit_limit", precision = 15, scale = 2)
     @Builder.Default
+    @jakarta.validation.constraints.DecimalMin(value = "0.0", message = "Credit limit must be non-negative")
     private BigDecimal creditLimit = BigDecimal.ZERO;
     
     @Column(name = "credit_terms_days")
     @Builder.Default
+    @jakarta.validation.constraints.Min(value = 1, message = "Credit terms days must be positive")
     private Integer creditTermsDays = 30;
     
     @Column(name = "payment_terms", columnDefinition = "TEXT")

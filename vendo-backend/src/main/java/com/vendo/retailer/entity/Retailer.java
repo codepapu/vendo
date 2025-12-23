@@ -1,6 +1,9 @@
 package com.vendo.retailer.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -64,6 +67,8 @@ public class Retailer {
     
     @Column(name = "commission_rate", precision = 5, scale = 2)
     @Builder.Default
+    @DecimalMin(value = "0.0", message = "Commission rate must be non-negative")
+    @DecimalMax(value = "100.0", message = "Commission rate cannot exceed 100")
     private BigDecimal commissionRate = BigDecimal.ZERO;
     
     @Column(nullable = false, length = 20)
@@ -72,14 +77,18 @@ public class Retailer {
     
     @Column(precision = 3, scale = 2)
     @Builder.Default
+    @DecimalMin(value = "0.0", message = "Rating must be non-negative")
+    @DecimalMax(value = "5.0", message = "Rating cannot exceed 5")
     private BigDecimal rating = BigDecimal.ZERO;
     
     @Column(name = "total_sales", precision = 15, scale = 2)
     @Builder.Default
+    @DecimalMin(value = "0.0", message = "Total sales must be non-negative")
     private BigDecimal totalSales = BigDecimal.ZERO;
     
     @Column(name = "total_orders", nullable = false)
     @Builder.Default
+    @Min(value = 0, message = "Total orders must be non-negative")
     private Integer totalOrders = 0;
     
     @Column(nullable = false)

@@ -28,6 +28,10 @@ public class CreateOrderRequest {
     @Valid
     private AddressRequest billingAddress;
     
+    private Long businessAccountId; // For B2B orders
+    
+    private String orderType; // B2C, B2B, RETAILER (defaults to B2C if not provided)
+    
     private String shippingMethod;
     
     private String couponCode;
@@ -47,6 +51,8 @@ public class OrderItemRequest {
     private Integer quantity;
     
     private Long variationId;
+    
+    private Long retailerId; // For marketplace orders
 }
 
 @Data

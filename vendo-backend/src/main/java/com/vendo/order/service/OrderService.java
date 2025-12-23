@@ -30,6 +30,7 @@ public class OrderService {
     
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
+    private final OrderItemRepository orderItemRepository;
     private final OrderAddressRepository orderAddressRepository;
     private final OrderHistoryRepository orderHistoryRepository;
     private final com.vendo.user.repository.UserRepository userRepository;
@@ -91,11 +92,23 @@ public class OrderService {
             ? userRepository.findById(userId).orElse(null)
             : null;
         
+        // Determine order type (default to B2C if not provided)
+        String orderType = request.getOrderType() != null ? request.getOrderType() : "B2C";
+        
+        // Get business account if provided (for B2B orders)
+        com.vendo.b2b.entity.BusinessAccount businessAccount = null;
+        if (request.getBusinessAccountId() != null) {
+            // TODO: Inject BusinessAccountRepository when available
+            // businessAccount = businessAccountRepository.findById(request.getBusinessAccountId()).orElse(null);
+        }
+        
         Order order = Order.builder()
                 .orderNumber(orderCode)
                 .user(user)
-                .orderType("B2C")
+                .businessAccount(businessAccount)
+                .orderType(orderType)
                 .status("PENDING")
+                .paymentStatus("PENDING")
                 .subtotal(subTotal)
                 .taxAmount(taxAmount)
                 .shippingAmount(shippingAmount)
@@ -107,16 +120,50 @@ public class OrderService {
                        (request.getCouponCode() != null ? "Coupon Code: " + request.getCouponCode() : ""))
                 .build();
         
-        // Create order products
-        List<OrderProduct> orderProducts = request.getItems().stream()
-                .map(item -> OrderProduct.builder()
+        // Create order items - use OrderItem for marketplace orders (with retailerId), OrderProduct for legacy
+        List<OrderItem> orderItems = new ArrayList<>();
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            BigDecimal unitPrice = BigDecimal.valueOf(100); // Placeholder - would fetch from product service
+            BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+            
+            if (itemRequest.getRetailerId() != null) {
+                // Create OrderItem for marketplace orders
+                com.vendo.retailer.entity.Retailer retailer = null;
+                // TODO: Inject RetailerRepository when available
+                // retailer = retailerRepository.findById(itemRequest.getRetailerId()).orElse(null);
+                
+                com.vendo.product.entity.Product product = null;
+                // TODO: Inject ProductRepository when available
+                // product = productRepository.findById(itemRequest.getProductId()).orElse(null);
+                
+                OrderItem orderItem = OrderItem.builder()
                         .order(order)
-                        .productId(item.getProductId())
-                        .productName("Product " + item.getProductId()) // Placeholder - would fetch from product service
-                        .qty(item.getQuantity())
-                        .price(BigDecimal.valueOf(100)) // Placeholder - would fetch from product service
-                        .build())
-                .collect(Collectors.toList());
+                        .product(product) // Product relationship
+                        .retailer(retailer)
+                        .productName("Product " + itemRequest.getProductId()) // Placeholder
+                        .sku(null) // Would get from product service
+                        .quantity(itemRequest.getQuantity())
+                        .unitPrice(unitPrice)
+                        .totalPrice(totalPrice)
+                        .commissionAmount(BigDecimal.ZERO) // Would calculate based on commission rate
+                        .build();
+                orderItems.add(orderItem);
+            } else {
+                // Create OrderProduct for legacy/backward compatibility
+                OrderProduct orderProduct = OrderProduct.builder()
+                        .order(order)
+                        .productId(itemRequest.getProductId())
+                        .productName("Product " + itemRequest.getProductId()) // Placeholder
+                        .qty(itemRequest.getQuantity())
+                        .price(unitPrice)
+                        .build();
+                orderProducts.add(orderProduct);
+            }
+        }
+        
+        order.setOrderItems(orderItems);
         order.setOrderProducts(orderProducts);
         
         // Create shipping address
@@ -325,11 +372,15 @@ public class OrderService {
         BigDecimal discountAmount = BigDecimal.ZERO; // Would calculate from coupon
         BigDecimal total = subTotal.add(taxAmount).add(shippingAmount).subtract(discountAmount);
         
+        // Determine order type (default to B2C if not provided)
+        String orderType = request.getOrderType() != null ? request.getOrderType() : "B2C";
+        
         Order order = Order.builder()
                 .orderNumber(orderCode)
                 .user(null) // Guest order - no user
-                .orderType("B2C")
+                .orderType(orderType)
                 .status("PENDING")
+                .paymentStatus("PENDING")
                 .subtotal(subTotal)
                 .taxAmount(taxAmount)
                 .shippingAmount(shippingAmount)
@@ -342,18 +393,49 @@ public class OrderService {
                        (request.getCouponCode() != null ? " | Coupon Code: " + request.getCouponCode() : ""))
                 .build();
         
-        // Create order products (using OrderProduct for backward compatibility)
-        List<OrderProduct> orderProducts = request.getItems().stream()
-                .map(item -> {
-                    OrderProduct op = new OrderProduct();
-                    op.setOrder(order);
-                    op.setProductId(item.getProductId());
-                    op.setQty(item.getQuantity());
-                    op.setPrice(BigDecimal.valueOf(100)); // Placeholder - would fetch from product service
-                    op.setProductName("Product " + item.getProductId()); // Would fetch from product service
-                    return op;
-                })
-                .toList();
+        // Create order items - use OrderItem for marketplace orders (with retailerId), OrderProduct for legacy
+        List<OrderItem> orderItems = new ArrayList<>();
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            BigDecimal unitPrice = BigDecimal.valueOf(100); // Placeholder - would fetch from product service
+            BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+            
+            if (itemRequest.getRetailerId() != null) {
+                // Create OrderItem for marketplace orders
+                com.vendo.retailer.entity.Retailer retailer = null;
+                // TODO: Inject RetailerRepository when available
+                // retailer = retailerRepository.findById(itemRequest.getRetailerId()).orElse(null);
+                
+                com.vendo.product.entity.Product product = null;
+                // TODO: Inject ProductRepository when available
+                // product = productRepository.findById(itemRequest.getProductId()).orElse(null);
+                
+                OrderItem orderItem = OrderItem.builder()
+                        .order(order)
+                        .product(product) // Product relationship
+                        .retailer(retailer)
+                        .productName("Product " + itemRequest.getProductId()) // Placeholder
+                        .sku(null) // Would get from product service
+                        .quantity(itemRequest.getQuantity())
+                        .unitPrice(unitPrice)
+                        .totalPrice(totalPrice)
+                        .commissionAmount(BigDecimal.ZERO) // Would calculate based on commission rate
+                        .build();
+                orderItems.add(orderItem);
+            } else {
+                // Create OrderProduct for legacy/backward compatibility
+                OrderProduct op = new OrderProduct();
+                op.setOrder(order);
+                op.setProductId(itemRequest.getProductId());
+                op.setQty(itemRequest.getQuantity());
+                op.setPrice(unitPrice);
+                op.setProductName("Product " + itemRequest.getProductId());
+                orderProducts.add(op);
+            }
+        }
+        
+        order.setOrderItems(orderItems);
         order.setOrderProducts(orderProducts);
         
         // Create addresses
@@ -403,13 +485,50 @@ public class OrderService {
      * Map Order entity to OrderResponse DTO
      */
     public OrderResponse mapToResponse(Order order) {
+        // Map order items - prefer OrderItem over OrderProduct (legacy)
+        List<OrderItemResponse> items = List.of();
+        if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+            items = order.getOrderItems().stream()
+                    .map(oi -> OrderItemResponse.builder()
+                            .id(oi.getId())
+                            .productId(oi.getProduct() != null ? oi.getProduct().getId() : null)
+                            .retailerId(oi.getRetailer() != null ? oi.getRetailer().getId() : null)
+                            .productName(oi.getProductName())
+                            .productSku(oi.getSku())
+                            .quantity(oi.getQuantity())
+                            .price(oi.getUnitPrice())
+                            .total(oi.getTotalPrice())
+                            .commissionAmount(oi.getCommissionAmount() != null ? oi.getCommissionAmount() : BigDecimal.ZERO)
+                            .build())
+                    .collect(Collectors.toList());
+        } else if (order.getOrderProducts() != null && !order.getOrderProducts().isEmpty()) {
+            // Fallback to legacy OrderProduct for backward compatibility
+            items = order.getOrderProducts().stream()
+                    .map(op -> OrderItemResponse.builder()
+                            .id(op.getId())
+                            .productId(op.getProductId())
+                            .retailerId(null) // OrderProduct doesn't have retailer_id
+                            .productName(op.getProductName())
+                            .productSku(null) // Would get from product service
+                            .quantity(op.getQty())
+                            .price(op.getPrice())
+                            .total(op.getPrice().multiply(BigDecimal.valueOf(op.getQty())))
+                            .commissionAmount(BigDecimal.ZERO) // OrderProduct doesn't have commission
+                            .build())
+                    .collect(Collectors.toList());
+        }
+        
         return OrderResponse.builder()
                 .id(order.getId())
                 .code(order.getCode())
                 .userId(order.getUserId())
+                .businessAccountId(order.getBusinessAccount() != null ? order.getBusinessAccount().getId() : null)
+                .orderType(order.getOrderType())
                 .status(order.getStatus())
+                .paymentStatus(order.getPaymentStatus())
+                .paymentMethod(order.getPaymentMethod())
                 .amount(order.getAmount())
-                .subTotal(order.getSubTotal())
+                .subTotal(order.getSubtotal())
                 .taxAmount(order.getTaxAmount())
                 .shippingAmount(order.getShippingAmount())
                 .discountAmount(order.getDiscountAmount())
@@ -420,18 +539,7 @@ public class OrderService {
                 .isConfirmed(false) // Order entity doesn't have this field
                 .isFinished(false) // Order entity doesn't have this field
                 .completedAt(null) // Order entity doesn't have this field
-                .items(order.getOrderProducts() != null ?
-                        order.getOrderProducts().stream()
-                                .map(op -> OrderItemResponse.builder()
-                                        .id(op.getId())
-                                        .productId(op.getProductId())
-                                        .productName(op.getProductName())
-                                        .productSku(null) // Would get from product service
-                                        .quantity(op.getQty())
-                                        .price(op.getPrice())
-                                        .total(op.getPrice().multiply(BigDecimal.valueOf(op.getQty())))
-                                        .build())
-                                .collect(Collectors.toList()) : List.of())
+                .items(items)
                 .shippingAddress(order.getAddresses() != null ?
                         order.getAddresses().stream()
                                 .filter(a -> "shipping_address".equals(a.getType()))
