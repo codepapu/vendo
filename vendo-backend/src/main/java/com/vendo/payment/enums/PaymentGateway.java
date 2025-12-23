@@ -6,5 +6,8 @@ public enum PaymentGateway {
     RAZORPAY,
     PAYSTACK,
     SSLCOMMERZ,
-    MOLLIE
+    MOLLIE,
+    GOOGLE_PAY,
+    PHONEPE,
+    UPI
 }

@@ -712,15 +712,112 @@ export interface ShippingMethod {
 }
 
 /**
+ * Payment gateway enum
+ */
+export type PaymentGateway =
+  | 'STRIPE'
+  | 'PAYPAL'
+  | 'RAZORPAY'
+  | 'PAYSTACK'
+  | 'SSLCOMMERZ'
+  | 'MOLLIE'
+  | 'GOOGLE_PAY'
+  | 'PHONEPE'
+  | 'UPI';
+
+/**
  * Payment method enum
  */
-export type PaymentMethod = 
-  | 'CREDIT_CARD' 
-  | 'DEBIT_CARD' 
-  | 'PAYPAL' 
-  | 'STRIPE' 
+export type PaymentMethod =
+  | 'CREDIT_CARD'
+  | 'DEBIT_CARD'
+  | 'PAYPAL'
+  | 'STRIPE'
   | 'CASH_ON_DELIVERY'
-  | 'BANK_TRANSFER';
+  | 'BANK_TRANSFER'
+  | 'UPI'
+  | 'GOOGLE_PAY'
+  | 'PHONEPE'
+  | 'NET_BANKING'
+  | 'WALLET';
+
+/**
+ * Payment status enum
+ */
+export type PaymentStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'CANCELLED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED'
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled'
+  | 'refunded'
+  | 'partially_refunded';
+
+/**
+ * Process Payment Request
+ */
+export interface ProcessPaymentRequest {
+  orderId: number;
+  userId: number;
+  amount: number;
+  currency: string;
+  gateway: PaymentGateway;
+  paymentMethod: PaymentMethod;
+  description?: string;
+  paymentData?: Record<string, string>;
+  customerEmail?: string;
+  customerName?: string;
+  customerPhone?: string;
+  returnUrl?: string;
+  cancelUrl?: string;
+  metadata?: Record<string, string>;
+}
+
+/**
+ * Refund Payment Request
+ */
+export interface RefundPaymentRequest {
+  paymentId: number;
+  amount?: number; // If null, full refund
+  reason?: string;
+  note?: string;
+}
+
+/**
+ * Payment Response
+ */
+export interface PaymentResponse {
+  id: number;
+  chargeId?: string;
+  transactionId?: string;
+  orderId?: number;
+  userId?: number;
+  amount: number;
+  paymentFee?: number;
+  refundedAmount?: number;
+  currency: string;
+  paymentChannel?: string;
+  paymentGateway?: string;
+  paymentMethod?: string;
+  status: PaymentStatus;
+  paymentType?: string;
+  description?: string;
+  refundNote?: string;
+  metadata?: string;
+  gatewayData?: Record<string, any>;
+  redirectUrl?: string;
+  errorCode?: string;
+  errorMessage?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 // ============================================================================
 // Shipment Tracking Types

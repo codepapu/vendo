@@ -138,23 +138,85 @@ public class PayPalGatewayService implements PaymentGatewayService {
         log.info("Handling PayPal webhook");
         
         if (!verifyWebhookSignature(payload, signature, paypalClientSecret)) {
+            log.error("Invalid PayPal webhook signature");
             return PaymentGatewayResponse.builder()
                     .success(false)
                     .message("Invalid webhook signature")
+                    .errorCode("INVALID_SIGNATURE")
                     .gatewayName(getGatewayName())
                     .build();
         }
         
-        // In production, would parse PayPal webhook event
-        // WebhookEvent event = WebhookEvent.parse(payload);
-        // Handle different event types (PAYMENT.SALE.COMPLETED, etc.)
-        
-        return PaymentGatewayResponse.builder()
-                .success(true)
-                .status(PaymentStatus.COMPLETED)
-                .message("Webhook processed successfully")
-                .gatewayName(getGatewayName())
-                .build();
+        try {
+            // In production, would parse PayPal webhook event
+            // WebhookEvent event = WebhookEvent.parse(payload);
+            // Handle different event types:
+            // - PAYMENT.SALE.COMPLETED -> PaymentStatus.COMPLETED
+            // - PAYMENT.SALE.DENIED -> PaymentStatus.FAILED
+            // - PAYMENT.CAPTURE.REFUNDED -> PaymentStatus.REFUNDED
+            
+            String chargeId = extractChargeIdFromPayload(payload);
+            PaymentStatus status = extractStatusFromPayload(payload);
+            
+            Map<String, Object> gatewayData = new java.util.HashMap<>();
+            gatewayData.put("webhook_event", extractEventTypeFromPayload(payload));
+            gatewayData.put("paypal_event_id", extractEventIdFromPayload(payload));
+            
+            return PaymentGatewayResponse.builder()
+                    .success(true)
+                    .chargeId(chargeId)
+                    .status(status != null ? status : PaymentStatus.COMPLETED)
+                    .message("Webhook processed successfully")
+                    .gatewayName(getGatewayName())
+                    .gatewayData(gatewayData)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error processing PayPal webhook", e);
+            return PaymentGatewayResponse.builder()
+                    .success(false)
+                    .message("Error processing webhook: " + e.getMessage())
+                    .errorCode("WEBHOOK_PROCESSING_ERROR")
+                    .errorMessage(e.getMessage())
+                    .gatewayName(getGatewayName())
+                    .build();
+        }
+    }
+    
+    private String extractChargeIdFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        if (payload.contains("payment_id") || payload.contains("sale_id")) {
+            return "PAYID-" + System.currentTimeMillis();
+        }
+        return null;
+    }
+    
+    private PaymentStatus extractStatusFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        if (payload.contains("COMPLETED") || payload.contains("completed")) {
+            return PaymentStatus.COMPLETED;
+        } else if (payload.contains("DENIED") || payload.contains("FAILED")) {
+            return PaymentStatus.FAILED;
+        } else if (payload.contains("REFUNDED")) {
+            return PaymentStatus.REFUNDED;
+        }
+        return PaymentStatus.PROCESSING;
+    }
+    
+    private String extractEventTypeFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        if (payload.contains("PAYMENT.SALE.COMPLETED")) {
+            return "PAYMENT.SALE.COMPLETED";
+        } else if (payload.contains("PAYMENT.SALE.DENIED")) {
+            return "PAYMENT.SALE.DENIED";
+        } else if (payload.contains("PAYMENT.CAPTURE.REFUNDED")) {
+            return "PAYMENT.CAPTURE.REFUNDED";
+        }
+        return "unknown";
+    }
+    
+    private String extractEventIdFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        return "WH-" + System.currentTimeMillis();
     }
     
     @Override

@@ -134,23 +134,86 @@ public class StripeGatewayService implements PaymentGatewayService {
         log.info("Handling Stripe webhook");
         
         if (!verifyWebhookSignature(payload, signature, stripeWebhookSecret)) {
+            log.error("Invalid Stripe webhook signature");
             return PaymentGatewayResponse.builder()
                     .success(false)
                     .message("Invalid webhook signature")
+                    .errorCode("INVALID_SIGNATURE")
                     .gatewayName(getGatewayName())
                     .build();
         }
         
-        // In production, would parse Stripe webhook event
-        // Event event = Webhook.constructEvent(payload, signature, stripeWebhookSecret);
-        // Handle different event types (payment_intent.succeeded, charge.refunded, etc.)
-        
-        return PaymentGatewayResponse.builder()
-                .success(true)
-                .status(PaymentStatus.COMPLETED)
-                .message("Webhook processed successfully")
-                .gatewayName(getGatewayName())
-                .build();
+        try {
+            // In production, would parse Stripe webhook event
+            // Event event = Webhook.constructEvent(payload, signature, stripeWebhookSecret);
+            // Handle different event types:
+            // - payment_intent.succeeded -> PaymentStatus.COMPLETED
+            // - payment_intent.payment_failed -> PaymentStatus.FAILED
+            // - charge.refunded -> PaymentStatus.REFUNDED
+            // - charge.dispute.created -> handle dispute
+            
+            String chargeId = extractChargeIdFromPayload(payload);
+            PaymentStatus status = extractStatusFromPayload(payload);
+            
+            Map<String, Object> gatewayData = new java.util.HashMap<>();
+            gatewayData.put("webhook_event", extractEventTypeFromPayload(payload));
+            gatewayData.put("stripe_event_id", extractEventIdFromPayload(payload));
+            
+            return PaymentGatewayResponse.builder()
+                    .success(true)
+                    .chargeId(chargeId)
+                    .status(status != null ? status : PaymentStatus.COMPLETED)
+                    .message("Webhook processed successfully")
+                    .gatewayName(getGatewayName())
+                    .gatewayData(gatewayData)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error processing Stripe webhook", e);
+            return PaymentGatewayResponse.builder()
+                    .success(false)
+                    .message("Error processing webhook: " + e.getMessage())
+                    .errorCode("WEBHOOK_PROCESSING_ERROR")
+                    .errorMessage(e.getMessage())
+                    .gatewayName(getGatewayName())
+                    .build();
+        }
+    }
+    
+    private String extractChargeIdFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        if (payload.contains("payment_intent") || payload.contains("charge")) {
+            return "ch_" + System.currentTimeMillis();
+        }
+        return null;
+    }
+    
+    private PaymentStatus extractStatusFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        if (payload.contains("succeeded") || payload.contains("paid")) {
+            return PaymentStatus.COMPLETED;
+        } else if (payload.contains("failed") || payload.contains("declined")) {
+            return PaymentStatus.FAILED;
+        } else if (payload.contains("refunded")) {
+            return PaymentStatus.REFUNDED;
+        }
+        return PaymentStatus.PROCESSING;
+    }
+    
+    private String extractEventTypeFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        if (payload.contains("payment_intent.succeeded")) {
+            return "payment_intent.succeeded";
+        } else if (payload.contains("payment_intent.payment_failed")) {
+            return "payment_intent.payment_failed";
+        } else if (payload.contains("charge.refunded")) {
+            return "charge.refunded";
+        }
+        return "unknown";
+    }
+    
+    private String extractEventIdFromPayload(String payload) {
+        // Simplified - in production use proper JSON parsing
+        return "evt_" + System.currentTimeMillis();
     }
     
     @Override

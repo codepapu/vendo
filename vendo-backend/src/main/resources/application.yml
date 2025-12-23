@@ -179,3 +179,46 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+
+# Payment Gateway Configuration
+payment:
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  paypal:
+    client-id: ${PAYPAL_CLIENT_ID:}
+    client-secret: ${PAYPAL_CLIENT_SECRET:}
+    mode: ${PAYPAL_MODE:sandbox} # sandbox or live
+    webhook-secret: ${PAYPAL_WEBHOOK_SECRET:}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  paystack:
+    secret-key: ${PAYSTACK_SECRET_KEY:}
+    public-key: ${PAYSTACK_PUBLIC_KEY:}
+    webhook-secret: ${PAYSTACK_WEBHOOK_SECRET:}
+  mollie:
+    api-key: ${MOLLIE_API_KEY:}
+    webhook-secret: ${MOLLIE_WEBHOOK_SECRET:}
+  sslcommerz:
+    store-id: ${SSLCOMMERZ_STORE_ID:}
+    store-password: ${SSLCOMMERZ_STORE_PASSWORD:}
+    webhook-secret: ${SSLCOMMERZ_WEBHOOK_SECRET:}
+  googlepay:
+    merchant-id: ${GOOGLE_PAY_MERCHANT_ID:}
+    api-key: ${GOOGLE_PAY_API_KEY:}
+    webhook-secret: ${GOOGLE_PAY_WEBHOOK_SECRET:}
+  phonepe:
+    merchant-id: ${PHONEPE_MERCHANT_ID:}
+    salt-key: ${PHONEPE_SALT_KEY:}
+    salt-index: ${PHONEPE_SALT_INDEX:1}
+    api-key: ${PHONEPE_API_KEY:}
+    webhook-secret: ${PHONEPE_WEBHOOK_SECRET:}
+    mode: ${PHONEPE_MODE:sandbox} # sandbox or production
+  upi:
+    merchant-id: ${UPI_MERCHANT_ID:}
+    api-key: ${UPI_API_KEY:}
+    webhook-secret: ${UPI_WEBHOOK_SECRET:}
+    provider: ${UPI_PROVIDER:razorpay} # razorpay, paytm, etc.

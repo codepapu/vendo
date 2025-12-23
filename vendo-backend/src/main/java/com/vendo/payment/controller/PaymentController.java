@@ -94,9 +94,35 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<PaymentResponse>> handleWebhook(
             @PathVariable String gateway,
             @RequestBody String payload,
-            @RequestHeader(value = "X-Signature", required = false) String signature) {
-        PaymentResponse payment = paymentService.handleWebhook(gateway, payload, signature);
-        return ResponseEntity.ok(ApiResponse.success("Webhook processed", payment));
+            @RequestHeader(value = "X-Signature", required = false) String signature,
+            @RequestHeader(value = "X-Razorpay-Signature", required = false) String razorpaySignature,
+            @RequestHeader(value = "Stripe-Signature", required = false) String stripeSignature,
+            @RequestHeader(value = "PayPal-Transmission-Id", required = false) String paypalTransmissionId,
+            @RequestHeader(value = "PayPal-Transmission-Sig", required = false) String paypalSignature,
+            @RequestHeader(value = "X-Phonepe-Signature", required = false) String phonepeSignature) {
+        
+        // Determine signature based on gateway
+        String actualSignature = signature;
+        if (actualSignature == null || actualSignature.isEmpty()) {
+            if ("razorpay".equalsIgnoreCase(gateway)) {
+                actualSignature = razorpaySignature;
+            } else if ("stripe".equalsIgnoreCase(gateway)) {
+                actualSignature = stripeSignature;
+            } else if ("paypal".equalsIgnoreCase(gateway)) {
+                actualSignature = paypalSignature;
+            } else if ("phonepe".equalsIgnoreCase(gateway) || "phonep".equalsIgnoreCase(gateway)) {
+                actualSignature = phonepeSignature;
+            }
+        }
+        
+        PaymentResponse payment = paymentService.handleWebhook(gateway, payload, actualSignature);
+        
+        if (payment.getErrorCode() != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Webhook processing failed: " + payment.getErrorMessage(), payment));
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success("Webhook processed successfully", payment));
     }
     
     @GetMapping("/history")

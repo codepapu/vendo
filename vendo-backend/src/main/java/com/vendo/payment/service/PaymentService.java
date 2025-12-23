@@ -124,17 +124,23 @@ public class PaymentService {
                 .amount(request.getAmount())
                 .currency(request.getCurrency())
                 .chargeId(gatewayResponse.getChargeId())
+                .transactionId(gatewayResponse.getTransactionId())
                 .paymentChannel(request.getGateway().name())
+                .paymentGateway(request.getGateway().name())
+                .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod().name() : null)
                 .status(gatewayResponse.getStatus() != null ? 
                         gatewayResponse.getStatus().name().toLowerCase() : "pending")
                 .description(request.getDescription())
                 .paymentType("confirm")
                 .paymentFee(BigDecimal.ZERO) // Would calculate based on gateway
+                .gatewayResponse(convertGatewayDataToJson(gatewayResponse.getGatewayData()))
+                .metadata(convertMetadataToJson(request.getMetadata()))
                 .build();
         
         Payment savedPayment = paymentRepository.save(payment);
-        log.info("Payment processed: ID={}, ChargeId={}, Gateway={}", 
-                savedPayment.getId(), savedPayment.getChargeId(), request.getGateway());
+        log.info("Payment processed: ID={}, ChargeId={}, Gateway={}, TransactionId={}", 
+                savedPayment.getId(), savedPayment.getChargeId(), request.getGateway(), 
+                savedPayment.getTransactionId());
         
         // Publish PaymentProcessedEvent
         PaymentProcessedEvent processedEvent = new PaymentProcessedEvent(
@@ -149,7 +155,17 @@ public class PaymentService {
         );
         eventPublisher.publish(processedEvent, "payment-processed");
         
-        return mapToResponse(savedPayment);
+        // Map to response and include redirect URL if available
+        PaymentResponse response = mapToResponse(savedPayment);
+        if (gatewayResponse.getRedirectUrl() != null) {
+            response.setRedirectUrl(gatewayResponse.getRedirectUrl());
+        }
+        if (gatewayResponse.getErrorCode() != null) {
+            response.setErrorCode(gatewayResponse.getErrorCode());
+            response.setErrorMessage(gatewayResponse.getErrorMessage());
+        }
+        
+        return response;
     }
     
     @Transactional
@@ -197,6 +213,11 @@ public class PaymentService {
         BigDecimal newRefundedAmount = alreadyRefunded.add(refundAmount);
         payment.setRefundedAmount(newRefundedAmount);
         payment.setRefundNote(request.getNote());
+        
+        // Update gateway response with refund data
+        if (gatewayResponse.getGatewayData() != null) {
+            payment.setGatewayResponse(convertGatewayDataToJson(gatewayResponse.getGatewayData()));
+        }
         
         if (newRefundedAmount.compareTo(payment.getAmount()) >= 0) {
             payment.setStatus("refunded");
@@ -254,6 +275,17 @@ public class PaymentService {
             if (payment != null && gatewayResponse.getStatus() != null) {
                 String oldStatus = payment.getStatus();
                 payment.setStatus(gatewayResponse.getStatus().name().toLowerCase());
+                
+                // Update transaction ID if provided
+                if (gatewayResponse.getTransactionId() != null) {
+                    payment.setTransactionId(gatewayResponse.getTransactionId());
+                }
+                
+                // Update gateway response data if provided
+                if (gatewayResponse.getGatewayData() != null) {
+                    payment.setGatewayResponse(convertGatewayDataToJson(gatewayResponse.getGatewayData()));
+                }
+                
                 payment = paymentRepository.save(payment);
                 
                 // Publish event based on status change
@@ -283,7 +315,12 @@ public class PaymentService {
                     eventPublisher.publish(failedEvent, "payment-failed");
                 }
                 
-                return mapToResponse(payment);
+                PaymentResponse response = mapToResponse(payment);
+                if (gatewayResponse.getErrorCode() != null) {
+                    response.setErrorCode(gatewayResponse.getErrorCode());
+                    response.setErrorMessage(gatewayResponse.getErrorMessage());
+                }
+                return response;
             }
         }
         
@@ -308,6 +345,7 @@ public class PaymentService {
         return PaymentResponse.builder()
                 .id(payment.getId())
                 .chargeId(payment.getChargeId())
+                .transactionId(payment.getTransactionId())
                 .orderId(payment.getOrderId())
                 .userId(payment.getUserId())
                 .amount(payment.getAmount())
@@ -315,13 +353,55 @@ public class PaymentService {
                 .refundedAmount(payment.getRefundedAmount())
                 .currency(payment.getCurrency())
                 .paymentChannel(payment.getPaymentChannel())
+                .paymentGateway(payment.getPaymentGateway())
+                .paymentMethod(payment.getPaymentMethod())
                 .status(payment.getStatus())
                 .paymentType(payment.getPaymentType())
                 .description(payment.getDescription())
                 .refundNote(payment.getRefundNote())
                 .metadata(payment.getMetadata())
+                .gatewayData(parseGatewayDataFromJson(payment.getGatewayResponse()))
                 .createdAt(payment.getCreatedAt())
                 .updatedAt(payment.getUpdatedAt())
                 .build();
+    }
+    
+    private String convertGatewayDataToJson(java.util.Map<String, Object> gatewayData) {
+        if (gatewayData == null || gatewayData.isEmpty()) {
+            return null;
+        }
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return objectMapper.writeValueAsString(gatewayData);
+        } catch (Exception e) {
+            log.error("Error converting gateway data to JSON", e);
+            return null;
+        }
+    }
+    
+    private String convertMetadataToJson(java.util.Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return null;
+        }
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return objectMapper.writeValueAsString(metadata);
+        } catch (Exception e) {
+            log.error("Error converting metadata to JSON", e);
+            return null;
+        }
+    }
+    
+    private java.util.Map<String, Object> parseGatewayDataFromJson(String json) {
+        if (json == null || json.isEmpty()) {
+            return null;
+        }
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return objectMapper.readValue(json, java.util.Map.class);
+        } catch (Exception e) {
+            log.error("Error parsing gateway data from JSON", e);
+            return null;
+        }
     }
 }

@@ -6,5 +6,10 @@ public enum PaymentMethod {
     PAYPAL,
     BANK_TRANSFER,
     DIGITAL_WALLET,
-    CRYPTO_CURRENCY
+    CRYPTO_CURRENCY,
+    UPI,
+    GOOGLE_PAY,
+    PHONEPE,
+    NET_BANKING,
+    WALLET
 }
