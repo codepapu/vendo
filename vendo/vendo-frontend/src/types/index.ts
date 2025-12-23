@@ -495,6 +495,11 @@ export interface OrderResponse {
   billingAddress?: AddressResponse;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  // Optional tracking fields (may come from shipment data)
+  trackingNumber?: string;
+  estimatedDeliveryDate?: string; // ISO date string
+  paymentStatus?: string;
+  paymentMethod?: string;
 }
 
 // ============================================================================
@@ -712,6 +717,44 @@ export type PaymentMethod =
   | 'STRIPE' 
   | 'CASH_ON_DELIVERY'
   | 'BANK_TRANSFER';
+
+// ============================================================================
+// Shipment Tracking Types
+// ============================================================================
+
+/**
+ * Shipment status enum
+ */
+export type ShipmentStatus = 
+  | 'PENDING' 
+  | 'IN_TRANSIT' 
+  | 'DELIVERED' 
+  | 'FAILED';
+
+/**
+ * Shipment tracking information
+ */
+export interface Shipment {
+  id: number;
+  orderId: number;
+  trackingNumber?: string;
+  carrier?: string;
+  status: ShipmentStatus;
+  shippedAt?: string; // ISO date string
+  deliveredAt?: string; // ISO date string
+  estimatedDeliveryDate?: string; // ISO date string
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+/**
+ * Extended OrderResponse with shipment information
+ */
+export interface OrderResponseWithTracking extends OrderResponse {
+  shipments?: Shipment[];
+  trackingNumber?: string;
+  estimatedDeliveryDate?: string;
+}
 
 // ============================================================================
 // All types are exported above using 'export interface' and 'export type'

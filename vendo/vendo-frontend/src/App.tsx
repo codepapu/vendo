@@ -20,6 +20,7 @@ const Addresses = lazy(() => import('@/pages/profile/addresses').then((m) => ({ 
 const Orders = lazy(() => import('@/pages/profile/orders').then((m) => ({ default: m.Orders })));
 const Settings = lazy(() => import('@/pages/profile/settings').then((m) => ({ default: m.Settings })));
 const OrderConfirmation = lazy(() => import('@/pages/checkout/confirmation').then((m) => ({ default: m.OrderConfirmation })));
+const OrderDetail = lazy(() => import('@/pages/orders/[id]').then((m) => ({ default: m.OrderDetail })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,14 @@ function App() {
               <Route
                 path="/checkout/confirmation"
                 element={<OrderConfirmation />}
+              />
+              <Route
+                path="/orders/:id"
+                element={
+                  <ProtectedRoute>
+                    <OrderDetail />
+                  </ProtectedRoute>
+                }
               />
             </Routes>
           </Suspense>

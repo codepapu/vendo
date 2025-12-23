@@ -1,8 +1,11 @@
-import { apiClient, handleApiError } from '@/lib/api';
+import { apiClient, handleApiError, showSuccessToast } from '@/lib/api';
 import type {
   OrderResponse,
   ApiResponse,
   PaginatedResponse,
+  CancellationReason,
+  CancelOrderRequest,
+  CancellationResponse,
 } from '@/types';
 
 /**
@@ -147,6 +150,51 @@ class OrderApiService {
       return null;
     } catch (error) {
       handleApiError(error, 'Failed to create order');
+      return null;
+    }
+  }
+
+  /**
+   * Get cancellation reasons
+   */
+  async getCancellationReasons(): Promise<CancellationReason[]> {
+    try {
+      const response = await apiClient.get<ApiResponse<CancellationReason[]>>(
+        '/v1/orders/cancellation-reasons'
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return [];
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch cancellation reasons');
+      return [];
+    }
+  }
+
+  /**
+   * Cancel an order
+   */
+  async cancelOrder(
+    orderId: number,
+    request: CancelOrderRequest
+  ): Promise<CancellationResponse | null> {
+    try {
+      const response = await apiClient.post<ApiResponse<CancellationResponse>>(
+        `/v1/orders/${orderId}/cancel`,
+        request
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast(response.data.message || 'Order cancelled successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to cancel order');
       return null;
     }
   }
