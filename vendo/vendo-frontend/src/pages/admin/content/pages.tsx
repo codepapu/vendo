@@ -16,15 +16,14 @@ export function AdminPages() {
   const queryClient = useQueryClient();
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  // Note: We'll need to add getAllPages method to contentApi
-  // For now, this is a placeholder structure
+  // Fetch pages
   const { data: pagesData, isLoading } = useQuery({
     queryKey: ['pages', searchKeyword],
-    queryFn: async () => {
-      // This would need to be implemented in the backend
-      // For now, return empty array
-      return { content: [] as Page[], totalElements: 0 };
-    },
+    queryFn: () => contentApi.getAllPages({
+      keyword: searchKeyword || undefined,
+      page: 0,
+      size: 50,
+    }),
   });
 
   // Delete mutation
@@ -109,7 +108,7 @@ export function AdminPages() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/admin/content/pages/${page.id}/edit`)}
+                    onClick={() => navigate(`/admin/content/pages/${page.id}`)}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>

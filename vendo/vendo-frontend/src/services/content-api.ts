@@ -266,6 +266,29 @@ class ContentApiService {
   }
 
   // Page Methods
+  async getAllPages(params?: {
+    status?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResponse<Page> | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<PaginatedResponse<Page>>>(
+        '/v1/pages',
+        { params }
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch pages');
+      return null;
+    }
+  }
+
   async getPageBySlug(slug: string): Promise<Page | null> {
     try {
       const response = await apiClient.get<ApiResponse<Page>>(

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { contentApi } from '@/services/content-api';
 import { formatDate } from '@/lib/utils';
+import { markdownToHtml } from '@/lib/markdown';
 
 /**
  * Public blog post detail page
@@ -87,7 +88,7 @@ export function BlogPostDetail() {
         {/* Content */}
         <div
           className="prose prose-lg max-w-none mb-8"
-          dangerouslySetInnerHTML={{ __html: post.content || '' }}
+          dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content || '') }}
         />
 
         {/* Tags */}

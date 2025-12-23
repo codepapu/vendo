@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { contentApi } from '@/services/content-api';
+import { markdownToHtml } from '@/lib/markdown';
 
 /**
  * Dynamic page rendering based on slug
@@ -45,7 +46,7 @@ export function DynamicPage() {
 
         <div
           className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: page.content || '' }}
+          dangerouslySetInnerHTML={{ __html: markdownToHtml(page.content || '') }}
         />
       </article>
     </div>
