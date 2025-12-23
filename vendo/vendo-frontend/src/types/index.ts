@@ -654,6 +654,66 @@ export interface PaginatedResponse<T> {
 }
 
 // ============================================================================
+// Cart Types
+// ============================================================================
+
+/**
+ * Cart item type matching backend CartItemResponse DTO
+ */
+export interface CartItem {
+  productId: number;
+  productName: string;
+  productSku: string;
+  productImage?: string;
+  price: number;
+  salePrice?: number;
+  quantity: number;
+  itemTotal: number;
+  variationId?: number;
+}
+
+/**
+ * Cart response type matching backend CartResponse DTO
+ */
+export interface Cart {
+  userId?: number;
+  items: CartItem[];
+  totalItems: number;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  updatedAt: string; // ISO date string
+}
+
+/**
+ * Shipping method type
+ */
+export interface ShippingMethod {
+  id: number;
+  name: string;
+  code: string;
+  description?: string;
+  carrier?: string;
+  baseCost: number;
+  costPerKg?: number;
+  estimatedDays?: number;
+  isActive: boolean;
+  createdAt: string; // ISO date string
+}
+
+/**
+ * Payment method enum
+ */
+export type PaymentMethod = 
+  | 'CREDIT_CARD' 
+  | 'DEBIT_CARD' 
+  | 'PAYPAL' 
+  | 'STRIPE' 
+  | 'CASH_ON_DELIVERY'
+  | 'BANK_TRANSFER';
+
+// ============================================================================
 // All types are exported above using 'export interface' and 'export type'
 // No additional export block needed - types are already exported individually
 // ============================================================================

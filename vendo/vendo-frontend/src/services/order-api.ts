@@ -104,6 +104,52 @@ class OrderApiService {
       return null;
     }
   }
+
+  /**
+   * Create a new order
+   */
+  async createOrder(orderData: {
+    items: Array<{ productId: number; quantity: number; variationId?: number }>;
+    shippingAddress: {
+      name: string;
+      phone: string;
+      email: string;
+      address: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    };
+    billingAddress: {
+      name: string;
+      phone: string;
+      email: string;
+      address: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    };
+    shippingMethod?: string;
+    couponCode?: string;
+    notes?: string;
+  }): Promise<OrderResponse | null> {
+    try {
+      const response = await apiClient.post<ApiResponse<OrderResponse>>(
+        '/v1/orders',
+        orderData
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to create order');
+      return null;
+    }
+  }
 }
 
 export const orderApi = new OrderApiService();
