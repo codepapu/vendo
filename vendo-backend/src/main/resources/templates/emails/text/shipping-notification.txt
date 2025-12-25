@@ -1,0 +1,28 @@
+================================================================================
+YOUR ORDER HAS SHIPPED
+================================================================================
+
+Hello [(${customerName})],
+
+Great news! Your order [(${orderNumber})] has been shipped and is on its way to you.
+
+TRACKING INFORMATION
+--------------------------------------------------------------------------------
+Carrier: [(${carrier})]
+Tracking Number: [(${trackingNumber})]
+
+[# th:if="${trackingUrl}"]
+Track your package: [(${trackingUrl})]
+[/]
+
+ORDER DETAILS
+--------------------------------------------------------------------------------
+Order Number: [(${orderNumber})]
+Expected Delivery: Please check tracking for delivery updates
+
+You can track your package in real-time using the tracking number above. If you have any questions about your shipment, please contact our support team.
+
+View your order: [(${orderUrl})]
+
+© [(${year})] [(${appName})]. All rights reserved.
+

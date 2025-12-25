@@ -1,0 +1,30 @@
+================================================================================
+ORDER CANCELLED
+================================================================================
+
+Hello [(${customerName})],
+
+We're writing to inform you that your order [(${orderNumber})] has been cancelled.
+
+ORDER DETAILS
+--------------------------------------------------------------------------------
+Order Number: [(${orderNumber})]
+Order Date: [(${orderDate})]
+Cancellation Date: [(${cancellationDate})]
+Reason: [(${cancellationReason})]
+
+[# th:if="${refundAmount}"]
+REFUND INFORMATION
+--------------------------------------------------------------------------------
+Refund Amount: [(${refundAmount})]
+
+If payment was processed, a refund will be issued to your original payment method within 5-10 business days.
+[/]
+
+If you have any questions about this cancellation or need assistance, please don't hesitate to contact our support team. We're here to help!
+
+View Order Details: [(${orderUrl})]
+Contact Support: [(${supportUrl})]
+
+© [(${year})] [(${appName})]. All rights reserved.
+

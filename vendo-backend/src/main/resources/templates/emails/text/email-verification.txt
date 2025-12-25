@@ -1,0 +1,25 @@
+================================================================================
+VERIFY YOUR EMAIL ADDRESS
+================================================================================
+
+Welcome to [(${appName})]!
+
+Thank you for registering! To complete your account setup, please verify your email address by clicking the link below.
+
+VERIFY YOUR EMAIL
+--------------------------------------------------------------------------------
+[(${verificationUrl})]
+
+NOTE
+--------------------------------------------------------------------------------
+This verification link will expire in [(${expirationHours})] hour(s). If you did not create an account, please ignore this email.
+
+Once verified, you'll be able to:
+- Access all features of your account
+- Receive order updates and notifications
+- Track your orders and manage your profile
+
+If you didn't create an account, you can safely ignore this email.
+
+© [(${year})] [(${appName})]. All rights reserved.
+

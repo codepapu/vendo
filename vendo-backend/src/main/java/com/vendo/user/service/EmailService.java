@@ -1,5 +1,4 @@
 package com.vendo.user.service;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,12 +6,18 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+/**
+ * User Email Service
+ * Wrapper service that uses the common email template service
+ * Maintains backward compatibility with existing code
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
     
     private final JavaMailSender mailSender;
+    private final com.vendo.common.email.service.EmailService commonEmailService;
     
     @Value("${spring.mail.from:noreply@vendo.com}")
     private String fromEmail;
@@ -20,42 +25,24 @@ public class EmailService {
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
     
+    /**
+     * Send password reset email using template
+     */
     public void sendPasswordResetEmail(String email, String token) {
         try {
-            String resetUrl = frontendUrl + "/reset-password?token=" + token + "&email=" + email;
-            
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(email);
-            message.setSubject("Password Reset Request");
-            message.setText("You requested a password reset. Click the link below to reset your password:\n\n" +
-                    resetUrl + "\n\n" +
-                    "This link will expire in 1 hour.\n\n" +
-                    "If you did not request this, please ignore this email.");
-            
-            mailSender.send(message);
-            log.info("Password reset email sent to: {}", email);
+            commonEmailService.sendPasswordResetEmail(email, token);
         } catch (Exception e) {
             log.error("Failed to send password reset email to: {}", email, e);
             throw new RuntimeException("Failed to send email", e);
         }
     }
     
+    /**
+     * Send email verification email using template
+     */
     public void sendVerificationEmail(String email, String token) {
         try {
-            String verificationUrl = frontendUrl + "/verify-email?token=" + token;
-            
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(email);
-            message.setSubject("Verify Your Email Address");
-            message.setText("Thank you for registering! Please verify your email address by clicking the link below:\n\n" +
-                    verificationUrl + "\n\n" +
-                    "This link will expire in 24 hours.\n\n" +
-                    "If you did not create an account, please ignore this email.");
-            
-            mailSender.send(message);
-            log.info("Verification email sent to: {}", email);
+            commonEmailService.sendVerificationEmail(email, token);
         } catch (Exception e) {
             log.error("Failed to send verification email to: {}", email, e);
             throw new RuntimeException("Failed to send email", e);
@@ -99,8 +86,14 @@ public class EmailService {
         }
     }
     
+    /**
+     * Send order confirmation email using template
+     * @deprecated Use CommonEmailService.sendOrderConfirmationEmail instead
+     */
+    @Deprecated
     public void sendOrderConfirmationEmail(String email, String subject, String message, Object orderDetails) {
         try {
+            // Fallback to simple email for backward compatibility
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setFrom(fromEmail);
             mailMessage.setTo(email);

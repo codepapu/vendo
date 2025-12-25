@@ -37,7 +37,8 @@ public class GuestCheckoutService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final AuthService authService;
-    private final EmailService emailService;
+    private final com.vendo.user.service.EmailService emailService;
+    private final com.vendo.common.email.service.EmailService commonEmailService;
     private final PasswordEncoder passwordEncoder;
     
     @Value("${guest.session.token.expiration-hours:168}") // 7 days default
@@ -185,23 +186,10 @@ public class GuestCheckoutService {
      */
     private void sendGuestOrderConfirmationEmail(String email, OrderResponse order) {
         try {
-            String subject = "Order Confirmation - " + order.getCode();
-            String message = String.format(
-                "Thank you for your order!\n\n" +
-                "Order Number: %s\n" +
-                "Order Date: %s\n" +
-                "Total Amount: $%.2f\n\n" +
-                "Your order has been received and is being processed.\n\n" +
-                "You can track your order using the order number above.\n\n" +
-                "If you created an account, please check your email for verification instructions.\n\n" +
-                "Thank you for shopping with us!",
-                order.getCode(),
-                order.getCreatedAt(),
-                order.getAmount().doubleValue()
-            );
-            
-            // Use EmailService to send email
-            emailService.sendOrderConfirmationEmail(email, subject, message, order);
+            // Use common email service with templates
+            String customerName = order.getShippingAddress() != null ? 
+                order.getShippingAddress().getName() : "Customer";
+            commonEmailService.sendOrderConfirmationEmail(email, customerName, order);
             log.info("Order confirmation email sent to guest: {}", email);
         } catch (Exception e) {
             log.error("Failed to send order confirmation email to guest: {}", email, e);

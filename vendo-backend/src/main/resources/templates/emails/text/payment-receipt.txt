@@ -1,0 +1,28 @@
+================================================================================
+PAYMENT RECEIPT
+================================================================================
+
+Hello [(${customerName})],
+
+This is a confirmation of your payment. Your transaction has been processed successfully.
+
+PAYMENT DETAILS
+--------------------------------------------------------------------------------
+Status: Payment Successful
+Amount: [(${paymentAmount})]
+Transaction ID: [(${transactionId})]
+Payment Date: [(${paymentDate})]
+Payment Method: [(${paymentMethod})]
+[# th:if="${orderNumber}"]
+Order Number: [(${orderNumber})]
+[/]
+
+This receipt serves as proof of payment. Please keep this for your records.
+
+View Receipt: [(${receiptUrl})]
+[# th:if="${orderUrl}"]
+View Order: [(${orderUrl})]
+[/]
+
+© [(${year})] [(${appName})]. All rights reserved.
+

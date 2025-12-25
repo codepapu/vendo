@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email Address</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #6366f1;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6366f1;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .welcome-box {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #6366f1;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #4f46e5;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .link-box {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo" th:text="${appName}">Vendo</div>
+            <div class="title">Verify Your Email Address</div>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-box">
+                <p style="margin: 0; font-size: 18px; color: #059669;">
+                    <strong>Welcome to <span th:text="${appName}">Vendo</span>!</strong>
+                </p>
+            </div>
+            
+            <p>Thank you for registering! To complete your account setup, please verify your email address by clicking the button below.</p>
+            
+            <div class="button-container">
+                <a th:href="${verificationUrl}" class="button">Verify Email Address</a>
+            </div>
+            
+            <p>Or copy and paste this link into your browser:</p>
+            <div class="link-box" th:text="${verificationUrl}">https://example.com/verify-email</div>
+            
+            <p style="color: #6b7280; font-size: 14px;">
+                <strong>Note:</strong> This verification link will expire in <span th:text="${expirationHours}">24</span> hour(s). If you did not create an account, please ignore this email.
+            </p>
+            
+            <p style="color: #6b7280; font-size: 14px;">
+                Once verified, you'll be able to:
+            </p>
+            <ul style="color: #6b7280; font-size: 14px;">
+                <li>Access all features of your account</li>
+                <li>Receive order updates and notifications</li>
+                <li>Track your orders and manage your profile</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>If you didn't create an account, you can safely ignore this email.</p>
+            <p>&copy; <span th:text="${year}">2024</span> <span th:text="${appName}">Vendo</span>. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+

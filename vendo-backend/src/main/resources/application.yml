@@ -143,6 +143,7 @@ jwt:
 
 # Application Configuration
 app:
+  name: ${APP_NAME:Vendo}
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
   storage:

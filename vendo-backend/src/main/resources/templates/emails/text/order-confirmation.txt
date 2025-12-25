@@ -1,0 +1,44 @@
+================================================================================
+ORDER CONFIRMATION
+================================================================================
+
+Hello [(${customerName})],
+
+Thank you for your order! We've received your order and it's being processed. You'll receive a confirmation email once your order ships.
+
+ORDER DETAILS
+--------------------------------------------------------------------------------
+Order Number: [(${orderNumber})]
+Order Date: [(${orderDate})]
+Total Amount: [(${orderTotal})]
+
+ORDER ITEMS
+--------------------------------------------------------------------------------
+[# th:each="item : ${orderItems}"]
+- [(${item.productName})]
+  Quantity: [(${item.quantity})]
+  Price: [(${#numbers.formatDecimal(item.price, 1, 2)})]
+  Total: [(${#numbers.formatDecimal(item.total, 1, 2)})]
+[/]
+
+Total: [(${orderTotal})]
+
+SHIPPING ADDRESS
+--------------------------------------------------------------------------------
+[# th:if="${shippingAddress}"]
+[(${shippingAddress.name})]
+[(${shippingAddress.address})]
+[(${shippingAddress.city})], [(${shippingAddress.state})] [(${shippingAddress.zipCode})]
+[(${shippingAddress.country})]
+[/]
+
+VIEW YOUR ORDER
+--------------------------------------------------------------------------------
+[(${orderUrl})]
+
+Track your order: [(${trackOrderUrl})]
+
+If you have any questions, please contact our support team.
+
+© [(${year})] [(${appName})]. All rights reserved.
+
