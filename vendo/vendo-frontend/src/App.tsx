@@ -22,6 +22,9 @@ const Settings = lazy(() => import('@/pages/profile/settings').then((m) => ({ de
 const OrderConfirmation = lazy(() => import('@/pages/checkout/confirmation').then((m) => ({ default: m.OrderConfirmation })));
 const OrderDetail = lazy(() => import('@/pages/orders/[id]').then((m) => ({ default: m.OrderDetail })));
 const GuestCheckout = lazy(() => import('@/pages/checkout/guest').then((m) => ({ default: m.GuestCheckout })));
+const PaymentPage = lazy(() => import('@/pages/payment/index').then((m) => ({ default: m.default })));
+const PaymentSuccess = lazy(() => import('@/pages/payment/success').then((m) => ({ default: m.PaymentSuccessPage })));
+const PaymentCancel = lazy(() => import('@/pages/payment/cancel').then((m) => ({ default: m.PaymentCancelPage })));
 const BlogIndex = lazy(() => import('@/pages/blog/index').then((m) => ({ default: m.BlogIndex })));
 const BlogPostDetail = lazy(() => import('@/pages/blog/[slug]').then((m) => ({ default: m.BlogPostDetail })));
 const DynamicPage = lazy(() => import('@/pages/pages/[slug]').then((m) => ({ default: m.DynamicPage })));
@@ -121,6 +124,23 @@ function App() {
               <Route
                 path="/checkout/guest"
                 element={<GuestCheckout />}
+              />
+              {/* Payment Routes */}
+              <Route
+                path="/payment"
+                element={
+                  <ProtectedRoute>
+                    <PaymentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payment/success"
+                element={<PaymentSuccess />}
+              />
+              <Route
+                path="/payment/cancel"
+                element={<PaymentCancel />}
               />
               {/* Content Management Routes */}
               <Route path="/blog" element={<BlogIndex />} />

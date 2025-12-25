@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Package, Loader2, Home, ShoppingBag, UserPlus } from 'lucide-react';
+import { CheckCircle, Package, Loader2, Home, ShoppingBag, UserPlus, CreditCard } from 'lucide-react';
 import { orderApi } from '@/services/order-api';
 import { guestCheckoutApi } from '@/services/guest-checkout-api';
 import { formatPrice } from '@/lib/utils';
@@ -235,7 +235,16 @@ export function OrderConfirmation() {
         )}
 
         {/* Actions */}
-        <div className="flex gap-4 justify-center">
+        <div className="flex gap-4 justify-center flex-wrap">
+          {/* Payment Button - Show if order is unpaid */}
+          {order && (!order.paymentStatus || order.paymentStatus === 'PENDING' || order.paymentStatus === 'pending') && (
+            <Button asChild className="bg-primary">
+              <Link to={`/payment?orderId=${order.id}`}>
+                <CreditCard className="h-4 w-4 mr-2" />
+                Complete Payment
+              </Link>
+            </Button>
+          )}
           <Button variant="outline" asChild>
             <Link to="/">
               <Home className="h-4 w-4 mr-2" />

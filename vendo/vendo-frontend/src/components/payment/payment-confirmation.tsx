@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, RefreshCw, Download, Copy } from 'lucide-react';
 import { PaymentResponse } from '@/types';
 import { useNavigate } from 'react-router-dom';
+import { RefundPaymentForm } from './refund-payment-form';
+import { useToast } from '@/hooks/use-toast';
+import { formatPrice } from '@/lib/utils';
 
 interface PaymentConfirmationProps {
   payment: PaymentResponse;
@@ -11,6 +15,9 @@ interface PaymentConfirmationProps {
 
 export function PaymentConfirmation({ payment, onRetry }: PaymentConfirmationProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [showRefundForm, setShowRefundForm] = useState(false);
+  const [currentPayment, setCurrentPayment] = useState<PaymentResponse>(payment);
 
   const getStatusIcon = () => {
     switch (payment.status?.toUpperCase()) {
@@ -109,12 +116,20 @@ export function PaymentConfirmation({ payment, onRetry }: PaymentConfirmationPro
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Amount:</span>
                 <span className="font-semibold">
-                  {new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: payment.currency || 'USD',
-                  }).format(payment.amount)}
+                  {formatPrice(payment.amount, payment.currency || 'USD')}
                 </span>
               </div>
+              {payment.amount - (payment.refundedAmount || 0) > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span className="text-muted-foreground">Refundable Amount:</span>
+                  <span className="font-semibold">
+                    {formatPrice(
+                      payment.amount - (payment.refundedAmount || 0),
+                      payment.currency || 'USD'
+                    )}
+                  </span>
+                </div>
+              )}
               {payment.paymentFee && payment.paymentFee > 0 && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Processing Fee:</span>
@@ -167,6 +182,41 @@ export function PaymentConfirmation({ payment, onRetry }: PaymentConfirmationPro
             </div>
           )}
 
+          {/* Gateway Data Details */}
+          {payment.gatewayData && Object.keys(payment.gatewayData).length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Transaction Details</h3>
+              <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
+                {Object.entries(payment.gatewayData).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span className="text-muted-foreground capitalize">
+                      {key.replace(/_/g, ' ')}:
+                    </span>
+                    <span className="font-mono text-xs break-all">{String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Refund Form */}
+          {showRefundForm && (
+            <div className="space-y-4">
+              <RefundPaymentForm
+                payment={currentPayment}
+                onRefundSuccess={(refundedPayment) => {
+                  setCurrentPayment(refundedPayment);
+                  setShowRefundForm(false);
+                  toast({
+                    title: 'Refund Processed',
+                    description: 'The refund has been processed successfully.',
+                  });
+                }}
+                onCancel={() => setShowRefundForm(false)}
+              />
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             {isSuccess ? (
@@ -176,6 +226,41 @@ export function PaymentConfirmation({ payment, onRetry }: PaymentConfirmationPro
                   className="flex-1"
                 >
                   View Order
+                </Button>
+                {payment.amount - (payment.refundedAmount || 0) > 0 && (
+                  <Button
+                    onClick={() => setShowRefundForm(!showRefundForm)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    {showRefundForm ? 'Cancel Refund' : 'Process Refund'}
+                  </Button>
+                )}
+                <Button
+                  onClick={() => {
+                    const receiptText = `
+Payment Receipt
+================
+Transaction ID: ${payment.transactionId || payment.chargeId || 'N/A'}
+Order ID: #${payment.orderId}
+Amount: ${formatPrice(payment.amount, payment.currency || 'USD')}
+Payment Method: ${payment.paymentMethod || 'N/A'}
+Payment Gateway: ${payment.paymentGateway || 'N/A'}
+Status: ${payment.status}
+Date: ${payment.createdAt ? new Date(payment.createdAt).toLocaleString() : 'N/A'}
+                    `.trim();
+                    navigator.clipboard.writeText(receiptText);
+                    toast({
+                      title: 'Receipt Copied',
+                      description: 'Payment receipt has been copied to clipboard.',
+                    });
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Receipt
                 </Button>
                 <Button
                   onClick={() => navigate('/orders')}

@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PaymentResponse } from '@/types';
 import { paymentApi } from '@/services/payment-api';
+import { usePaymentWebhook } from '@/hooks/use-payment-webhook';
 
 interface PaymentStatusProps {
   chargeId: string;
@@ -44,13 +46,25 @@ export function PaymentStatus({
     }
   };
 
+  // Try to use webhook if available, fallback to polling
+  const { refreshPaymentStatus } = usePaymentWebhook(
+    chargeId,
+    (updatedPayment) => {
+      setPayment(updatedPayment);
+      if (onStatusChange) {
+        onStatusChange(updatedPayment);
+      }
+    },
+    true
+  );
+
   useEffect(() => {
     if (!chargeId) return;
 
     // Initial fetch
     fetchPaymentStatus();
 
-    // Set up polling
+    // Set up polling as fallback (webhook may not be available)
     const interval = setInterval(async () => {
       const shouldContinue = await fetchPaymentStatus();
       if (!shouldContinue) {

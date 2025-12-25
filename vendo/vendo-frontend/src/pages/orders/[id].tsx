@@ -334,7 +334,7 @@ export function OrderDetail() {
                     Payment Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Payment Status</span>
                     <span className="font-medium">
@@ -345,6 +345,21 @@ export function OrderDetail() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Payment Method</span>
                       <span className="font-medium">{order.paymentMethod}</span>
+                    </div>
+                  )}
+                  {/* Payment Button - Show if order is unpaid */}
+                  {(!order.paymentStatus || 
+                    order.paymentStatus === 'PENDING' || 
+                    order.paymentStatus === 'pending' ||
+                    order.paymentStatus === 'FAILED' ||
+                    order.paymentStatus === 'failed') && (
+                    <div className="pt-2 border-t">
+                      <Button asChild className="w-full">
+                        <Link to={`/payment?orderId=${order.id}`}>
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Complete Payment
+                        </Link>
+                      </Button>
                     </div>
                   )}
                 </CardContent>
