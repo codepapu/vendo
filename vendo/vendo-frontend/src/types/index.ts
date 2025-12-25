@@ -858,6 +858,50 @@ export interface OrderResponseWithTracking extends OrderResponse {
 }
 
 // ============================================================================
+// Notification Types
+// ============================================================================
+
+/**
+ * Notification response type matching backend NotificationResponse DTO
+ */
+export interface NotificationResponse {
+  id: number;
+  userId: number;
+  type: 'email' | 'sms' | 'push' | 'in_app';
+  title: string;
+  message: string;
+  data?: string; // JSON string for additional data
+  isRead: boolean;
+  readAt?: string; // ISO date string
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+/**
+ * Notification preference response type
+ */
+export interface NotificationPreferenceResponse {
+  id?: number;
+  userId: number;
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  pushEnabled: boolean;
+  inAppEnabled: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Notification preference request type
+ */
+export interface NotificationPreferenceRequest {
+  emailEnabled?: boolean;
+  smsEnabled?: boolean;
+  pushEnabled?: boolean;
+  inAppEnabled?: boolean;
+}
+
+// ============================================================================
 // All types are exported above using 'export interface' and 'export type'
 // No additional export block needed - types are already exported individually
 // ============================================================================

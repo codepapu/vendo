@@ -16,6 +16,7 @@ export { couponApi } from './coupon-api';
 export { shippingApi } from './shipping-api';
 export { guestCheckoutApi } from './guest-checkout-api';
 export { paymentApi } from './payment-api';
+export { notificationApi } from './notification-api';
 
 // Re-export default exports
 export { default as authApiDefault } from './auth-api';

@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .requestMatchers("/login/oauth2/**").permitAll()
                 // OAuth2 endpoints
                 .requestMatchers("/oauth2/authorization/**").permitAll()
+                // WebSocket endpoints - allow for handshake, authentication handled in WebSocket interceptor
+                .requestMatchers("/ws/**", "/ws").permitAll()
                 // All other requests require authentication
                 .anyRequest().authenticated()
             )

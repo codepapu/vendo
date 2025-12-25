@@ -111,11 +111,22 @@ export const handleApiError = (error: unknown, defaultMessage = 'An error occurr
 /**
  * Show success toast notification
  */
-export const showSuccessToast = (message: string) => {
+export const showSuccessToast = (message: string, title: string = 'Success') => {
   toast({
-    title: 'Success',
+    title,
     description: message,
-    variant: 'default',
+    variant: 'success',
+  });
+};
+
+/**
+ * Show error toast notification
+ */
+export const showErrorToast = (message: string, title: string = 'Error') => {
+  toast({
+    title,
+    description: message,
+    variant: 'destructive',
   });
 };
 

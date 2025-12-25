@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { NotificationProvider } from '@/components/notifications';
 import { useAuthStore } from '@/stores/auth-store';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,6 +43,7 @@ export function Header() {
                 <ShoppingCart className="h-4 w-4" />
                 Cart
               </Link>
+              <NotificationProvider />
               <Link
                 to="/profile"
                 className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1"
@@ -109,6 +111,10 @@ export function Header() {
                     <ShoppingCart className="h-4 w-4" />
                     Cart
                   </Link>
+                  <div className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                    <NotificationProvider />
+                    <span className="text-sm font-medium">Notifications</span>
+                  </div>
                   <Link
                     to="/profile"
                     className="block text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
