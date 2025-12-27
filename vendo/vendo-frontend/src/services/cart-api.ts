@@ -15,6 +15,7 @@ export interface CartItemRequest {
  * Cart item response type
  */
 export interface CartItemResponse {
+  id?: number;
   productId: number;
   productName: string;
   productSku: string;
@@ -24,6 +25,8 @@ export interface CartItemResponse {
   quantity: number;
   itemTotal: number;
   variationId?: number;
+  retailerId?: number;
+  retailerName?: string;
 }
 
 /**
@@ -31,6 +34,8 @@ export interface CartItemResponse {
  */
 export interface CartResponse {
   userId?: number;
+  cartType?: 'B2C' | 'B2B' | 'MULTI_VENDOR';
+  businessAccountId?: number;
   items: CartItemResponse[];
   totalItems: number;
   subtotal: number;
@@ -38,6 +43,33 @@ export interface CartResponse {
   shipping: number;
   total: number;
   updatedAt: string; // ISO date string
+}
+
+/**
+ * Cart pricing response type (with B2B pricing and retailer breakdown)
+ */
+export interface CartPricingResponse {
+  cartId: number;
+  cartType: 'B2C' | 'B2B' | 'MULTI_VENDOR';
+  items: CartItemPricing[];
+  retailerShipping: Record<number, number>; // retailerId -> shipping cost
+  retailerSubtotals: Record<number, number>; // retailerId -> subtotal
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+}
+
+export interface CartItemPricing {
+  itemId: number;
+  productId: number;
+  productName: string;
+  retailerId?: number;
+  retailerName?: string;
+  quantity: number;
+  unitPrice: number;
+  itemTotal: number;
+  isB2BPricing?: boolean;
 }
 
 /**
@@ -147,6 +179,28 @@ class CartApiService {
     } catch (error) {
       handleApiError(error, 'Failed to clear cart');
       return false;
+    }
+  }
+
+  /**
+   * Get cart pricing with B2B pricing applied if applicable
+   */
+  async getCartPricing(businessAccountId?: number): Promise<CartPricingResponse | null> {
+    try {
+      const params = businessAccountId ? { businessAccountId } : {};
+      const response = await apiClient.get<ApiResponse<CartPricingResponse>>(
+        '/v1/cart/pricing',
+        { params }
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to get cart pricing');
+      return null;
     }
   }
 }

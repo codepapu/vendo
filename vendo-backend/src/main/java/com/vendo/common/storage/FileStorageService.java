@@ -8,6 +8,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -124,6 +125,33 @@ public class FileStorageService {
             return true;
         } catch (NoSuchKeyException e) {
             return false;
+        }
+    }
+    
+    /**
+     * Download file from S3/MinIO as InputStream
+     */
+    public InputStream downloadFile(String key) throws IOException {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        
+        return s3Client.getObject(getObjectRequest);
+    }
+    
+    /**
+     * Download file from S3/MinIO as byte array
+     */
+    public byte[] downloadFileAsBytes(String key) throws IOException {
+        try (InputStream inputStream = downloadFile(key)) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            return buffer.toByteArray();
         }
     }
     

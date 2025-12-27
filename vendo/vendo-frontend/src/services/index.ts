@@ -18,6 +18,11 @@ export { guestCheckoutApi } from './guest-checkout-api';
 export { paymentApi } from './payment-api';
 export { notificationApi } from './notification-api';
 export { adminApi } from './admin-api';
+export { retailerApi } from './retailer-api';
+export { analyticsApi } from './analytics-api';
+export { reportingApi } from './reporting-api';
+export { mediaApi } from './media-api';
+export { contentApi } from './content-api';
 
 // Re-export default exports
 export { default as authApiDefault } from './auth-api';
@@ -33,3 +38,8 @@ export { default as shippingApiDefault } from './shipping-api';
 export { default as guestCheckoutApiDefault } from './guest-checkout-api';
 export { default as paymentApiDefault } from './payment-api';
 export { default as adminApiDefault } from './admin-api';
+export { default as retailerApiDefault } from './retailer-api';
+export { default as analyticsApiDefault } from './analytics-api';
+export { default as reportingApiDefault } from './reporting-api';
+export { default as mediaApiDefault } from './media-api';
+export { default as contentApiDefault } from './content-api';

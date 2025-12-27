@@ -175,6 +175,32 @@ class OrderApiService {
   }
 
   /**
+   * Update order status
+   */
+  async updateOrderStatus(
+    orderId: number,
+    status: string
+  ): Promise<OrderResponse | null> {
+    try {
+      const response = await apiClient.put<ApiResponse<OrderResponse>>(
+        `/v1/orders/${orderId}/status`,
+        null,
+        { params: { status } }
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast(response.data.message || 'Order status updated successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to update order status');
+      return null;
+    }
+  }
+
+  /**
    * Cancel an order
    */
   async cancelOrder(

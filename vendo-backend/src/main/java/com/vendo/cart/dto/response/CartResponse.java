@@ -16,6 +16,8 @@ import java.util.List;
 public class CartResponse {
     
     private Long userId;
+    private String cartType; // B2C, B2B, MULTI_VENDOR
+    private Long businessAccountId;
     private List<CartItemResponse> items;
     private Integer totalItems;
     private BigDecimal subtotal;
@@ -30,6 +32,7 @@ public class CartResponse {
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemResponse {
+    private Long id;
     private Long productId;
     private String productName;
     private String productSku;
@@ -39,4 +42,6 @@ public class CartItemResponse {
     private Integer quantity;
     private BigDecimal itemTotal;
     private Long variationId;
+    private Long retailerId;
+    private String retailerName;
 }

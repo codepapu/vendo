@@ -44,7 +44,7 @@ public class Cart {
     
     @Column(name = "cart_type", nullable = false, length = 20)
     @Builder.Default
-    private String cartType = "B2C"; // B2C, B2B
+    private String cartType = "B2C"; // B2C, B2B, MULTI_VENDOR
     
     @Column(nullable = false, length = 3)
     @Builder.Default

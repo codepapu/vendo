@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ProtectedRoute } from '@/components/protected-route';
+import { B2BCheckout } from '@/components/checkout/B2BCheckout';
 import { useAuthStore } from '@/stores/auth-store';
-import { cartApi } from '@/services/cart-api';
+import { useB2BStore } from '@/stores/b2b-store';
+import { cartApi, type CartPricingResponse } from '@/services/cart-api';
 import { addressApi } from '@/services/address-api';
 import { shippingApi } from '@/services/shipping-api';
 import { couponApi } from '@/services/coupon-api';
@@ -16,7 +18,7 @@ import { orderApi } from '@/services/order-api';
 import { userApi } from '@/services/user-api';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, X, MapPin, Truck, CreditCard, Tag } from 'lucide-react';
+import { Loader2, Check, X, MapPin, Truck, CreditCard, Tag, Store, Receipt } from 'lucide-react';
 import type { AddressResponse, ShippingMethod, PaymentMethod, CouponResponse } from '@/types';
 
 export function Checkout() {
@@ -30,16 +32,27 @@ export function Checkout() {
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<number | null>(null);
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [selectedShippingMethodId, setSelectedShippingMethodId] = useState<number | null>(null);
+  // Per-retailer shipping methods for multi-vendor
+  const [retailerShippingMethods, setRetailerShippingMethods] = useState<Record<number, number>>({});
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('CREDIT_CARD');
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<CouponResponse | null>(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [orderNotes, setOrderNotes] = useState('');
 
+  const { currentBusinessAccount } = useB2BStore();
+
   // Fetch cart
   const { data: cart } = useQuery({
     queryKey: ['cart'],
     queryFn: () => cartApi.getCart(),
+  });
+
+  // Fetch cart pricing (with B2B pricing if applicable)
+  const { data: cartPricing } = useQuery({
+    queryKey: ['cartPricing', currentBusinessAccount?.id],
+    queryFn: () => cartApi.getCartPricing(currentBusinessAccount?.id),
+    enabled: !!cart && cart.items.length > 0,
   });
 
   // Fetch addresses
@@ -77,6 +90,27 @@ export function Checkout() {
       setSelectedShippingMethodId(shippingMethods[0].id);
     }
   }, [shippingMethods, selectedShippingMethodId]);
+
+  // Determine checkout flow based on cart type
+  const cartType = cart?.cartType || 'B2C';
+  const isB2B = cartType === 'B2B' && currentBusinessAccount;
+  const isMultiVendor = cartType === 'MULTI_VENDOR';
+
+  // Initialize per-retailer shipping methods for multi-vendor
+  useEffect(() => {
+    if (isMultiVendor && cartPricing && shippingMethods.length > 0) {
+      const defaultMethodId = shippingMethods[0].id;
+      const newRetailerMethods: Record<number, number> = {};
+      Object.keys(cartPricing.retailerSubtotals || {}).forEach((retailerId) => {
+        if (!retailerShippingMethods[Number(retailerId)]) {
+          newRetailerMethods[Number(retailerId)] = defaultMethodId;
+        }
+      });
+      if (Object.keys(newRetailerMethods).length > 0) {
+        setRetailerShippingMethods((prev) => ({ ...prev, ...newRetailerMethods }));
+      }
+    }
+  }, [isMultiVendor, cartPricing, shippingMethods, retailerShippingMethods]);
 
   // Validate coupon mutation
   const validateCouponMutation = useMutation({
@@ -151,13 +185,29 @@ export function Checkout() {
       return;
     }
 
-    if (!selectedShippingMethodId) {
-      toast({
-        title: 'Shipping method required',
-        description: 'Please select a shipping method',
-        variant: 'destructive',
-      });
-      return;
+    // Validate shipping method(s)
+    if (isMultiVendor) {
+      // For multi-vendor, check all retailers have shipping methods
+      const missingRetailers = Object.keys(cartPricing?.retailerSubtotals || {}).filter(
+        (retailerId) => !retailerShippingMethods[Number(retailerId)]
+      );
+      if (missingRetailers.length > 0) {
+        toast({
+          title: 'Shipping method required',
+          description: 'Please select shipping methods for all retailers',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else {
+      if (!selectedShippingMethodId) {
+        toast({
+          title: 'Shipping method required',
+          description: 'Please select a shipping method',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
     const shippingAddress = addresses.find((a) => a.id === selectedShippingAddressId);
@@ -174,13 +224,17 @@ export function Checkout() {
       return;
     }
 
-    const selectedShippingMethod = shippingMethods.find((m) => m.id === selectedShippingMethodId);
-    const shippingCost = selectedShippingMethod?.baseCost || 0;
-
-    // Calculate totals
-    const subtotal = cart.subtotal;
-    const tax = cart.tax || subtotal * 0.1; // 10% tax if not calculated
-    const shipping = shippingCost;
+    // Calculate totals - use cartPricing if available for accurate totals
+    const subtotal = cartPricing?.subtotal || cart.subtotal;
+    const tax = cartPricing?.tax || cart.tax || subtotal * 0.1;
+    let shipping = 0;
+    if (isMultiVendor && cartPricing) {
+      // For multi-vendor, sum up shipping from all retailers
+      shipping = cartPricing.shipping || 0;
+    } else {
+      const selectedShippingMethod = shippingMethods.find((m) => m.id === selectedShippingMethodId);
+      shipping = selectedShippingMethod?.baseCost || 0;
+    }
     const discount = appliedCoupon?.calculatedDiscount || 0;
     const total = subtotal + tax + shipping - discount;
 
@@ -191,6 +245,7 @@ export function Checkout() {
         productId: item.productId,
         quantity: item.quantity,
         variationId: item.variationId,
+        retailerId: item.retailerId, // Include retailer ID for multi-vendor orders
       })),
       shippingAddress: {
         name: shippingAddress.contactName || 'Customer',
@@ -212,9 +267,14 @@ export function Checkout() {
         zipCode: billingAddress.postalCode,
         country: billingAddress.country,
       },
-      shippingMethod: selectedShippingMethod?.code || 'STANDARD',
+      shippingMethod: isMultiVendor 
+        ? 'MULTI_VENDOR' // Special handling for multi-vendor
+        : (selectedShippingMethod?.code || 'STANDARD'),
+      // Include per-retailer shipping methods for multi-vendor
+      retailerShippingMethods: isMultiVendor ? retailerShippingMethods : undefined,
       couponCode: appliedCoupon?.code || null,
       notes: orderNotes,
+      orderType: isMultiVendor ? 'MARKETPLACE' : (cart.cartType || 'B2C'),
     };
 
     createOrderMutation.mutate(orderData);
@@ -237,12 +297,38 @@ export function Checkout() {
     );
   }
 
-  const subtotal = cart.subtotal;
-  const tax = cart.tax || subtotal * 0.1;
+  // Handle B2B checkout completion
+  const handleB2BCheckoutComplete = (poId: number) => {
+    navigate(`/b2b/purchase-orders/${poId}`);
+  };
+
+  const subtotal = cartPricing?.subtotal || cart.subtotal;
+  const tax = cartPricing?.tax || cart.tax || subtotal * 0.1;
   const selectedShippingMethod = shippingMethods.find((m) => m.id === selectedShippingMethodId);
-  const shipping = selectedShippingMethod?.baseCost || 0;
+  const shipping = cartPricing?.shipping || selectedShippingMethod?.baseCost || 0;
   const discount = appliedCoupon?.calculatedDiscount || 0;
   const total = subtotal + tax + shipping - discount;
+
+  // Show B2B checkout if applicable
+  if (isB2B && cartPricing) {
+    return (
+      <ProtectedRoute>
+        <div className="container py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-6xl mx-auto space-y-8"
+          >
+            <div>
+              <h1 className="text-4xl font-bold mb-2">B2B Checkout</h1>
+              <p className="text-muted-foreground">Create a purchase order for your business</p>
+            </div>
+            <B2BCheckout cart={cartPricing} onComplete={handleB2BCheckoutComplete} />
+          </motion.div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   // Guest checkout option - show login prompt but allow continuation
   const CheckoutContent = () => (
@@ -253,8 +339,14 @@ export function Checkout() {
           className="max-w-6xl mx-auto space-y-8"
         >
           <div>
-            <h1 className="text-4xl font-bold mb-2">Checkout</h1>
-            <p className="text-muted-foreground">Complete your order</p>
+            <h1 className="text-4xl font-bold mb-2">
+              {isMultiVendor ? 'Marketplace Checkout' : 'Checkout'}
+            </h1>
+            <p className="text-muted-foreground">
+              {isMultiVendor 
+                ? 'Complete your order from multiple retailers' 
+                : 'Complete your order'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -387,50 +479,121 @@ export function Checkout() {
                   </CardContent>
                 </Card>
 
-                {/* Shipping Method */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Truck className="h-5 w-5" />
-                      Shipping Method
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {shippingMethods.map((method) => (
-                      <label
-                        key={method.id}
-                        className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
-                          selectedShippingMethodId === method.id
-                            ? 'border-primary bg-primary/5'
-                            : ''
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="shippingMethod"
-                          value={method.id}
-                          checked={selectedShippingMethodId === method.id}
-                          onChange={() => setSelectedShippingMethodId(method.id)}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium">{method.name}</div>
-                          {method.description && (
-                            <div className="text-sm text-muted-foreground">
-                              {method.description}
+                {/* Shipping Method - Per Retailer for Multi-Vendor */}
+                {isMultiVendor && cartPricing ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Truck className="h-5 w-5" />
+                        Shipping Methods (Per Retailer)
+                      </CardTitle>
+                      <CardDescription>
+                        Select shipping method for each retailer
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {Object.entries(cartPricing.retailerSubtotals || {}).map(([retailerId, subtotal]) => {
+                        const retailerItems = cart.items.filter(item => item.retailerId === Number(retailerId));
+                        const retailerName = retailerItems[0]?.retailerName || `Retailer ${retailerId}`;
+                        const retailerShipping = cartPricing.retailerShipping[Number(retailerId)] || 0;
+                        
+                        return (
+                          <div key={retailerId} className="border rounded-lg p-4 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Store className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium">{retailerName}</span>
+                              <span className="text-sm text-muted-foreground">
+                                ({retailerItems.length} item{retailerItems.length !== 1 ? 's' : ''})
+                              </span>
                             </div>
-                          )}
-                          {method.estimatedDays && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              Estimated delivery: {method.estimatedDays} business days
+                            <div className="space-y-2">
+                              {shippingMethods.map((method) => (
+                                <label
+                                  key={`${retailerId}-${method.id}`}
+                                  className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                                    retailerShippingMethods[Number(retailerId)] === method.id
+                                      ? 'border-primary bg-primary/5'
+                                      : ''
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`shippingMethod-${retailerId}`}
+                                    value={method.id}
+                                    checked={retailerShippingMethods[Number(retailerId)] === method.id}
+                                    onChange={() => {
+                                      setRetailerShippingMethods((prev) => ({
+                                        ...prev,
+                                        [Number(retailerId)]: method.id,
+                                      }));
+                                    }}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <div className="font-medium">{method.name}</div>
+                                    {method.description && (
+                                      <div className="text-sm text-muted-foreground">
+                                        {method.description}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="font-semibold">{formatPrice(method.baseCost)}</div>
+                                </label>
+                              ))}
                             </div>
-                          )}
-                        </div>
-                        <div className="font-semibold">{formatPrice(method.baseCost)}</div>
-                      </label>
-                    ))}
-                  </CardContent>
-                </Card>
+                            <div className="text-sm text-muted-foreground pt-2 border-t">
+                              Subtotal: {formatPrice(subtotal)} | Shipping: {formatPrice(retailerShipping)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Truck className="h-5 w-5" />
+                        Shipping Method
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {shippingMethods.map((method) => (
+                        <label
+                          key={method.id}
+                          className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
+                            selectedShippingMethodId === method.id
+                              ? 'border-primary bg-primary/5'
+                              : ''
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="shippingMethod"
+                            value={method.id}
+                            checked={selectedShippingMethodId === method.id}
+                            onChange={() => setSelectedShippingMethodId(method.id)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium">{method.name}</div>
+                            {method.description && (
+                              <div className="text-sm text-muted-foreground">
+                                {method.description}
+                              </div>
+                            )}
+                            {method.estimatedDays && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Estimated delivery: {method.estimatedDays} business days
+                              </div>
+                            )}
+                          </div>
+                          <div className="font-semibold">{formatPrice(method.baseCost)}</div>
+                        </label>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Payment Method */}
                 <Card>
@@ -542,18 +705,63 @@ export function Checkout() {
               <Card className="h-fit sticky top-4">
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>
+                  {isMultiVendor && (
+                    <CardDescription>Items from multiple retailers</CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     {cart.items.map((item, index) => (
                       <div key={`${item.productId}-${index}`} className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          {item.productName} x {item.quantity}
-                        </span>
+                        <div className="flex-1">
+                          <div className="text-muted-foreground">
+                            {item.productName} x {item.quantity}
+                          </div>
+                          {item.retailerName && (
+                            <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Store className="h-3 w-3" />
+                              {item.retailerName}
+                            </div>
+                          )}
+                        </div>
                         <span>{formatPrice(item.itemTotal)}</span>
                       </div>
                     ))}
                   </div>
+                  {isMultiVendor && cartPricing && (
+                    <div className="pt-2 border-t space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground mb-2">
+                        Breakdown by Retailer:
+                      </div>
+                      {Object.entries(cartPricing.retailerSubtotals || {}).map(([retailerId, subtotal]) => {
+                        const retailerItems = cart.items.filter(item => item.retailerId === Number(retailerId));
+                        const retailerName = retailerItems[0]?.retailerName || `Retailer ${retailerId}`;
+                        const retailerShipping = cartPricing.retailerShipping[Number(retailerId)] || 0;
+                        const commission = subtotal * 0.10; // 10% commission
+                        
+                        return (
+                          <div key={retailerId} className="text-xs space-y-1 pl-2 border-l-2">
+                            <div className="font-medium">{retailerName}</div>
+                            <div className="flex justify-between text-muted-foreground">
+                              <span>Subtotal:</span>
+                              <span>{formatPrice(subtotal)}</span>
+                            </div>
+                            <div className="flex justify-between text-muted-foreground">
+                              <span>Shipping:</span>
+                              <span>{formatPrice(retailerShipping)}</span>
+                            </div>
+                            <div className="flex justify-between text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Receipt className="h-3 w-3" />
+                                Commission:
+                              </span>
+                              <span>{formatPrice(commission)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div className="space-y-2 pt-4 border-t">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
@@ -588,7 +796,15 @@ export function Checkout() {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={createOrderMutation.isPending || !selectedShippingAddressId || !selectedShippingMethodId}
+                    disabled={
+                      createOrderMutation.isPending || 
+                      !selectedShippingAddressId || 
+                      (isMultiVendor 
+                        ? Object.keys(cartPricing?.retailerSubtotals || {}).some(
+                            (retailerId) => !retailerShippingMethods[Number(retailerId)]
+                          )
+                        : !selectedShippingMethodId)
+                    }
                   >
                     {createOrderMutation.isPending ? (
                       <>

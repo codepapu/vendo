@@ -2,6 +2,7 @@ package com.vendo.cart.controller;
 
 import com.vendo.common.dto.ApiResponse;
 import com.vendo.cart.dto.request.CartItemRequest;
+import com.vendo.cart.dto.response.CartPricingResponse;
 import com.vendo.cart.dto.response.CartResponse;
 import com.vendo.cart.service.CartService;
 import jakarta.validation.Valid;
@@ -22,6 +23,15 @@ public class CartController {
         Long userId = Long.parseLong(authentication.getName());
         CartResponse cart = cartService.getCart(userId);
         return ResponseEntity.ok(ApiResponse.success(cart));
+    }
+    
+    @GetMapping("/pricing")
+    public ResponseEntity<ApiResponse<CartPricingResponse>> getCartPricing(
+            @RequestParam(required = false) Long businessAccountId,
+            Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        CartPricingResponse pricing = cartService.getCartPricing(userId, businessAccountId);
+        return ResponseEntity.ok(ApiResponse.success(pricing));
     }
     
     @PostMapping("/items")

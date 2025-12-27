@@ -37,6 +37,12 @@ const AdminOrders = lazy(() => import('@/pages/admin/orders').then((m) => ({ def
 const AdminUsers = lazy(() => import('@/pages/admin/users').then((m) => ({ default: m.AdminUsers })));
 const AdminSettings = lazy(() => import('@/pages/admin/settings').then((m) => ({ default: m.AdminSettings })));
 const AdminCoupons = lazy(() => import('@/pages/admin/coupons').then((m) => ({ default: m.AdminCoupons })));
+const RetailerRegister = lazy(() => import('@/pages/retailer/register').then((m) => ({ default: m.default })));
+const RetailerDashboard = lazy(() => import('@/pages/retailer/dashboard').then((m) => ({ default: m.default })));
+const RetailerProducts = lazy(() => import('@/pages/retailer/products').then((m) => ({ default: m.default })));
+const RetailerOrders = lazy(() => import('@/pages/retailer/orders').then((m) => ({ default: m.default })));
+const RetailerAnalytics = lazy(() => import('@/pages/retailer/analytics').then((m) => ({ default: m.default })));
+const AnalyticsDashboard = lazy(() => import('@/pages/analytics/dashboard').then((m) => ({ default: m.default })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -222,6 +228,56 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminCoupons />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Retailer Routes */}
+              <Route
+                path="/retailer/register"
+                element={
+                  <ProtectedRoute>
+                    <RetailerRegister />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/retailer/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <RetailerDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/retailer/products"
+                element={
+                  <ProtectedRoute>
+                    <RetailerProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/retailer/orders"
+                element={
+                  <ProtectedRoute>
+                    <RetailerOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/retailer/analytics"
+                element={
+                  <ProtectedRoute>
+                    <RetailerAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Analytics & Reporting Routes */}
+              <Route
+                path="/analytics/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AnalyticsDashboard />
                   </ProtectedRoute>
                 }
               />

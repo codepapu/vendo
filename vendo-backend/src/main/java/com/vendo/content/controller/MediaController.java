@@ -57,4 +57,27 @@ public class MediaController {
         mediaService.deleteFile(id);
         return ResponseEntity.ok(ApiResponse.success("File deleted successfully"));
     }
+    
+    @GetMapping("/files/{id}/url")
+    public ResponseEntity<ApiResponse<String>> getFileUrl(@PathVariable Long id) {
+        String url = mediaService.getFileUrl(id);
+        return ResponseEntity.ok(ApiResponse.success(url));
+    }
+    
+    @PostMapping("/files/{id}/resize")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AUTHOR')")
+    public ResponseEntity<ApiResponse<MediaFileResponse>> resizeImage(
+            @PathVariable Long id,
+            @RequestParam int width,
+            @RequestParam int height) throws IOException {
+        MediaFileResponse resizedFile = mediaService.resizeImage(id, width, height);
+        return ResponseEntity.ok(ApiResponse.success("Image resized successfully", resizedFile));
+    }
+    
+    @PostMapping("/files/{id}/optimize")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AUTHOR')")
+    public ResponseEntity<ApiResponse<MediaFileResponse>> optimizeImage(@PathVariable Long id) throws IOException {
+        MediaFileResponse optimizedFile = mediaService.optimizeImage(id);
+        return ResponseEntity.ok(ApiResponse.success("Image optimized successfully", optimizedFile));
+    }
 }
