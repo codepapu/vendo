@@ -32,6 +32,11 @@ const AdminBlogPosts = lazy(() => import('@/pages/admin/content/blog').then((m) 
 const AdminBlogPostEditor = lazy(() => import('@/pages/admin/content/blog/[id]').then((m) => ({ default: m.AdminBlogPostEditor })));
 const AdminPages = lazy(() => import('@/pages/admin/content/pages').then((m) => ({ default: m.AdminPages })));
 const AdminPageEditor = lazy(() => import('@/pages/admin/content/pages/[id]').then((m) => ({ default: m.AdminPageEditor })));
+const AdminProducts = lazy(() => import('@/pages/admin/products').then((m) => ({ default: m.AdminProducts })));
+const AdminOrders = lazy(() => import('@/pages/admin/orders').then((m) => ({ default: m.AdminOrders })));
+const AdminUsers = lazy(() => import('@/pages/admin/users').then((m) => ({ default: m.AdminUsers })));
+const AdminSettings = lazy(() => import('@/pages/admin/settings').then((m) => ({ default: m.AdminSettings })));
+const AdminCoupons = lazy(() => import('@/pages/admin/coupons').then((m) => ({ default: m.AdminCoupons })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -176,6 +181,47 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminPageEditor />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Admin Management Routes */}
+              <Route
+                path="/admin/products"
+                element={
+                  <ProtectedRoute>
+                    <AdminProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedRoute>
+                    <AdminOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <ProtectedRoute>
+                    <AdminSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/coupons"
+                element={
+                  <ProtectedRoute>
+                    <AdminCoupons />
                   </ProtectedRoute>
                 }
               />

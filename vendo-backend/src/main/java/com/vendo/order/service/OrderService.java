@@ -11,6 +11,7 @@ import com.vendo.order.dto.response.OrderResponse;
 import com.vendo.order.entity.*;
 import com.vendo.order.repository.*;
 import com.vendo.order.service.ShippingMethodService;
+import com.vendo.retailer.service.CommissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ public class OrderService {
     private final com.vendo.b2b.repository.BusinessAccountRepository businessAccountRepository;
     private final com.vendo.tax.service.TaxService taxService;
     private final ShippingMethodService shippingMethodService;
+    private final CommissionService commissionService;
     private final EventPublisher eventPublisher;
     
     @Transactional(readOnly = true)
@@ -278,6 +280,17 @@ public class OrderService {
         
         Order savedOrder = orderRepository.save(order);
         log.info("Order created with ID: {} and code: {}", savedOrder.getId(), savedOrder.getCode());
+        
+        // Calculate and create commission records for retailer orders
+        if (savedOrder.getOrderItems() != null && !savedOrder.getOrderItems().isEmpty()) {
+            try {
+                commissionService.createCommissionRecordsForOrder(savedOrder.getId());
+                log.info("Commissions calculated for order: {}", savedOrder.getId());
+            } catch (Exception e) {
+                log.error("Failed to calculate commissions for order {}: {}", savedOrder.getId(), e.getMessage(), e);
+                // Don't fail order creation if commission calculation fails
+            }
+        }
         
         // Publish OrderCreatedEvent
         OrderAddress shippingAddr = savedOrder.getAddresses().stream()
@@ -617,6 +630,17 @@ public class OrderService {
         
         Order savedOrder = orderRepository.save(order);
         log.info("Guest order created with ID: {} and code: {}", savedOrder.getId(), savedOrder.getOrderNumber());
+        
+        // Calculate and create commission records for retailer orders
+        if (savedOrder.getOrderItems() != null && !savedOrder.getOrderItems().isEmpty()) {
+            try {
+                commissionService.createCommissionRecordsForOrder(savedOrder.getId());
+                log.info("Commissions calculated for guest order: {}", savedOrder.getId());
+            } catch (Exception e) {
+                log.error("Failed to calculate commissions for guest order {}: {}", savedOrder.getId(), e.getMessage(), e);
+                // Don't fail order creation if commission calculation fails
+            }
+        }
         
         return mapToResponse(savedOrder);
     }
