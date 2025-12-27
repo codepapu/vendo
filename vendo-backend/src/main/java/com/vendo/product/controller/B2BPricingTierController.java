@@ -7,6 +7,14 @@ import com.vendo.product.dto.request.B2BPricingTierRequest;
 import com.vendo.product.dto.response.B2BPricingTierResponse;
 import com.vendo.product.entity.B2BPricingTier;
 import com.vendo.product.service.B2BPricingTierService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +34,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/products/pricing-tiers")
 @RequiredArgsConstructor
+@Tag(name = "B2B Pricing Tiers", description = "B2B pricing tier management endpoints for configuring product pricing by business type and quantity")
+@SecurityRequirement(name = "bearer-jwt")
 public class B2BPricingTierController {
     
     private final B2BPricingTierService b2BPricingTierService;
@@ -34,9 +44,26 @@ public class B2BPricingTierController {
      * Create a new B2B pricing tier
      * Only accessible by ADMIN
      */
+    @Operation(
+            summary = "Create a new B2B pricing tier",
+            description = "Creates a new B2B pricing tier for a product with specific pricing based on business type and quantity range. " +
+                    "Only accessible by ADMIN role.",
+            tags = {"B2B Pricing Tiers"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "B2B pricing tier created successfully",
+                    content = @Content(schema = @Schema(implementation = B2BPricingTierResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<B2BPricingTierResponse>> createPricingTier(
+            @Parameter(description = "B2B pricing tier details", required = true)
             @Valid @RequestBody B2BPricingTierRequest request) {
         log.info("Creating B2B pricing tier for product: {}", request.getProductId());
         
@@ -58,10 +85,27 @@ public class B2BPricingTierController {
      * Update an existing B2B pricing tier
      * Only accessible by ADMIN
      */
+    @Operation(
+            summary = "Update B2B pricing tier",
+            description = "Updates an existing B2B pricing tier. Only accessible by ADMIN role.",
+            tags = {"B2B Pricing Tiers"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "B2B pricing tier updated successfully",
+                    content = @Content(schema = @Schema(implementation = B2BPricingTierResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Pricing tier not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<B2BPricingTierResponse>> updatePricingTier(
+            @Parameter(description = "Pricing tier ID", required = true, example = "1")
             @PathVariable Long id,
+            @Parameter(description = "B2B pricing tier update request", required = true)
             @Valid @RequestBody B2BPricingTierRequest request) {
         log.info("Updating B2B pricing tier: {}", id);
         
@@ -83,9 +127,21 @@ public class B2BPricingTierController {
      * Delete a B2B pricing tier
      * Only accessible by ADMIN
      */
+    @Operation(
+            summary = "Delete B2B pricing tier",
+            description = "Deletes a B2B pricing tier. Only accessible by ADMIN role.",
+            tags = {"B2B Pricing Tiers"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "B2B pricing tier deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Pricing tier not found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deletePricingTier(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deletePricingTier(
+            @Parameter(description = "Pricing tier ID", required = true, example = "1")
+            @PathVariable Long id) {
         log.info("Deleting B2B pricing tier: {}", id);
         
         b2BPricingTierService.deletePricingTier(id);
@@ -96,9 +152,25 @@ public class B2BPricingTierController {
      * Get a B2B pricing tier by ID
      * Only accessible by ADMIN
      */
+    @Operation(
+            summary = "Get B2B pricing tier by ID",
+            description = "Retrieves a B2B pricing tier by its ID. Only accessible by ADMIN role.",
+            tags = {"B2B Pricing Tiers"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pricing tier retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = B2BPricingTierResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Pricing tier not found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<B2BPricingTierResponse>> getPricingTier(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<B2BPricingTierResponse>> getPricingTier(
+            @Parameter(description = "Pricing tier ID", required = true, example = "1")
+            @PathVariable Long id) {
         B2BPricingTier tier = b2BPricingTierService.getPricingTier(id);
         B2BPricingTierResponse response = mapToResponse(tier);
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -108,9 +180,24 @@ public class B2BPricingTierController {
      * Get all pricing tiers for a product
      * Only accessible by ADMIN
      */
+    @Operation(
+            summary = "Get pricing tiers by product",
+            description = "Retrieves all B2B pricing tiers for a specific product. Only accessible by ADMIN role.",
+            tags = {"B2B Pricing Tiers"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pricing tiers retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
     @GetMapping("/product/{productId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<B2BPricingTierResponse>>> getPricingTiersByProduct(
+            @Parameter(description = "Product ID", required = true, example = "1")
             @PathVariable Long productId) {
         List<B2BPricingTier> tiers = b2BPricingTierService.getPricingTiersByProduct(productId);
         List<B2BPricingTierResponse> responses = tiers.stream()
@@ -123,9 +210,25 @@ public class B2BPricingTierController {
      * Get all pricing tiers for a business type
      * Only accessible by ADMIN
      */
+    @Operation(
+            summary = "Get pricing tiers by business type",
+            description = "Retrieves all B2B pricing tiers for a specific business type (CORPORATE, SME, ENTERPRISE). " +
+                    "Only accessible by ADMIN role.",
+            tags = {"B2B Pricing Tiers"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pricing tiers retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid business type"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+    })
     @GetMapping("/business-type/{businessType}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<B2BPricingTierResponse>>> getPricingTiersByBusinessType(
+            @Parameter(description = "Business type (CORPORATE, SME, ENTERPRISE)", required = true, example = "CORPORATE")
             @PathVariable String businessType) {
         List<B2BPricingTier> tiers = b2BPricingTierService.getPricingTiersByBusinessType(businessType);
         List<B2BPricingTierResponse> responses = tiers.stream()

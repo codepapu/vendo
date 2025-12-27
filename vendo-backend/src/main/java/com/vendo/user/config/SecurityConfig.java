@@ -35,6 +35,8 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/authorization/**").permitAll()
                 // WebSocket endpoints - allow for handshake, authentication handled in WebSocket interceptor
                 .requestMatchers("/ws/**", "/ws").permitAll()
+                // Swagger/OpenAPI documentation endpoints
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 // All other requests require authentication
                 .anyRequest().authenticated()
             )
