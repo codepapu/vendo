@@ -1,5 +1,6 @@
 package com.vendo.product.service;
 
+import com.vendo.b2b.service.B2BPricingService;
 import com.vendo.common.event.EventPublisher;
 import com.vendo.common.event.product.ProductCreatedEvent;
 import com.vendo.common.event.product.ProductStockUpdatedEvent;
@@ -36,6 +37,7 @@ public class ProductService {
     private final TaxRepository taxRepository;
     private final ProductReviewRepository productReviewRepository;
     private final EventPublisher eventPublisher;
+    private final B2BPricingService b2BPricingService;
     
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(String status, Pageable pageable) {
@@ -219,7 +221,11 @@ public class ProductService {
         if (request.getIsFeatured() != null) product.setIsFeatured(request.getIsFeatured());
         if (request.getIsVariation() != null) product.setIsVariation(request.getIsVariation());
         if (request.getSaleType() != null) product.setSaleType(request.getSaleType());
-        if (request.getPrice() != null) product.setPrice(request.getPrice());
+        boolean priceChanged = false;
+        if (request.getPrice() != null && !request.getPrice().equals(product.getPrice())) {
+            product.setPrice(request.getPrice());
+            priceChanged = true;
+        }
         if (request.getSalePrice() != null) product.setSalePrice(request.getSalePrice());
         if (request.getStartDate() != null) product.setStartDate(request.getStartDate());
         if (request.getEndDate() != null) product.setEndDate(request.getEndDate());
@@ -262,6 +268,11 @@ public class ProductService {
         
         Product updatedProduct = productRepository.save(product);
         log.info("Product updated with ID: {}", updatedProduct.getId());
+        
+        // Evict B2B pricing cache if product price changed
+        if (priceChanged) {
+            b2BPricingService.evictPricingCacheForProduct(updatedProduct.getId());
+        }
         
         // Publish ProductUpdatedEvent
         if (!updatedFields.isEmpty()) {

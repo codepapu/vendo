@@ -43,10 +43,10 @@ spring:
           min-idle: 0
   
   cache:
-    type: caffeine
-    caffeine:
-      spec: maximumSize=10000,expireAfterWrite=10m,expireAfterAccess=5m
-    cache-names: users,products,orders,categories
+    type: redis
+    redis:
+      time-to-live: 600000 # 10 minutes default (in milliseconds)
+    cache-names: users,products,orders,categories,b2bPricing
   
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
