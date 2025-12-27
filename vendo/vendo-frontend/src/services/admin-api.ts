@@ -692,6 +692,423 @@ class AdminApiService {
       return null;
     }
   }
+
+  // ============================================================================
+  // Business Account Management
+  // ============================================================================
+
+  /**
+   * Get all business accounts for admin
+   */
+  async getAllBusinessAccounts(params?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResponse<any> | null> {
+    try {
+      // Try admin endpoint first, fallback to B2B endpoint
+      try {
+        const response = await apiClient.get<ApiResponse<PaginatedResponse<any>>>(
+          '/v1/admin/business-accounts',
+          { params }
+        );
+        
+        if (response.data.success && response.data.data) {
+          return response.data.data;
+        }
+      } catch {
+        // Fallback: Use B2B endpoint if admin endpoint doesn't exist
+        // Note: This may require backend implementation
+        const response = await apiClient.get<ApiResponse<PaginatedResponse<any>>>(
+          '/v1/b2b/accounts',
+          { params }
+        );
+        
+        if (response.data.success && response.data.data) {
+          return response.data.data;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch business accounts');
+      return null;
+    }
+  }
+
+  /**
+   * Get business account by ID
+   */
+  async getBusinessAccountById(accountId: number): Promise<any | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        `/v1/b2b/accounts/${accountId}`
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch business account');
+      return null;
+    }
+  }
+
+  /**
+   * Approve or reject business account
+   */
+  async approveBusinessAccount(
+    accountId: number,
+    status: 'APPROVED' | 'REJECTED',
+    notes?: string
+  ): Promise<any | null> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>(
+        `/v1/b2b/accounts/${accountId}/approve`,
+        { status, notes }
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast(`Business account ${status.toLowerCase()} successfully`);
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, `Failed to ${status.toLowerCase()} business account`);
+      return null;
+    }
+  }
+
+  /**
+   * Update credit limit for business account
+   */
+  async updateCreditLimit(
+    accountId: number,
+    creditLimit: number,
+    notes?: string
+  ): Promise<any | null> {
+    try {
+      const response = await apiClient.put<ApiResponse<any>>(
+        `/v1/b2b/accounts/${accountId}/credit-limit`,
+        { creditLimit, notes }
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast('Credit limit updated successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to update credit limit');
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // Retailer Management
+  // ============================================================================
+
+  /**
+   * Get all retailers for admin
+   */
+  async getAllRetailers(params?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDir?: 'ASC' | 'DESC';
+  }): Promise<PaginatedResponse<any> | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<PaginatedResponse<any>>>(
+        '/v1/retailers',
+        { params }
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch retailers');
+      return null;
+    }
+  }
+
+  /**
+   * Get retailer by ID
+   */
+  async getRetailerById(retailerId: number): Promise<any | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        `/v1/retailers/${retailerId}`
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch retailer');
+      return null;
+    }
+  }
+
+  /**
+   * Approve retailer
+   */
+  async approveRetailer(retailerId: number): Promise<any | null> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>(
+        `/v1/retailers/${retailerId}/approve`
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast('Retailer approved successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to approve retailer');
+      return null;
+    }
+  }
+
+  /**
+   * Update retailer status
+   */
+  async updateRetailerStatus(
+    retailerId: number,
+    status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED'
+  ): Promise<any | null> {
+    try {
+      const response = await apiClient.put<ApiResponse<any>>(
+        `/v1/retailers/${retailerId}/status`,
+        null,
+        { params: { status } }
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast('Retailer status updated successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to update retailer status');
+      return null;
+    }
+  }
+
+  /**
+   * Update retailer commission rate
+   */
+  async updateRetailerCommissionRate(
+    retailerId: number,
+    commissionRate: number
+  ): Promise<any | null> {
+    try {
+      // Update retailer with new commission rate
+      const response = await apiClient.put<ApiResponse<any>>(
+        `/v1/retailers/${retailerId}`,
+        { commissionRate }
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast('Commission rate updated successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to update commission rate');
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // Admin Dashboard
+  // ============================================================================
+
+  /**
+   * Get admin dashboard data
+   */
+  async getAdminDashboard(): Promise<any | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        '/v1/admin/dashboard'
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch admin dashboard');
+      return null;
+    }
+  }
+
+  /**
+   * Get dashboard statistics
+   */
+  async getDashboardStats(): Promise<any | null> {
+    try {
+      const dashboard = await this.getAdminDashboard();
+      return dashboard?.stats || null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch dashboard statistics');
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // Payout Management
+  // ============================================================================
+
+  /**
+   * Get payout history for a retailer
+   */
+  async getRetailerPayoutHistory(
+    retailerId: number,
+    params?: {
+      page?: number;
+      size?: number;
+    }
+  ): Promise<PaginatedResponse<any> | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<PaginatedResponse<any>>>(
+        `/v1/retailers/${retailerId}/payouts`,
+        { params }
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch payout history');
+      return null;
+    }
+  }
+
+  /**
+   * Get pending payouts for a retailer
+   */
+  async getPendingPayouts(retailerId: number): Promise<any[] | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<any[]>>(
+        `/v1/retailers/${retailerId}/payouts/pending`
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch pending payouts');
+      return null;
+    }
+  }
+
+  /**
+   * Get all pending payouts (admin)
+   */
+  async getAllPendingPayouts(params?: {
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResponse<any> | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<PaginatedResponse<any>>>(
+        '/v1/retailers/payouts/admin/pending',
+        { params }
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch pending payouts');
+      return null;
+    }
+  }
+
+  /**
+   * Calculate payout for a retailer
+   */
+  async calculatePayout(
+    retailerId: number,
+    startDate: string,
+    endDate: string
+  ): Promise<any | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        `/v1/retailers/${retailerId}/payouts/calculate`,
+        {
+          params: {
+            startDate,
+            endDate,
+          },
+        }
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to calculate payout');
+      return null;
+    }
+  }
+
+  /**
+   * Process payout for a retailer
+   */
+  async processPayout(
+    retailerId: number,
+    startDate: string,
+    endDate: string,
+    bankAccountId?: number
+  ): Promise<any | null> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>(
+        `/v1/retailers/${retailerId}/payouts`,
+        null,
+        {
+          params: {
+            startDate,
+            endDate,
+            bankAccountId: bankAccountId || undefined,
+          },
+        }
+      );
+      
+      if (response.data.success && response.data.data) {
+        showSuccessToast('Payout processed successfully');
+        return response.data.data;
+      }
+      
+      return null;
+    } catch (error) {
+      handleApiError(error, 'Failed to process payout');
+      return null;
+    }
+  }
 }
 
 export const adminApi = new AdminApiService();

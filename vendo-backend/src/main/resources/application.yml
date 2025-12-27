@@ -172,6 +172,37 @@ app:
       enabled: ${SMS_ENABLED:false}
     push:
       enabled: ${PUSH_ENABLED:false}
+  
+  # CDN Configuration
+  cdn:
+    enabled: ${CDN_ENABLED:false}
+    base-url: ${CDN_BASE_URL:}
+    provider: ${CDN_PROVIDER:cloudflare} # cloudflare, cloudfront, fastly, etc.
+    api-key: ${CDN_API_KEY:}
+    api-secret: ${CDN_API_SECRET:}
+    zone-id: ${CDN_ZONE_ID:}
+    cache-ttl: ${CDN_CACHE_TTL:86400} # 24 hours in seconds
+  
+  # Image Optimization Configuration
+  image:
+    optimization:
+      enabled: ${IMAGE_OPTIMIZATION_ENABLED:true}
+      thumbnail:
+        width: ${IMAGE_THUMBNAIL_WIDTH:300}
+        height: ${IMAGE_THUMBNAIL_HEIGHT:300}
+      medium:
+        width: ${IMAGE_MEDIUM_WIDTH:800}
+        height: ${IMAGE_MEDIUM_HEIGHT:800}
+      large:
+        width: ${IMAGE_LARGE_WIDTH:1920}
+        height: ${IMAGE_LARGE_HEIGHT:1920}
+      webp:
+        enabled: ${IMAGE_WEBP_ENABLED:true}
+      quality: ${IMAGE_QUALITY:0.85}
+  
+  # Two-Factor Authentication Configuration
+  2fa:
+    issuer: ${2FA_ISSUER:Vendo}
 
 # Tax API Configuration
 tax:

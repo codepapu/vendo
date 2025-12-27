@@ -12,6 +12,10 @@ export function formatPrice(price: number, currency: string = 'USD'): string {
   }).format(price);
 }
 
+export function formatCurrency(amount: number, currency: string = 'USD'): string {
+  return formatPrice(amount, currency);
+}
+
 export function formatDate(date: string | Date): string {
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',

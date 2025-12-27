@@ -33,6 +33,7 @@ public class AuthService {
     private final PasswordResetService passwordResetService;
     private final TokenBlacklistService tokenBlacklistService;
     private final EventPublisher eventPublisher;
+    private final TwoFactorAuthService twoFactorAuthService;
     
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -138,6 +139,20 @@ public class AuthService {
         // Check if email is verified (optional - can be made required)
         if (!user.getIsVerified() && user.getEmailVerifiedAt() == null) {
             throw new BadRequestException("Email is not verified. Please check your email for verification link.");
+        }
+        
+        // Check if 2FA is enabled
+        boolean is2FAEnabled = twoFactorAuthService.is2FAEnabled(user.getId());
+        if (is2FAEnabled) {
+            // If 2FA is enabled but no code provided, throw exception indicating 2FA is required
+            if (request.getTwoFactorCode() == null || request.getTwoFactorCode().isEmpty()) {
+                throw new BadRequestException("2FA code is required. Please provide the code from your authenticator app.");
+            }
+            
+            // Verify 2FA code
+            if (!twoFactorAuthService.verify2FACodeForLogin(user.getId(), request.getTwoFactorCode())) {
+                throw new BadRequestException("Invalid 2FA code");
+            }
         }
         
         // Update last login

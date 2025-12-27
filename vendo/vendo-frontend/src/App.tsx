@@ -37,6 +37,9 @@ const AdminOrders = lazy(() => import('@/pages/admin/orders').then((m) => ({ def
 const AdminUsers = lazy(() => import('@/pages/admin/users').then((m) => ({ default: m.AdminUsers })));
 const AdminSettings = lazy(() => import('@/pages/admin/settings').then((m) => ({ default: m.AdminSettings })));
 const AdminCoupons = lazy(() => import('@/pages/admin/coupons').then((m) => ({ default: m.AdminCoupons })));
+const AdminBusinessAccounts = lazy(() => import('@/pages/admin/business-accounts').then((m) => ({ default: m.AdminBusinessAccounts })));
+const AdminRetailers = lazy(() => import('@/pages/admin/retailers').then((m) => ({ default: m.AdminRetailers })));
+const AdminDashboard = lazy(() => import('@/pages/admin/dashboard').then((m) => ({ default: m.AdminDashboard })));
 const RetailerRegister = lazy(() => import('@/pages/retailer/register').then((m) => ({ default: m.default })));
 const RetailerDashboard = lazy(() => import('@/pages/retailer/dashboard').then((m) => ({ default: m.default })));
 const RetailerProducts = lazy(() => import('@/pages/retailer/products').then((m) => ({ default: m.default })));
@@ -228,6 +231,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminCoupons />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/business-accounts"
+                element={
+                  <ProtectedRoute>
+                    <AdminBusinessAccounts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/retailers"
+                element={
+                  <ProtectedRoute>
+                    <AdminRetailers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
                   </ProtectedRoute>
                 }
               />

@@ -77,6 +77,16 @@ dependencies {
     implementation("org.apache.poi:poi-ooxml:5.2.5")
     implementation("com.opencsv:opencsv:5.9")
     
+    // TOTP (Two-Factor Authentication)
+    implementation("dev.samstevens.totp:totp:1.7.1")
+    
+    // QR Code Generation
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.google.zxing:javase:3.5.2")
+    
+    // Image Processing (WebP support)
+    implementation("org.sejda.imageio:imageio-webp:0.1.6")
+    
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
