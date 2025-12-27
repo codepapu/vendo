@@ -1,4 +1,4 @@
-package com.vendo.return.dto.request;
+package com.vendo.orderreturn.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

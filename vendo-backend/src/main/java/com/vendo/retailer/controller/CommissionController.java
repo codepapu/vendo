@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,12 +41,12 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Commissions retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/retailer/{retailerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -81,13 +80,13 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Commissions retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Order not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @GetMapping("/order/{orderId}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -105,13 +104,13 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Total commissions retrieved successfully",
                     content = @Content(schema = @Schema(implementation = BigDecimal.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/retailer/{retailerId}/total")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -129,14 +128,14 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Total commissions retrieved successfully",
                     content = @Content(schema = @Schema(implementation = BigDecimal.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid status"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/retailer/{retailerId}/total/{status}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -155,14 +154,14 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Commission status updated successfully",
                     content = @Content(schema = @Schema(implementation = CommissionTrackingResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Commission not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid status or data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Commission not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status or data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PutMapping("/{commissionId}/status")
     @PreAuthorize("hasRole('ADMIN')")
@@ -187,13 +186,13 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Commission report generated successfully",
                     content = @Content(schema = @Schema(implementation = CommissionReportResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/retailer/{retailerId}/report")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -215,14 +214,14 @@ public class CommissionController {
             tags = {"Commissions"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Commissions calculated successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Order not found"),
-            @ApiResponse(responseCode = "400", description = "Order not completed or commissions already calculated"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Order not completed or commissions already calculated"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PostMapping("/order/{orderId}/calculate")
     @PreAuthorize("hasRole('ADMIN')")

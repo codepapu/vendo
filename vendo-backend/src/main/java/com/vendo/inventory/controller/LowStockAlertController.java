@@ -29,7 +29,7 @@ public class LowStockAlertController {
     
     @PostMapping("/send")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<String>> sendLowStockAlerts(
+    public ResponseEntity<ApiResponse<Void>> sendLowStockAlerts(
             @RequestParam(required = false) Long retailerId,
             @RequestParam(required = false) Long warehouseId) {
         lowStockAlertService.sendLowStockAlerts(retailerId, warehouseId);
@@ -49,7 +49,7 @@ public class LowStockAlertController {
     
     @PutMapping("/thresholds/{inventoryId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('VENDOR')")
-    public ResponseEntity<ApiResponse<String>> updateAlertThresholds(
+    public ResponseEntity<ApiResponse<Void>> updateAlertThresholds(
             @PathVariable Long inventoryId,
             @RequestParam(required = false) Integer lowStockThreshold,
             @RequestParam(required = false) Integer reorderPoint) {

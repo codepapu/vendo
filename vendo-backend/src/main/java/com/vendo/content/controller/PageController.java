@@ -1,7 +1,6 @@
 package com.vendo.content.controller;
 
 import com.vendo.common.dto.ApiResponse;
-import com.vendo.content.dto.request.PageRequest;
 import com.vendo.content.dto.response.PageResponse;
 import com.vendo.content.service.PageService;
 import jakarta.validation.Valid;
@@ -47,7 +46,7 @@ public class PageController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PageResponse>> createPage(
-            @Valid @RequestBody PageRequest request) {
+            @Valid @RequestBody com.vendo.content.dto.request.PageRequest request) {
         PageResponse page = pageService.createPage(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Page created successfully", page));
@@ -57,7 +56,7 @@ public class PageController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PageResponse>> updatePage(
             @PathVariable Long id,
-            @Valid @RequestBody PageRequest request) {
+            @Valid @RequestBody com.vendo.content.dto.request.PageRequest request) {
         PageResponse page = pageService.updatePage(id, request);
         return ResponseEntity.ok(ApiResponse.success("Page updated successfully", page));
     }

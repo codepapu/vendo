@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,14 +41,14 @@ public class RetailerProductController {
             tags = {"Retailer Products"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Product added successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Retailer or product not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer or product not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -69,14 +68,14 @@ public class RetailerProductController {
             tags = {"Retailer Products"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Product price updated successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid price"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid price"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/{productRetailerId}/price")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -98,14 +97,14 @@ public class RetailerProductController {
             tags = {"Retailer Products"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Stock updated successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid stock quantity"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid stock quantity"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/{productRetailerId}/stock")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -128,12 +127,12 @@ public class RetailerProductController {
             tags = {"Retailer Products"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Products retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -166,13 +165,13 @@ public class RetailerProductController {
             tags = {"Retailer Products"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Product deactivated successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/{productRetailerId}/deactivate")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -193,13 +192,13 @@ public class RetailerProductController {
             tags = {"Retailer Products"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Product activated successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product retailer relationship not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/{productRetailerId}/activate")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")

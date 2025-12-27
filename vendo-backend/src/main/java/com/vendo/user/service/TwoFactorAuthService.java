@@ -17,9 +17,6 @@ import com.vendo.user.repository.UserRepository;
 import dev.samstevens.totp.code.*;
 import dev.samstevens.totp.exceptions.CodeGenerationException;
 import dev.samstevens.totp.exceptions.QrGenerationException;
-import dev.samstevens.totp.qr.QrData;
-import dev.samstevens.totp.qr.QrGenerator;
-import dev.samstevens.totp.qr.QrUriGenerator;
 import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
 import dev.samstevens.totp.time.SystemTimeProvider;
@@ -61,8 +58,6 @@ public class TwoFactorAuthService {
     private static final int BACKUP_CODE_LENGTH = 8;
     
     private final SecretGenerator secretGenerator = new DefaultSecretGenerator();
-    private final QrUriGenerator qrUriGenerator = new QrUriGenerator();
-    private final QrGenerator qrGenerator = new QrGenerator();
     private final TimeProvider timeProvider = new SystemTimeProvider();
     private final CodeGenerator codeGenerator = new DefaultCodeGenerator();
     private final CodeVerifier codeVerifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
@@ -314,16 +309,9 @@ public class TwoFactorAuthService {
     
     private String generateQRCode(String email, String secret) {
         try {
-            QrData data = new QrData.Builder()
-                    .label(email)
-                    .secret(secret)
-                    .issuer(issuer)
-                    .algorithm(HashingAlgorithm.SHA1)
-                    .digits(6)
-                    .period(30)
-                    .build();
-            
-            String qrUri = qrUriGenerator.getUri(data);
+            // Generate QR code URI manually (TOTP library format)
+            String qrUri = String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s&algorithm=SHA1&digits=6&period=30",
+                    "Vendo", email, secret, "Vendo");
             
             // Generate QR code image as base64
             QRCodeWriter qrCodeWriter = new QRCodeWriter();

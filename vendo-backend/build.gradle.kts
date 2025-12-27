@@ -85,7 +85,11 @@ dependencies {
     implementation("com.google.zxing:javase:3.5.2")
     
     // Image Processing (WebP support)
-    implementation("org.sejda.imageio:imageio-webp:0.1.6")
+    // Note: imageio-webp may not be available in Maven Central, using alternative
+    // implementation("org.sejda.imageio:imageio-webp:0.1.6")
+    
+    // Image Thumbnail Generation
+    implementation("net.coobird:thumbnailator:0.4.20")
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

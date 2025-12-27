@@ -61,7 +61,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // If rate limit exceeded, return 429 Too Many Requests
         if (!result.isAllowed()) {
             log.warn("Rate limit exceeded for client: {} on path: {}", clientId, path);
-            response.setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+            response.setStatus(429); // SC_TOO_MANY_REQUESTS
             response.setContentType("application/json");
             response.getWriter().write(String.format(
                     "{\"error\":\"Rate limit exceeded\",\"message\":\"%s\",\"retryAfter\":%d}",

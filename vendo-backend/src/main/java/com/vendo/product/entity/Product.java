@@ -69,6 +69,25 @@ public class Product {
     @Size(max = 100)
     private String sku;
     
+    @Column
+    private Integer quantity;
+    
+    @Column(name = "allow_checkout_when_out_of_stock", nullable = false)
+    @Builder.Default
+    private Boolean allowCheckoutWhenOutOfStock = false;
+    
+    @Column(name = "with_storehouse_management", nullable = false)
+    @Builder.Default
+    private Boolean withStorehouseManagement = false;
+    
+    @Column(name = "stock_status", length = 191)
+    @Builder.Default
+    private String stockStatus = "in_stock";
+    
+    @Column
+    @Builder.Default
+    private Integer order = 0;
+    
     @Column(length = 100)
     @Size(max = 100)
     private String barcode;
@@ -78,16 +97,9 @@ public class Product {
     @Builder.Default
     private String productType = "SIMPLE";
     
-    @Column(nullable = false, length = 20)
-    @Builder.Default
-    private String status = "DRAFT";
-    
     @Column(name = "is_featured", nullable = false)
     @Builder.Default
     private Boolean isFeatured = false;
-    
-    @Column(precision = 10, scale = 2)
-    private BigDecimal weight;
     
     @Column(columnDefinition = "JSONB")
     private String dimensions; // JSON: {length, width, height, unit}
@@ -128,10 +140,6 @@ public class Product {
     
     private Long taxId;
     
-    @Column(nullable = false)
-    @Builder.Default
-    private Long views = 0L;
-    
     private Long storeId;
     
     @Column(nullable = false)
@@ -148,12 +156,6 @@ public class Product {
     @Column(length = 191)
     private String image;
     
-    @Column(length = 60)
-    @Builder.Default
-    private String productType = "physical";
-    
-    @Column(length = 150)
-    private String barcode;
     
     @Column(precision = 15, scale = 2)
     private BigDecimal costPerItem;

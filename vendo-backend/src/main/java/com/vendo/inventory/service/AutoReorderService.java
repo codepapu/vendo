@@ -3,6 +3,7 @@ package com.vendo.inventory.service;
 import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
 import com.vendo.common.notification.NotificationService;
+import com.vendo.common.notification.NotificationRequest;
 import com.vendo.inventory.dto.request.AutoReorderSettingsRequest;
 import com.vendo.inventory.dto.response.AutoReorderSettingsResponse;
 import com.vendo.inventory.entity.AutoReorderSettings;
@@ -206,12 +207,13 @@ public class AutoReorderService {
         );
         
         if (settings.getRetailer() != null && settings.getRetailer().getUser() != null) {
-            notificationService.sendNotification(
-                    settings.getRetailer().getUser().getId(),
-                    "Auto Reorder Triggered",
-                    message,
-                    com.vendo.common.notification.NotificationPriority.HIGH
-            );
+            com.vendo.common.notification.NotificationRequest notificationRequest = com.vendo.common.notification.NotificationRequest.builder()
+                    .userId(settings.getRetailer().getUser().getId())
+                    .title("Auto Reorder Triggered")
+                    .message(message)
+                    .priority(com.vendo.common.notification.NotificationPriority.HIGH)
+                    .build();
+            notificationService.sendNotification(notificationRequest);
         }
         
         // Update last reorder time

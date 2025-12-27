@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class PaymentRefundedEvent extends BaseEvent {
     

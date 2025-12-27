@@ -126,7 +126,7 @@ public class ShippingService {
         if (carrier != null) {
             shipment = shipmentRepository.findByTrackingNumberAndCarrier(trackingNumber, carrier)
                     .orElseThrow(() -> new ResourceNotFoundException("Shipment", 
-                            "trackingNumber=" + trackingNumber + ", carrier=" + carrier));
+                            "trackingNumber", trackingNumber + ", carrier=" + carrier));
         } else {
             shipment = shipmentRepository.findByTrackingNumber(trackingNumber)
                     .orElseThrow(() -> new ResourceNotFoundException("Shipment", "trackingNumber", trackingNumber));

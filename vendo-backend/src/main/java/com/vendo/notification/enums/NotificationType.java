@@ -33,6 +33,10 @@ public enum NotificationType {
     SHIPMENT_TRACKING,
     DELIVERY_REMINDER,
     
+    // Inventory notifications
+    LOW_STOCK_ALERT,
+    OUT_OF_STOCK,
+    
     // General
     SYSTEM_UPDATE,
     MAINTENANCE_NOTICE,

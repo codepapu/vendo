@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class OrderPaymentSagaEvent extends BaseEvent {
     

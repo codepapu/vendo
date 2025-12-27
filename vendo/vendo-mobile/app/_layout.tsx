@@ -34,6 +34,15 @@ export default function RootLayout() {
         <Stack.Screen name="orders" />
         <Stack.Screen name="orders/[id]" />
         <Stack.Screen name="settings" />
+        {/* Public Pages */}
+        <Stack.Screen name="about" />
+        <Stack.Screen name="contact" />
+        <Stack.Screen name="privacy" />
+        <Stack.Screen name="terms" />
+        <Stack.Screen name="faq" />
+        <Stack.Screen name="categories" />
+        <Stack.Screen name="stores" />
+        <Stack.Screen name="stores/[slug]" />
         <Stack.Screen name="b2b" />
         <Stack.Screen name="b2b/products" />
         <Stack.Screen name="b2b/orders" />

@@ -183,7 +183,7 @@ public class MultiVendorOrderService {
         
         // Calculate total amount
         BigDecimal totalAmount = subOrders.stream()
-                .map(OrderResponse::getTotalAmount)
+                .map(OrderResponse::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
         // Deduct commission from total

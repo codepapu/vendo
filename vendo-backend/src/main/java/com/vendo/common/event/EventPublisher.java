@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Centralized event publisher for all domain events.
@@ -29,22 +28,18 @@ public class EventPublisher {
         try {
             log.info("Publishing event: {} to topic: {}", event.getEventType(), topic);
             
-            ListenableFuture<SendResult<String, BaseEvent>> future = 
+            CompletableFuture<SendResult<String, BaseEvent>> future = 
                 kafkaTemplate.send(topic, event.getEventId(), event);
             
-            future.addCallback(new ListenableFutureCallback<SendResult<String, BaseEvent>>() {
-                @Override
-                public void onSuccess(SendResult<String, BaseEvent> result) {
+            future.whenComplete((result, ex) -> {
+                if (ex != null) {
+                    log.error("Failed to publish event: eventId={}, topic={}", 
+                            event.getEventId(), topic, ex);
+                } else {
                     log.info("Event published successfully: eventId={}, topic={}, partition={}, offset={}",
                             event.getEventId(), topic, 
                             result.getRecordMetadata().partition(),
                             result.getRecordMetadata().offset());
-                }
-                
-                @Override
-                public void onFailure(Throwable ex) {
-                    log.error("Failed to publish event: eventId={}, topic={}", 
-                            event.getEventId(), topic, ex);
                 }
             });
         } catch (Exception e) {

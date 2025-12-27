@@ -31,7 +31,7 @@ public class ImageOptimizationController {
     ) throws IOException {
         Long userId = Long.parseLong(authentication.getName());
         ImageOptimizationResponse response = imageOptimizationService.optimizeImage(file, userId);
-        return ResponseEntity.ok(ApiResponse.success(response, "Image optimized successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Image optimized successfully", response));
     }
     
     @PostMapping("/{imageId}")
@@ -41,7 +41,7 @@ public class ImageOptimizationController {
             @PathVariable Long imageId
     ) throws IOException {
         ImageOptimizationResponse response = imageOptimizationService.optimizeExistingImage(imageId);
-        return ResponseEntity.ok(ApiResponse.success(response, "Image optimized successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Image optimized successfully", response));
     }
 }
 

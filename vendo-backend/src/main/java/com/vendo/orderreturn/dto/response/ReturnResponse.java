@@ -1,4 +1,4 @@
-package com.vendo.return.dto.response;
+package com.vendo.orderreturn.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

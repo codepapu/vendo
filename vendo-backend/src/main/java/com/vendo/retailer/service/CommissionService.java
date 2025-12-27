@@ -247,6 +247,10 @@ public class CommissionService {
             endDate = LocalDate.now();
         }
         
+        // Create final copies for use in lambda
+        final LocalDate finalStartDate = startDate;
+        final LocalDate finalEndDate = endDate;
+        
         BigDecimal totalCommissions = commissionTrackingRepository.getTotalCommissionsByRetailerAndDateRange(
                 retailerId, startDate, endDate);
         totalCommissions = totalCommissions != null ? totalCommissions : BigDecimal.ZERO;
@@ -260,8 +264,8 @@ public class CommissionService {
         // Get daily summaries
         List<CommissionTracking> allCommissions = commissionTrackingRepository.findByRetailerId(retailerId);
         List<CommissionReportResponse.CommissionSummary> summaries = allCommissions.stream()
-                .filter(c -> c.getCreatedAt().toLocalDate().isAfter(startDate.minusDays(1)) &&
-                            c.getCreatedAt().toLocalDate().isBefore(endDate.plusDays(1)))
+                .filter(c -> c.getCreatedAt().toLocalDate().isAfter(finalStartDate.minusDays(1)) &&
+                            c.getCreatedAt().toLocalDate().isBefore(finalEndDate.plusDays(1)))
                 .collect(Collectors.groupingBy(
                         c -> c.getCreatedAt().toLocalDate(),
                         Collectors.collectingAndThen(

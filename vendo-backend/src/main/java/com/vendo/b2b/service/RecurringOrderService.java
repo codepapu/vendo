@@ -14,7 +14,7 @@ import com.vendo.notification.dto.request.SendNotificationRequest;
 import com.vendo.notification.enums.NotificationType;
 import com.vendo.notification.service.NotificationService;
 import com.vendo.order.dto.request.CreateOrderRequest;
-import com.vendo.order.dto.request.OrderItemRequest;
+import com.vendo.order.dto.request.CreateOrderRequest;
 import com.vendo.order.entity.Order;
 import com.vendo.order.repository.OrderRepository;
 import com.vendo.order.service.OrderService;
@@ -268,8 +268,8 @@ public class RecurringOrderService {
         log.info("Generating order from recurring order: {}", recurringOrder.getId());
         
         // Build order request
-        List<OrderItemRequest> orderItems = recurringOrder.getRecurringOrderItems().stream()
-                .map(item -> OrderItemRequest.builder()
+        List<CreateOrderRequest.OrderItemRequest> orderItems = recurringOrder.getRecurringOrderItems().stream()
+                .map(item -> CreateOrderRequest.OrderItemRequest.builder()
                         .productId(item.getProduct() != null ? item.getProduct().getId() : null)
                         .quantity(item.getQuantity())
                         .build())

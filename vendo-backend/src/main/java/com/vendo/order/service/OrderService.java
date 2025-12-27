@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -91,7 +92,7 @@ public class OrderService {
         BigDecimal subTotal = BigDecimal.ZERO;
         List<com.vendo.tax.dto.request.TaxRequest.TaxItemRequest> taxItems = new ArrayList<>();
         
-        for (OrderItemRequest itemRequest : request.getItems()) {
+        for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
             com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product", "id", itemRequest.getProductId()));
             
@@ -212,7 +213,7 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderProduct> orderProducts = new ArrayList<>();
         
-        for (OrderItemRequest itemRequest : request.getItems()) {
+        for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
             BigDecimal unitPrice = BigDecimal.valueOf(100); // Placeholder - would fetch from product service
             BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
             
@@ -286,7 +287,7 @@ public class OrderService {
         // Create initial order history
         OrderHistory history = OrderHistory.builder()
                 .order(order)
-                .status("pending")
+                .action("ORDER_CREATED")
                 .description("Order created")
                 .build();
         order.setHistories(List.of(history));
@@ -324,7 +325,7 @@ public class OrderService {
                 .findFirst()
                 .orElse(null);
         
-        OrderCreatedEvent.ShippingAddress shippingAddress = shippingAddr != null ?
+        OrderCreatedEvent.ShippingAddress eventShippingAddress = shippingAddr != null ?
                 OrderCreatedEvent.ShippingAddress.builder()
                         .fullName(shippingAddr.getName())
                         .phone(shippingAddr.getPhone())
@@ -354,7 +355,7 @@ public class OrderService {
                 savedOrder.getStatus(),
                 "pending", // Payment method - would get from payment service
                 eventItems,
-                shippingAddress
+                eventShippingAddress
         );
         eventPublisher.publish(orderCreatedEvent, "order-created");
         
@@ -372,16 +373,10 @@ public class OrderService {
         // Add history entry
         OrderHistory history = OrderHistory.builder()
                 .order(order)
-                .status(status)
+                .action(status)
                 .description("Status changed from " + oldStatus + " to " + status)
                 .build();
         order.getHistories().add(history);
-        
-        // Set completed date if status is completed
-        if ("completed".equals(status)) {
-            order.setCompletedAt(LocalDateTime.now());
-            order.setIsFinished(true);
-        }
         
         Order updatedOrder = orderRepository.save(order);
         log.info("Order status updated: {} -> {}", oldStatus, status);
@@ -415,7 +410,7 @@ public class OrderService {
         // Add history entry
         OrderHistory history = OrderHistory.builder()
                 .order(order)
-                .status("cancelled")
+                .action("cancelled")
                 .description("Order cancelled: " + reason)
                 .build();
         order.getHistories().add(history);
@@ -455,7 +450,7 @@ public class OrderService {
         // Add history entry
         OrderHistory history = OrderHistory.builder()
                 .order(order)
-                .status(order.getStatus())
+                .action(order.getStatus())
                 .description("Refund processed: " + amount + " - " + reason)
                 .build();
         order.getHistories().add(history);
@@ -477,7 +472,7 @@ public class OrderService {
         BigDecimal subTotal = BigDecimal.ZERO;
         List<com.vendo.tax.dto.request.TaxRequest.TaxItemRequest> taxItems = new ArrayList<>();
         
-        for (OrderItemRequest itemRequest : request.getItems()) {
+        for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
             com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product", "id", itemRequest.getProductId()));
             
@@ -577,7 +572,7 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderProduct> orderProducts = new ArrayList<>();
         
-        for (OrderItemRequest itemRequest : request.getItems()) {
+        for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
             BigDecimal unitPrice = BigDecimal.valueOf(100); // Placeholder - would fetch from product service
             BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
             
@@ -649,7 +644,7 @@ public class OrderService {
         // Create initial order history
         OrderHistory history = OrderHistory.builder()
                 .order(order)
-                .status("PENDING")
+                .action("PENDING")
                 .description("Guest order created")
                 .build();
         order.setHistories(List.of(history));
@@ -676,10 +671,10 @@ public class OrderService {
      */
     public OrderResponse mapToResponse(Order order) {
         // Map order items - prefer OrderItem over OrderProduct (legacy)
-        List<OrderItemResponse> items = List.of();
+        List<OrderResponse.OrderItemResponse> items = List.of();
         if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
             items = order.getOrderItems().stream()
-                    .map(oi -> OrderItemResponse.builder()
+                    .map(oi -> OrderResponse.OrderItemResponse.builder()
                             .id(oi.getId())
                             .productId(oi.getProduct() != null ? oi.getProduct().getId() : null)
                             .retailerId(oi.getRetailer() != null ? oi.getRetailer().getId() : null)
@@ -694,7 +689,7 @@ public class OrderService {
         } else if (order.getOrderProducts() != null && !order.getOrderProducts().isEmpty()) {
             // Fallback to legacy OrderProduct for backward compatibility
             items = order.getOrderProducts().stream()
-                    .map(op -> OrderItemResponse.builder()
+                    .map(op -> OrderResponse.OrderItemResponse.builder()
                             .id(op.getId())
                             .productId(op.getProductId())
                             .retailerId(null) // OrderProduct doesn't have retailer_id
@@ -734,7 +729,7 @@ public class OrderService {
                         order.getAddresses().stream()
                                 .filter(a -> "shipping_address".equals(a.getType()))
                                 .findFirst()
-                                .map(a -> AddressResponse.builder()
+                                .map(a -> OrderResponse.AddressResponse.builder()
                                         .name(a.getName())
                                         .phone(a.getPhone())
                                         .email(a.getEmail())
@@ -749,7 +744,7 @@ public class OrderService {
                         order.getAddresses().stream()
                                 .filter(a -> "billing_address".equals(a.getType()))
                                 .findFirst()
-                                .map(a -> AddressResponse.builder()
+                                .map(a -> OrderResponse.AddressResponse.builder()
                                         .name(a.getName())
                                         .phone(a.getPhone())
                                         .email(a.getEmail())

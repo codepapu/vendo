@@ -415,16 +415,24 @@ class RetailerServiceTest {
                 .status("DELIVERED")
                 .createdAt(LocalDateTime.now())
                 .build();
+        Product product1 = Product.builder()
+                .id(1L)
+                .name("Test Product")
+                .build();
         OrderItem item1 = OrderItem.builder()
                 .id(1L)
                 .order(order1)
                 .retailer(activeRetailer)
+                .product(product1)
+                .productName("Test Product")
                 .totalPrice(new BigDecimal("500.00"))
                 .quantity(5)
                 .createdAt(LocalDateTime.now())
                 .build();
         thisMonthItems.add(item1);
 
+        // Mock orderItemRepository.findByRetailerId to return the same list for all calls
+        // (the service calls it multiple times)
         when(orderItemRepository.findByRetailerId(retailerId)).thenReturn(thisMonthItems);
 
         // When
@@ -506,12 +514,9 @@ class RetailerServiceTest {
                 .storeSlug("INVALID_SLUG_WITH_UPPERCASE") // Invalid format
                 .build();
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(retailerRepository.findByUserId(1L)).thenReturn(Optional.empty());
-        when(retailerRepository.existsByStoreSlug("INVALID_SLUG_WITH_UPPERCASE")).thenReturn(false);
-
         // When/Then - Service should handle or validation should catch
         // In production, validation annotations would catch this
+        // We don't set up mocks since validation should prevent reaching the service layer
         assertDoesNotThrow(() -> {
             // This would be caught by @Pattern validation in DTO
         });

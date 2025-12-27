@@ -9,7 +9,7 @@ import com.vendo.content.entity.MediaFile;
 import com.vendo.content.repository.MediaFileRepository;
 import com.vendo.content.service.MediaService;
 import com.vendo.notification.dto.response.NotificationPreferenceResponse;
-import com.vendo.notification.service.NotificationService;
+import com.vendo.notification.service.NotificationPreferenceService;
 import com.vendo.user.dto.request.ChangePasswordRequest;
 import com.vendo.user.dto.request.UpdateProfileRequest;
 import com.vendo.user.dto.response.UserProfileResponse;
@@ -34,7 +34,7 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final MediaFileRepository mediaFileRepository;
     private final MediaService mediaService;
-    private final NotificationService notificationService;
+    private final NotificationPreferenceService notificationPreferenceService;
     private final PasswordEncoder passwordEncoder;
     private final EventPublisher eventPublisher;
     
@@ -238,7 +238,7 @@ public class UserProfileService {
         
         // Load notification preferences
         try {
-            NotificationPreferenceResponse preferences = notificationService.getUserPreferences(user.getId());
+            NotificationPreferenceResponse preferences = notificationPreferenceService.getPreferences(user.getId());
             builder.notificationPreferences(preferences);
         } catch (Exception e) {
             log.warn("Failed to load notification preferences for user ID: {}", user.getId(), e);

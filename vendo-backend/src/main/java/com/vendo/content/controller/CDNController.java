@@ -38,7 +38,7 @@ public class CDNController {
             @Valid @RequestBody InvalidateCacheRequest request
     ) {
         cdnService.invalidateCache(request);
-        return ResponseEntity.ok(ApiResponse.success(null, "CDN cache invalidated successfully"));
+        return ResponseEntity.ok(ApiResponse.success("CDN cache invalidated successfully"));
     }
     
     @GetMapping("/stats")

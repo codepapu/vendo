@@ -20,5 +20,7 @@ public class CartItemRequest {
     @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
     
+    private Long retailerId; // Optional: for marketplace orders
+    
     private Long variationId; // Optional: for product variations
 }

@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+// Removed ambiguous import
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,12 +42,12 @@ public class RetailerStorefrontController {
             tags = {"Storefronts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Storefront retrieved successfully",
                     content = @Content(schema = @Schema(implementation = StorefrontResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Storefront not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Storefront not found")
     })
     @GetMapping("/{slug}")
     public ResponseEntity<ApiResponse<StorefrontResponse>> getStorefront(
@@ -66,12 +66,12 @@ public class RetailerStorefrontController {
             tags = {"Storefronts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Storefront retrieved successfully",
                     content = @Content(schema = @Schema(implementation = StorefrontResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Storefront not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Storefront not found")
     })
     @GetMapping("/retailer/{retailerId}")
     public ResponseEntity<ApiResponse<StorefrontResponse>> getStorefrontById(
@@ -91,14 +91,14 @@ public class RetailerStorefrontController {
             tags = {"Storefronts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Storefront updated successfully",
                     content = @Content(schema = @Schema(implementation = StorefrontResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Storefront not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Storefront not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
     })
     @PutMapping("/{retailerId}")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -127,12 +127,12 @@ public class RetailerStorefrontController {
             tags = {"Storefronts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Products retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Storefront not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Storefront not found")
     })
     @GetMapping("/{slug}/products")
     public ResponseEntity<ApiResponse<Page<ProductRetailerResponse>>> getStorefrontProducts(
@@ -160,7 +160,7 @@ public class RetailerStorefrontController {
             tags = {"Storefronts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailers retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))

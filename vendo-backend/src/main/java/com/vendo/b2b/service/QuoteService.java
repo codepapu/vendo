@@ -17,7 +17,6 @@ import com.vendo.notification.dto.request.SendNotificationRequest;
 import com.vendo.notification.enums.NotificationType;
 import com.vendo.notification.service.NotificationService;
 import com.vendo.order.dto.request.CreateOrderRequest;
-import com.vendo.order.dto.request.OrderItemRequest;
 import com.vendo.order.entity.Order;
 import com.vendo.order.repository.OrderRepository;
 import com.vendo.order.service.OrderService;
@@ -288,8 +287,8 @@ public class QuoteService {
         }
         
         // Build order request from quote
-        List<OrderItemRequest> orderItems = quote.getQuoteItems().stream()
-                .map(item -> OrderItemRequest.builder()
+        List<CreateOrderRequest.OrderItemRequest> orderItems = quote.getQuoteItems().stream()
+                .map(item -> CreateOrderRequest.OrderItemRequest.builder()
                         .productId(item.getProduct() != null ? item.getProduct().getId() : null)
                         .quantity(item.getQuantity())
                         .retailerId(null) // B2B orders don't have retailers
@@ -297,7 +296,7 @@ public class QuoteService {
                 .collect(Collectors.toList());
         
         // Get business account address for shipping/billing
-        com.vendo.address.entity.Address defaultAddress = null;
+        com.vendo.user.entity.Address defaultAddress = null;
         // TODO: Get default address from business account
         
         CreateOrderRequest orderRequest = CreateOrderRequest.builder()

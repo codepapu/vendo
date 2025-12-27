@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+// Removed ambiguous import
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,7 +39,7 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailers retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
@@ -69,12 +69,12 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailer retrieved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RetailerResponse>> getRetailerById(
@@ -90,12 +90,12 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailer retrieved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found")
     })
     @GetMapping("/slug/{slug}")
     public ResponseEntity<ApiResponse<RetailerResponse>> getRetailerBySlug(
@@ -111,13 +111,13 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailer retrieved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found for user"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found for user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -135,13 +135,13 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Retailer registered successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data or user already registered"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data or user already registered"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/register")
     @PreAuthorize("hasRole('USER') or hasRole('CUSTOMER')")
@@ -161,13 +161,13 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailer approved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
@@ -188,13 +188,13 @@ public class RetailerController {
             tags = {"Retailers - Dashboard"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Dashboard data retrieved successfully",
                     content = @Content(schema = @Schema(implementation = com.vendo.retailer.dto.response.RetailerDashboardResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found for user"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found for user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -213,13 +213,13 @@ public class RetailerController {
             tags = {"Retailers - Dashboard"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Dashboard data retrieved successfully",
                     content = @Content(schema = @Schema(implementation = com.vendo.retailer.dto.response.RetailerDashboardResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
     })
     @GetMapping("/{id}/dashboard")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -244,14 +244,14 @@ public class RetailerController {
             tags = {"Retailers - Commission"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Commission calculated successfully",
                     content = @Content(schema = @Schema(implementation = java.math.BigDecimal.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid order total or commission rate"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid order total or commission rate"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/{id}/commission/calculate")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -275,14 +275,14 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailer updated successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -307,14 +307,14 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailer status updated successfully",
                     content = @Content(schema = @Schema(implementation = RetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid status value"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status value"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
@@ -333,9 +333,9 @@ public class RetailerController {
             tags = {"Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retailer deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Retailer deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -354,13 +354,13 @@ public class RetailerController {
             tags = {"Retailers - Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Orders retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions or ownership")
     })
     @GetMapping("/{id}/orders")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")

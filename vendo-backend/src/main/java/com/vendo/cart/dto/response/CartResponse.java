@@ -25,23 +25,23 @@ public class CartResponse {
     private BigDecimal shipping;
     private BigDecimal total;
     private LocalDateTime updatedAt;
-}
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CartItemResponse {
-    private Long id;
-    private Long productId;
-    private String productName;
-    private String productSku;
-    private String productImage;
-    private BigDecimal price;
-    private BigDecimal salePrice;
-    private Integer quantity;
-    private BigDecimal itemTotal;
-    private Long variationId;
-    private Long retailerId;
-    private String retailerName;
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CartItemResponse {
+        private Long id;
+        private Long productId;
+        private String productName;
+        private String productSku;
+        private String productImage;
+        private BigDecimal price;
+        private BigDecimal salePrice;
+        private Integer quantity;
+        private BigDecimal itemTotal;
+        private Long variationId;
+        private Long retailerId;
+        private String retailerName;
+    }
 }

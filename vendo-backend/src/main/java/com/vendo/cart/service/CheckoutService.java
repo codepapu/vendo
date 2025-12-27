@@ -20,14 +20,11 @@ public class CheckoutService {
     
     @Transactional
     public CartResponse processCheckout(Long userId, CheckoutRequest request) {
-        String identifier = "user_" + userId;
-        String instance = "default";
-        
-        Cart cart = cartRepository.findByIdentifierAndInstance(identifier, instance)
-                .orElseThrow(() -> new com.vendo.common.exception.ResourceNotFoundException("Cart", "identifier", identifier));
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new com.vendo.common.exception.ResourceNotFoundException("Cart", "userId", userId));
         
         // Validate cart has items
-        if (cart.getContent() == null || cart.getContent().equals("{}")) {
+        if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new com.vendo.common.exception.BadRequestException("Cart is empty");
         }
         

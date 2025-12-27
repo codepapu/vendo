@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,12 +40,12 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Reviews retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found")
     })
     @GetMapping("/retailer/{retailerId}")
     public ResponseEntity<ApiResponse<Page<RetailerReviewResponse>>> getReviewsByRetailer(
@@ -70,12 +69,12 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Approved reviews retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found")
     })
     @GetMapping("/retailer/{retailerId}/approved")
     public ResponseEntity<ApiResponse<List<RetailerReviewResponse>>> getApprovedReviews(
@@ -92,12 +91,12 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Average rating retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Double.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found")
     })
     @GetMapping("/retailer/{retailerId}/rating")
     public ResponseEntity<ApiResponse<Double>> getAverageRating(
@@ -114,12 +113,12 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Review count retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Long.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found")
     })
     @GetMapping("/retailer/{retailerId}/count")
     public ResponseEntity<ApiResponse<Long>> getReviewCount(
@@ -135,12 +134,12 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Review retrieved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerReviewResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Review not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Review not found")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RetailerReviewResponse>> getReviewById(
@@ -157,14 +156,14 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Review created successfully",
                     content = @Content(schema = @Schema(implementation = RetailerReviewResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data or user already reviewed this retailer"),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data or user already reviewed this retailer"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('CUSTOMER')")
@@ -184,13 +183,13 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Review approved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerReviewResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Review not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Review not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
@@ -207,9 +206,9 @@ public class RetailerReviewController {
             tags = {"Retailer Reviews"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Review deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Review not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Review deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Review not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

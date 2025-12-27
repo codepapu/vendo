@@ -22,15 +22,15 @@ public class GuestOrderRequest {
     
     @NotEmpty(message = "Order items are required")
     @Valid
-    private List<OrderItemRequest> items;
+    private List<CreateOrderRequest.OrderItemRequest> items;
     
     @NotNull(message = "Shipping address is required")
     @Valid
-    private AddressRequest shippingAddress;
+    private CreateOrderRequest.AddressRequest shippingAddress;
     
     @NotNull(message = "Billing address is required")
     @Valid
-    private AddressRequest billingAddress;
+    private CreateOrderRequest.AddressRequest billingAddress;
     
     @NotNull(message = "Email is required for guest checkout")
     @Email(message = "Email must be valid")

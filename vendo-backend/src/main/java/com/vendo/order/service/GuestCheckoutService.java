@@ -14,6 +14,7 @@ import com.vendo.user.entity.User;
 import com.vendo.user.repository.UserRepository;
 import com.vendo.user.service.AuthService;
 import com.vendo.user.service.EmailService;
+import com.vendo.user.service.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,7 @@ public class GuestCheckoutService {
     private final AuthService authService;
     private final com.vendo.user.service.EmailService emailService;
     private final com.vendo.common.email.service.EmailService commonEmailService;
+    private final com.vendo.user.service.EmailVerificationService emailVerificationService;
     private final PasswordEncoder passwordEncoder;
     
     @Value("${guest.session.token.expiration-hours:168}") // 7 days default
@@ -145,7 +147,7 @@ public class GuestCheckoutService {
             User user = User.builder()
                     .email(request.getEmail())
                     .username(request.getEmail().split("@")[0] + "_" + System.currentTimeMillis())
-                    .passwordHash(passwordEncoder.encode(request.getPassword()))
+                    .password(passwordEncoder.encode(request.getPassword()))
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
                     .phone(request.getPhone())
@@ -164,7 +166,7 @@ public class GuestCheckoutService {
             orderRepository.save(order);
             
             // Send email verification
-            authService.sendVerificationEmail(request.getEmail());
+            emailVerificationService.sendVerificationEmail(user.getId());
             
             log.info("Account created and linked to order: userId={}, orderId={}", user.getId(), orderId);
             return true;

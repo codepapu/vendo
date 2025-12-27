@@ -37,46 +37,46 @@ public class CreateOrderRequest {
     private String couponCode;
     
     private String notes;
-}
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OrderItemRequest {
-    @NotNull(message = "Product ID is required")
-    private Long productId;
     
-    @NotNull(message = "Quantity is required")
-    private Integer quantity;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderItemRequest {
+        @NotNull(message = "Product ID is required")
+        private Long productId;
+        
+        @NotNull(message = "Quantity is required")
+        private Integer quantity;
+        
+        private Long variationId;
+        
+        private Long retailerId; // For marketplace orders
+    }
     
-    private Long variationId;
-    
-    private Long retailerId; // For marketplace orders
-}
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AddressRequest {
-    @NotNull(message = "Name is required")
-    private String name;
-    
-    @NotNull(message = "Phone is required")
-    private String phone;
-    
-    @NotNull(message = "Email is required")
-    private String email;
-    
-    @NotNull(message = "Address is required")
-    private String address;
-    
-    private String city;
-    
-    private String state;
-    
-    private String zipCode;
-    
-    private String country;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AddressRequest {
+        @NotNull(message = "Name is required")
+        private String name;
+        
+        @NotNull(message = "Phone is required")
+        private String phone;
+        
+        @NotNull(message = "Email is required")
+        private String email;
+        
+        @NotNull(message = "Address is required")
+        private String address;
+        
+        private String city;
+        
+        private String state;
+        
+        private String zipCode;
+        
+        private String country;
+    }
 }

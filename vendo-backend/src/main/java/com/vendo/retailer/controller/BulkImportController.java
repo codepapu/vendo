@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+// Removed ambiguous import
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,13 +44,13 @@ public class BulkImportController {
             tags = {"Bulk Import"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Import completed successfully",
                     content = @Content(schema = @Schema(implementation = ImportResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid file format or data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file format or data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -76,13 +76,13 @@ public class BulkImportController {
             tags = {"Bulk Import"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "File validated successfully",
                     content = @Content(schema = @Schema(implementation = ImportResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid file format or data errors found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file format or data errors found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/validate")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -105,12 +105,12 @@ public class BulkImportController {
             tags = {"Bulk Import"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Template downloaded successfully",
                     content = @Content(mediaType = "text/plain")
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/template")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -134,12 +134,12 @@ public class BulkImportController {
             tags = {"Bulk Import"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Import history retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")

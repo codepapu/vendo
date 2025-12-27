@@ -9,6 +9,7 @@ import com.vendo.order.entity.OrderHistory;
 import com.vendo.order.repository.OrderRepository;
 import com.vendo.order.repository.OrderHistoryRepository;
 import com.vendo.common.notification.NotificationService;
+import com.vendo.common.notification.NotificationRequest;
 import com.vendo.retailer.service.RetailerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +82,7 @@ public class OrderStatusService {
         // Create order history
         OrderHistory history = OrderHistory.builder()
                 .order(order)
-                .status(newStatus.toLowerCase())
+                .action(newStatus.toLowerCase())
                 .description(description != null ? description : 
                         String.format("Status changed from %s to %s", currentStatus, newStatus))
                 .build();
@@ -113,8 +114,7 @@ public class OrderStatusService {
                 savedOrder.getUser() != null ? savedOrder.getUser().getId() : null,
                 currentStatus,
                 newStatus,
-                savedOrder.getTotalAmount(),
-                savedOrder.getCurrency()
+                "Status updated"
         );
         eventPublisher.publish(event, "order-updated");
         
@@ -126,12 +126,13 @@ public class OrderStatusService {
                     newStatus
             );
             
-            notificationService.sendNotification(
-                    savedOrder.getUser().getId(),
-                    "Order Status Update",
-                    message,
-                    com.vendo.common.notification.NotificationPriority.MEDIUM
-            );
+            NotificationRequest notificationRequest = NotificationRequest.builder()
+                    .userId(savedOrder.getUser().getId())
+                    .title("Order Status Update")
+                    .message(message)
+                    .priority(com.vendo.common.notification.NotificationPriority.NORMAL)
+                    .build();
+            notificationService.sendNotification(notificationRequest);
         }
         
         return savedOrder;

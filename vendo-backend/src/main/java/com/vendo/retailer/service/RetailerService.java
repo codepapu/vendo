@@ -2,7 +2,6 @@ package com.vendo.retailer.service;
 
 import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
-import com.vendo.order.dto.response.OrderItemResponse;
 import com.vendo.order.dto.response.OrderResponse;
 import com.vendo.order.entity.Order;
 import com.vendo.order.entity.OrderItem;
@@ -28,6 +27,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -510,10 +511,10 @@ public class RetailerService {
      */
     private OrderResponse mapOrderToResponse(Order order) {
         // Map order items - only include items from this retailer
-        List<OrderItemResponse> items = List.of();
+        List<OrderResponse.OrderItemResponse> items = List.of();
         if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
             items = order.getOrderItems().stream()
-                    .map(oi -> OrderItemResponse.builder()
+                    .map(oi -> OrderResponse.OrderItemResponse.builder()
                             .id(oi.getId())
                             .productId(oi.getProduct() != null ? oi.getProduct().getId() : null)
                             .retailerId(oi.getRetailer() != null ? oi.getRetailer().getId() : null)
@@ -543,9 +544,9 @@ public class RetailerService {
                 .discountAmount(order.getDiscountAmount())
                 .paymentFee(BigDecimal.ZERO)
                 .description(order.getNotes())
-                .isConfirmed(order.getIsConfirmed())
-                .isFinished(order.getIsFinished())
-                .completedAt(order.getCompletedAt())
+                .isConfirmed(false) // Order entity doesn't have this field
+                .isFinished(false) // Order entity doesn't have this field
+                .completedAt(null) // Order entity doesn't have this field
                 .items(items)
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())

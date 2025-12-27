@@ -44,7 +44,7 @@ public class RecommendationController {
     }
     
     @PostMapping("/track")
-    public ResponseEntity<ApiResponse<String>> trackUserBehavior(
+    public ResponseEntity<ApiResponse<Void>> trackUserBehavior(
             Authentication authentication,
             @RequestParam Long productId,
             @RequestParam String action) {

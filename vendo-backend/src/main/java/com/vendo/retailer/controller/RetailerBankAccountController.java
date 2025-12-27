@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+// Removed ambiguous import
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,12 +36,12 @@ public class RetailerBankAccountController {
             tags = {"Retailer Bank Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Bank accounts retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -58,13 +58,13 @@ public class RetailerBankAccountController {
             tags = {"Retailer Bank Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Primary bank account retrieved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerBankAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Primary bank account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Primary bank account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/primary")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -81,13 +81,13 @@ public class RetailerBankAccountController {
             tags = {"Retailer Bank Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Bank account retrieved successfully",
                     content = @Content(schema = @Schema(implementation = RetailerBankAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Bank account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Bank account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -106,14 +106,14 @@ public class RetailerBankAccountController {
             tags = {"Retailer Bank Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Bank account created successfully",
                     content = @Content(schema = @Schema(implementation = RetailerBankAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -133,14 +133,14 @@ public class RetailerBankAccountController {
             tags = {"Retailer Bank Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Bank account updated successfully",
                     content = @Content(schema = @Schema(implementation = RetailerBankAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Bank account not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Bank account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -161,10 +161,10 @@ public class RetailerBankAccountController {
             tags = {"Retailer Bank Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Bank account deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Bank account not found"),
-            @ApiResponse(responseCode = "400", description = "Cannot delete primary bank account"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Bank account deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Bank account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Cannot delete primary bank account"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")

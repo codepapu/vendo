@@ -239,7 +239,7 @@ public class CartService {
                     .productId(item.getProduct().getId())
                     .productName(item.getProduct().getName())
                     .retailerId(retailerId)
-                    .retailerName(item.getRetailer() != null ? item.getRetailer().getName() : null)
+                    .retailerName(item.getRetailer() != null ? item.getRetailer().getStoreName() : null)
                     .quantity(item.getQuantity())
                     .unitPrice(unitPrice)
                     .itemTotal(itemTotal)
@@ -341,7 +341,7 @@ public class CartService {
     private CartResponse mapToResponse(Cart cart) {
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
         
-        List<com.vendo.cart.dto.response.CartItemResponse> itemResponses = items.stream()
+        List<CartResponse.CartItemResponse> itemResponses = items.stream()
                 .map(this::mapItemToResponse)
                 .collect(Collectors.toList());
         
@@ -373,11 +373,11 @@ public class CartService {
                 .build();
     }
     
-    private com.vendo.cart.dto.response.CartItemResponse mapItemToResponse(CartItem item) {
+    private com.vendo.cart.dto.response.CartResponse.CartItemResponse mapItemToResponse(CartItem item) {
         Product product = item.getProduct();
         BigDecimal itemTotal = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
         
-        return com.vendo.cart.dto.response.CartItemResponse.builder()
+        return com.vendo.cart.dto.response.CartResponse.CartItemResponse.builder()
                 .id(item.getId())
                 .productId(product.getId())
                 .productName(product.getName())
@@ -388,7 +388,7 @@ public class CartService {
                 .quantity(item.getQuantity())
                 .itemTotal(itemTotal)
                 .retailerId(item.getRetailer() != null ? item.getRetailer().getId() : null)
-                .retailerName(item.getRetailer() != null ? item.getRetailer().getName() : null)
+                .retailerName(item.getRetailer() != null ? item.getRetailer().getStoreName() : null)
                 .build();
     }
 }

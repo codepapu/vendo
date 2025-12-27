@@ -1,4 +1,4 @@
-package com.vendo.return.service;
+package com.vendo.orderreturn.service;
 
 import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
@@ -12,10 +12,11 @@ import com.vendo.order.repository.OrderItemRepository;
 import com.vendo.order.repository.OrderReturnRepository;
 import com.vendo.order.repository.OrderReturnItemRepository;
 import com.vendo.order.repository.OrderReturnHistoryRepository;
+import com.vendo.payment.repository.PaymentRepository;
 import com.vendo.payment.service.PaymentService;
 import com.vendo.payment.dto.request.RefundPaymentRequest;
-import com.vendo.return.dto.request.CreateReturnRequest;
-import com.vendo.return.dto.response.ReturnResponse;
+import com.vendo.orderreturn.dto.request.CreateReturnRequest;
+import com.vendo.orderreturn.dto.response.ReturnResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,7 @@ public class ReturnService {
     private final OrderReturnHistoryRepository returnHistoryRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final PaymentRepository paymentRepository;
     private final PaymentService paymentService;
     
     /**
@@ -142,7 +144,6 @@ public class ReturnService {
                 .action("RETURN_APPROVED")
                 .description(notes != null ? notes : "Return approved")
                 .userId(adminId)
-                .userType("Admin")
                 .build();
         
         orderReturn.getHistories().add(history);
@@ -173,7 +174,6 @@ public class ReturnService {
                 .action("RETURN_REJECTED")
                 .description(reason != null ? reason : "Return rejected")
                 .userId(adminId)
-                .userType("Admin")
                 .build();
         
         orderReturn.getHistories().add(history);
@@ -204,9 +204,10 @@ public class ReturnService {
         // Process refund through payment gateway
         try {
             Order order = orderReturn.getOrder();
-            if (order.getPayments() != null && !order.getPayments().isEmpty()) {
+            List<com.vendo.payment.entity.Payment> payments = paymentRepository.findByOrderId(order.getId());
+            if (payments != null && !payments.isEmpty()) {
                 // Get the first payment (in production, would handle multiple payments)
-                com.vendo.payment.entity.Payment payment = order.getPayments().get(0);
+                com.vendo.payment.entity.Payment payment = payments.get(0);
                 
                 RefundPaymentRequest refundRequest = RefundPaymentRequest.builder()
                         .paymentId(payment.getId())
@@ -224,9 +225,8 @@ public class ReturnService {
             OrderReturnHistory history = OrderReturnHistory.builder()
                     .orderReturn(orderReturn)
                     .action("REFUND_PROCESSED")
-                    .description("Refund processed: " + totalRefundAmount)
+                    .description("Refund processed: " + totalRefundAmount + " by Admin")
                     .userId(adminId)
-                    .userType("Admin")
                     .build();
             
             orderReturn.getHistories().add(history);

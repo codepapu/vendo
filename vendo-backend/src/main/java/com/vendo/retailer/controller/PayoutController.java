@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+// Removed ambiguous import
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,14 +45,14 @@ public class PayoutController {
             tags = {"Payouts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Payout calculated successfully",
                     content = @Content(schema = @Schema(implementation = PayoutResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid date range"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid date range"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/calculate")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -77,14 +77,14 @@ public class PayoutController {
             tags = {"Payouts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Payout processed successfully",
                     content = @Content(schema = @Schema(implementation = PayoutResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Retailer or bank account not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid date range or insufficient funds"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Retailer or bank account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid date range or insufficient funds"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -114,12 +114,12 @@ public class PayoutController {
             tags = {"Payouts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Payout history retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -148,12 +148,12 @@ public class PayoutController {
             tags = {"Payouts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Pending payouts retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/pending")
     @PreAuthorize("hasRole('RETAILER') or hasRole('ADMIN')")
@@ -173,12 +173,12 @@ public class PayoutController {
             tags = {"Payouts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Pending payouts retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @GetMapping("/admin/pending")
     @PreAuthorize("hasRole('ADMIN')")

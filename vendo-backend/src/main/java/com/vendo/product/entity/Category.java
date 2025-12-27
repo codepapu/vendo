@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -55,13 +56,35 @@ public class Category {
     @Builder.Default
     private Integer sortOrder = 0;
     
+    // Alias for sortOrder
+    public Integer getOrder() {
+        return sortOrder;
+    }
+    
+    public void setOrder(Integer order) {
+        this.sortOrder = order;
+    }
+    
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
     
+    @Column(name = "is_featured", nullable = false)
+    @Builder.Default
+    private Boolean isFeatured = false;
+    
     @Column(name = "image_url", length = 500)
     @Size(max = 500)
     private String imageUrl;
+    
+    // Alias for imageUrl
+    public String getImage() {
+        return imageUrl;
+    }
+    
+    public void setImage(String image) {
+        this.imageUrl = image;
+    }
     
     @Column(unique = true, length = 255)
     @Size(max = 255)
@@ -70,6 +93,10 @@ public class Category {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
     
     @ManyToMany(mappedBy = "categories")
     @Builder.Default

@@ -68,9 +68,9 @@ public class CategoryService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .status(request.getStatus() != null ? request.getStatus() : "published")
-                .order(request.getOrder() != null ? request.getOrder() : 0)
+                .sortOrder(request.getOrder() != null ? request.getOrder() : 0)
                 .isFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false)
-                .image(request.getImage())
+                .imageUrl(request.getImage())
                 .build();
         
         // Set parent if provided

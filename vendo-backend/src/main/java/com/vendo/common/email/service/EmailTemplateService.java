@@ -66,7 +66,7 @@ public class EmailTemplateService {
             
             mailSender.send(message);
             log.info("HTML email sent successfully to: {} with template: {}", to, templateName);
-        } catch (MessagingException e) {
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             log.error("Failed to send HTML email to: {} with template: {}", to, templateName, e);
             throw new RuntimeException("Failed to send email", e);
         }
@@ -106,7 +106,7 @@ public class EmailTemplateService {
             
             mailSender.send(message);
             log.info("Multipart email sent successfully to: {} with template: {}", to, templateName);
-        } catch (MessagingException e) {
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             log.error("Failed to send multipart email to: {} with template: {}", to, templateName, e);
             throw new RuntimeException("Failed to send email", e);
         }
@@ -142,7 +142,7 @@ public class EmailTemplateService {
             
             mailSender.send(message);
             log.info("Text email sent successfully to: {} with template: {}", to, templateName);
-        } catch (MessagingException e) {
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             log.error("Failed to send text email to: {} with template: {}", to, templateName, e);
             throw new RuntimeException("Failed to send email", e);
         }

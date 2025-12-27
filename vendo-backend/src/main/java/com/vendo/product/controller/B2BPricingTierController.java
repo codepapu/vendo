@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,14 +50,14 @@ public class B2BPricingTierController {
             tags = {"B2B Pricing Tiers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "B2B pricing tier created successfully",
                     content = @Content(schema = @Schema(implementation = B2BPricingTierResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Product not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -91,14 +90,14 @@ public class B2BPricingTierController {
             tags = {"B2B Pricing Tiers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "B2B pricing tier updated successfully",
                     content = @Content(schema = @Schema(implementation = B2BPricingTierResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Pricing tier not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Pricing tier not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -133,9 +132,9 @@ public class B2BPricingTierController {
             tags = {"B2B Pricing Tiers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "B2B pricing tier deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Pricing tier not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "B2B pricing tier deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Pricing tier not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -158,13 +157,13 @@ public class B2BPricingTierController {
             tags = {"B2B Pricing Tiers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Pricing tier retrieved successfully",
                     content = @Content(schema = @Schema(implementation = B2BPricingTierResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Pricing tier not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Pricing tier not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -186,13 +185,13 @@ public class B2BPricingTierController {
             tags = {"B2B Pricing Tiers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Pricing tiers retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @GetMapping("/product/{productId}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -217,13 +216,13 @@ public class B2BPricingTierController {
             tags = {"B2B Pricing Tiers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Pricing tiers retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid business type"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid business type"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @GetMapping("/business-type/{businessType}")
     @PreAuthorize("hasRole('ADMIN')")

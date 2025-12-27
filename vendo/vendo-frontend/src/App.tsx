@@ -46,6 +46,15 @@ const RetailerProducts = lazy(() => import('@/pages/retailer/products').then((m)
 const RetailerOrders = lazy(() => import('@/pages/retailer/orders').then((m) => ({ default: m.default })));
 const RetailerAnalytics = lazy(() => import('@/pages/retailer/analytics').then((m) => ({ default: m.default })));
 const AnalyticsDashboard = lazy(() => import('@/pages/analytics/dashboard').then((m) => ({ default: m.default })));
+// Public pages
+const About = lazy(() => import('@/pages/about').then((m) => ({ default: m.About })));
+const Contact = lazy(() => import('@/pages/contact').then((m) => ({ default: m.Contact })));
+const Privacy = lazy(() => import('@/pages/privacy').then((m) => ({ default: m.Privacy })));
+const Terms = lazy(() => import('@/pages/terms').then((m) => ({ default: m.Terms })));
+const FAQ = lazy(() => import('@/pages/faq').then((m) => ({ default: m.FAQ })));
+const Categories = lazy(() => import('@/pages/categories').then((m) => ({ default: m.Categories })));
+const Stores = lazy(() => import('@/pages/stores').then((m) => ({ default: m.Stores })));
+const StoreDetail = lazy(() => import('@/pages/stores/[slug]').then((m) => ({ default: m.StoreDetail })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -156,6 +165,15 @@ function App() {
                 path="/payment/cancel"
                 element={<PaymentCancel />}
               />
+              {/* Public Pages */}
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/stores" element={<Stores />} />
+              <Route path="/stores/:slug" element={<StoreDetail />} />
               {/* Content Management Routes */}
               <Route path="/blog" element={<BlogIndex />} />
               <Route path="/blog/:slug" element={<BlogPostDetail />} />

@@ -103,7 +103,6 @@ public class OrderPaymentSaga {
                     .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
             
             order.setStatus("confirmed");
-            order.setIsConfirmed(true);
             orderRepository.save(order);
             
             OrderPaymentSagaEvent confirmEvent = new OrderPaymentSagaEvent(

@@ -28,30 +28,30 @@ public class CheckoutRequest {
     private String paymentMethod;
     
     private String notes;
-}
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AddressRequest {
-    @NotNull(message = "Name is required")
-    private String name;
     
-    @NotNull(message = "Phone is required")
-    private String phone;
-    
-    @NotNull(message = "Email is required")
-    private String email;
-    
-    @NotNull(message = "Address is required")
-    private String address;
-    
-    private String city;
-    
-    private String state;
-    
-    private String zipCode;
-    
-    private String country;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AddressRequest {
+        @NotNull(message = "Name is required")
+        private String name;
+        
+        @NotNull(message = "Phone is required")
+        private String phone;
+        
+        @NotNull(message = "Email is required")
+        private String email;
+        
+        @NotNull(message = "Address is required")
+        private String address;
+        
+        private String city;
+        
+        private String state;
+        
+        private String zipCode;
+        
+        private String country;
+    }
 }

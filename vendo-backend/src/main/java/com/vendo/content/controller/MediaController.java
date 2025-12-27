@@ -61,7 +61,7 @@ public class MediaController {
     @GetMapping("/files/{id}/url")
     public ResponseEntity<ApiResponse<String>> getFileUrl(@PathVariable Long id) {
         String url = mediaService.getFileUrl(id);
-        return ResponseEntity.ok(ApiResponse.success(url));
+        return ResponseEntity.ok(ApiResponse.success("File URL retrieved", url));
     }
     
     @PostMapping("/files/{id}/resize")

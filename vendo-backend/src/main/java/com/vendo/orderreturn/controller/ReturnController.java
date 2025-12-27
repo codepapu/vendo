@@ -1,9 +1,9 @@
-package com.vendo.return.controller;
+package com.vendo.orderreturn.controller;
 
 import com.vendo.common.dto.ApiResponse;
-import com.vendo.return.dto.request.CreateReturnRequest;
-import com.vendo.return.dto.response.ReturnResponse;
-import com.vendo.return.service.ReturnService;
+import com.vendo.orderreturn.dto.request.CreateReturnRequest;
+import com.vendo.orderreturn.dto.response.ReturnResponse;
+import com.vendo.orderreturn.service.ReturnService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

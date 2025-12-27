@@ -95,14 +95,16 @@ public class LowStockAlertService {
             }
             
             // Send to admins
-            notificationService.sendNotification(
-                    null, // Admin notification - would need admin user IDs
-                    "Low Stock Alert",
-                    message,
-                    "CRITICAL".equals(product.getAlertLevel()) ? 
+            com.vendo.common.notification.NotificationRequest notificationRequest = 
+                    com.vendo.common.notification.NotificationRequest.builder()
+                    .recipient(null) // Admin notification - would need admin user IDs
+                    .title("Low Stock Alert")
+                    .message(message)
+                    .priority("CRITICAL".equals(product.getAlertLevel()) ? 
                             com.vendo.common.notification.NotificationPriority.HIGH :
-                            com.vendo.common.notification.NotificationPriority.MEDIUM
-            );
+                            com.vendo.common.notification.NotificationPriority.NORMAL)
+                    .build();
+            notificationService.sendNotification(notificationRequest);
         }
         
         log.info("Sent {} low stock alerts", alertResponse.getTotalCount());

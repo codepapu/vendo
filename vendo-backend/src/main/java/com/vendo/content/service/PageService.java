@@ -4,7 +4,6 @@ import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
 import com.vendo.content.dto.request.PageRequest;
 import com.vendo.content.dto.response.PageResponse;
-import com.vendo.content.entity.Page;
 import com.vendo.content.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +21,11 @@ public class PageService {
     
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<PageResponse> getAllPages(String status, String keyword, Pageable pageable) {
-        org.springframework.data.domain.Page<Page> pages = pageRepository.findAll(pageable);
+        org.springframework.data.domain.Page<com.vendo.content.entity.Page> pages = pageRepository.findAll(pageable);
         
         // Filter by status and keyword in memory
         // In production, add proper repository methods with @Query for better performance
-        java.util.List<Page> filteredPages = pages.getContent().stream()
+        java.util.List<com.vendo.content.entity.Page> filteredPages = pages.getContent().stream()
                 .filter(page -> {
                     if (status != null && !status.isEmpty() && !page.getStatus().equals(status)) {
                         return false;
@@ -51,7 +50,7 @@ public class PageService {
     
     @Transactional(readOnly = true)
     public PageResponse getPageBySlug(String slug) {
-        Page page = pageRepository.findBySlugAndStatus(slug, "published")
+        com.vendo.content.entity.Page page = pageRepository.findBySlugAndStatus(slug, "published")
                 .orElseThrow(() -> new ResourceNotFoundException("Page", "slug", slug));
         
         // Increment view count
@@ -63,7 +62,7 @@ public class PageService {
     
     @Transactional(readOnly = true)
     public PageResponse getPageById(Long id) {
-        Page page = pageRepository.findById(id)
+        com.vendo.content.entity.Page page = pageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Page", "id", id));
         return mapToResponse(page);
     }
@@ -75,7 +74,7 @@ public class PageService {
             throw new BadRequestException("Page with slug '" + request.getSlug() + "' already exists");
         }
         
-        Page page = Page.builder()
+        com.vendo.content.entity.Page page = com.vendo.content.entity.Page.builder()
                 .title(request.getTitle())
                 .slug(request.getSlug())
                 .content(request.getContent())
@@ -87,7 +86,7 @@ public class PageService {
                 .viewCount(0L)
                 .build();
         
-        Page savedPage = pageRepository.save(page);
+        com.vendo.content.entity.Page savedPage = pageRepository.save(page);
         log.info("Page created: ID={}, Title={}", savedPage.getId(), savedPage.getTitle());
         
         return mapToResponse(savedPage);
@@ -95,7 +94,7 @@ public class PageService {
     
     @Transactional
     public PageResponse updatePage(Long id, PageRequest request) {
-        Page page = pageRepository.findById(id)
+        com.vendo.content.entity.Page page = pageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Page", "id", id));
         
         // Check slug uniqueness if changed
@@ -116,7 +115,7 @@ public class PageService {
         page.setMetaDescription(request.getMetaDescription());
         page.setMetaKeywords(request.getMetaKeywords());
         
-        Page updatedPage = pageRepository.save(page);
+        com.vendo.content.entity.Page updatedPage = pageRepository.save(page);
         log.info("Page updated: ID={}", id);
         
         return mapToResponse(updatedPage);
@@ -124,13 +123,13 @@ public class PageService {
     
     @Transactional
     public void deletePage(Long id) {
-        Page page = pageRepository.findById(id)
+        com.vendo.content.entity.Page page = pageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Page", "id", id));
         pageRepository.delete(page);
         log.info("Page deleted: ID={}", id);
     }
     
-    private PageResponse mapToResponse(Page page) {
+    private PageResponse mapToResponse(com.vendo.content.entity.Page page) {
         return PageResponse.builder()
                 .id(page.getId())
                 .title(page.getTitle())

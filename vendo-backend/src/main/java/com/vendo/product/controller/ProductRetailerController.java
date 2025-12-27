@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,12 +40,12 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Products retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/retailer/{retailerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -71,12 +70,12 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Retailers retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product not found")
     })
     @GetMapping("/product/{productId}")
     public ResponseEntity<ApiResponse<List<ProductRetailerResponse>>> getRetailersByProduct(
@@ -93,12 +92,12 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Low stock products retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/retailer/{retailerId}/low-stock")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -115,12 +114,12 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Product-retailer relationship retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product-retailer relationship not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product-retailer relationship not found")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductRetailerResponse>> getProductRetailerById(
@@ -137,12 +136,12 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Product-retailer relationship retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product-retailer relationship not found")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product-retailer relationship not found")
     })
     @GetMapping("/product/{productId}/retailer/{retailerId}")
     public ResponseEntity<ApiResponse<ProductRetailerResponse>> getProductRetailerByProductAndRetailer(
@@ -161,14 +160,14 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Product-retailer relationship created successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Product or retailer not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product or retailer not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -187,14 +186,14 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Product-retailer relationship updated successfully",
                     content = @Content(schema = @Schema(implementation = ProductRetailerResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product-retailer relationship not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product-retailer relationship not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")
@@ -214,9 +213,9 @@ public class ProductRetailerController {
             tags = {"Product Retailers"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product-retailer relationship deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Product-retailer relationship not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product-retailer relationship deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product-retailer relationship not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RETAILER')")

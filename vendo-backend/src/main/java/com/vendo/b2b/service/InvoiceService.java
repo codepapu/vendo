@@ -114,7 +114,7 @@ public class InvoiceService {
                         .productName(orderItem.getProductName())
                         .productImage(orderItem.getProduct() != null && orderItem.getProduct().getImages() != null && 
                                 !orderItem.getProduct().getImages().isEmpty() ? 
-                                orderItem.getProduct().getImages().get(0).getUrl() : null)
+                                orderItem.getProduct().getImages() : null)
                         .qty(orderItem.getQuantity())
                         .price(orderItem.getUnitPrice())
                         .taxAmount(BigDecimal.ZERO) // Tax is calculated at invoice level

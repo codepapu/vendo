@@ -10,7 +10,7 @@ import com.vendo.b2b.repository.BusinessAccountRepository;
 import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
 import com.vendo.order.dto.request.CreateOrderRequest;
-import com.vendo.order.dto.request.OrderItemRequest;
+import com.vendo.order.dto.request.CreateOrderRequest;
 import com.vendo.order.dto.response.OrderResponse;
 import com.vendo.order.entity.Order;
 import com.vendo.order.repository.OrderRepository;
@@ -201,8 +201,8 @@ public class BulkOrderService {
             
             try {
                 // Create order for this item
-                List<OrderItemRequest> orderItems = List.of(
-                        OrderItemRequest.builder()
+                List<CreateOrderRequest.OrderItemRequest> orderItems = List.of(
+                        CreateOrderRequest.OrderItemRequest.builder()
                                 .productId(item.getProduct() != null ? item.getProduct().getId() : null)
                                 .quantity(item.getQuantity())
                                 .build()

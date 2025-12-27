@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,7 +62,7 @@ public class B2BController {
             tags = {"B2B - Business Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Business account created successfully",
                     content = @Content(
@@ -72,8 +71,8 @@ public class B2BController {
                             examples = @ExampleObject(value = "{\"success\":true,\"message\":\"Business account created successfully\",\"data\":{\"id\":1,\"userId\":1,\"companyName\":\"Acme Corp\",\"businessType\":\"CORPORATE\",\"status\":\"PENDING\"}}")
                     )
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
     })
     @PostMapping("/accounts")
     @PreAuthorize("isAuthenticated()")
@@ -98,13 +97,13 @@ public class B2BController {
             tags = {"B2B - Business Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Business account retrieved successfully",
                     content = @Content(schema = @Schema(implementation = BusinessAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Business account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Business account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/accounts/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -126,13 +125,13 @@ public class B2BController {
             tags = {"B2B - Business Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Business account retrieved successfully",
                     content = @Content(schema = @Schema(implementation = BusinessAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Business account not found for user"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Business account not found for user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/accounts/me")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -153,13 +152,13 @@ public class B2BController {
             tags = {"B2B - Business Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Business account status updated successfully",
                     content = @Content(schema = @Schema(implementation = BusinessAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Business account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Business account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PostMapping("/accounts/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
@@ -185,13 +184,13 @@ public class B2BController {
             tags = {"B2B - Business Accounts"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Credit limit updated successfully",
                     content = @Content(schema = @Schema(implementation = BusinessAccountResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Business account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Business account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PutMapping("/accounts/{id}/credit-limit")
     @PreAuthorize("hasRole('ADMIN')")
@@ -216,13 +215,13 @@ public class B2BController {
             tags = {"B2B - Pricing"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Pricing retrieved successfully",
                     content = @Content(schema = @Schema(implementation = PricingResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Product or business account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product or business account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/pricing/{productId}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -262,13 +261,13 @@ public class B2BController {
             tags = {"B2B - Purchase Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Purchase order created successfully",
                     content = @Content(schema = @Schema(implementation = PurchaseOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/purchase-orders")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -294,12 +293,12 @@ public class B2BController {
             tags = {"B2B - Purchase Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Purchase orders retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/purchase-orders")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -341,13 +340,13 @@ public class B2BController {
             tags = {"B2B - Purchase Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Purchase order retrieved successfully",
                     content = @Content(schema = @Schema(implementation = PurchaseOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Purchase order not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Purchase order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/purchase-orders/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -368,13 +367,13 @@ public class B2BController {
             tags = {"B2B - Purchase Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Purchase order approved successfully",
                     content = @Content(schema = @Schema(implementation = PurchaseOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Purchase order not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Purchase order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PostMapping("/purchase-orders/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
@@ -400,13 +399,13 @@ public class B2BController {
             tags = {"B2B - Purchase Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Purchase order rejected successfully",
                     content = @Content(schema = @Schema(implementation = PurchaseOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Purchase order not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Purchase order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Admin access required")
     })
     @PostMapping("/purchase-orders/{id}/reject")
     @PreAuthorize("hasRole('ADMIN')")
@@ -432,14 +431,14 @@ public class B2BController {
             tags = {"B2B - Invoices"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Invoice generated successfully",
                     content = @Content(schema = @Schema(implementation = InvoiceResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Order not found"),
-            @ApiResponse(responseCode = "400", description = "Invoice already exists or order not completed"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invoice already exists or order not completed"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/invoices/generate/{orderId}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -463,12 +462,12 @@ public class B2BController {
             tags = {"B2B - Invoices"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Invoices retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/invoices")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -510,13 +509,13 @@ public class B2BController {
             tags = {"B2B - Invoices"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Invoice retrieved successfully",
                     content = @Content(schema = @Schema(implementation = InvoiceResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Invoice not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Invoice not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/invoices/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -537,14 +536,14 @@ public class B2BController {
             tags = {"B2B - Invoices"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Invoice marked as paid successfully",
                     content = @Content(schema = @Schema(implementation = InvoiceResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Invoice not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid payment amount"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Invoice not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid payment amount"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/invoices/{id}/mark-paid")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -569,12 +568,12 @@ public class B2BController {
             tags = {"B2B - Invoices"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Overdue invoices retrieved successfully",
                     content = @Content(schema = @Schema(implementation = List.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/invoices/overdue")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -610,13 +609,13 @@ public class B2BController {
             tags = {"B2B - Invoices"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "PDF invoice generated successfully",
                     content = @Content(mediaType = "application/pdf")
             ),
-            @ApiResponse(responseCode = "404", description = "Invoice not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Invoice not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/invoices/{id}/pdf")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -650,13 +649,13 @@ public class B2BController {
             tags = {"B2B - Quotes"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Quote generated successfully",
                     content = @Content(schema = @Schema(implementation = QuoteResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/quotes")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -682,12 +681,12 @@ public class B2BController {
             tags = {"B2B - Quotes"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Quotes retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/quotes")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -727,13 +726,13 @@ public class B2BController {
             tags = {"B2B - Quotes"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Quote retrieved successfully",
                     content = @Content(schema = @Schema(implementation = QuoteResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Quote not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Quote not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/quotes/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -754,14 +753,14 @@ public class B2BController {
             tags = {"B2B - Quotes"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Quote updated successfully",
                     content = @Content(schema = @Schema(implementation = QuoteResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Quote not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Quote not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/quotes/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -785,14 +784,14 @@ public class B2BController {
             tags = {"B2B - Quotes"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Quote converted to order successfully",
                     content = @Content(schema = @Schema(implementation = com.vendo.order.dto.response.OrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Quote not found"),
-            @ApiResponse(responseCode = "400", description = "Quote not accepted or invalid state"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Quote not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Quote not accepted or invalid state"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/quotes/{id}/convert")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -824,13 +823,13 @@ public class B2BController {
             tags = {"B2B - Recurring Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Recurring order created successfully",
                     content = @Content(schema = @Schema(implementation = RecurringOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/recurring-orders")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -856,12 +855,12 @@ public class B2BController {
             tags = {"B2B - Recurring Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Recurring orders retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/recurring-orders")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -901,14 +900,14 @@ public class B2BController {
             tags = {"B2B - Recurring Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Recurring order updated successfully",
                     content = @Content(schema = @Schema(implementation = RecurringOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Recurring order not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Recurring order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/recurring-orders/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -932,13 +931,13 @@ public class B2BController {
             tags = {"B2B - Recurring Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Recurring order cancelled successfully",
                     content = @Content(schema = @Schema(implementation = RecurringOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Recurring order not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Recurring order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/recurring-orders/{id}/cancel")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -964,13 +963,13 @@ public class B2BController {
             tags = {"B2B - Order Templates"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Order template created successfully",
                     content = @Content(schema = @Schema(implementation = OrderTemplateResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/order-templates")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -996,12 +995,12 @@ public class B2BController {
             tags = {"B2B - Order Templates"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Order templates retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/order-templates")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1041,14 +1040,14 @@ public class B2BController {
             tags = {"B2B - Order Templates"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Order template updated successfully",
                     content = @Content(schema = @Schema(implementation = OrderTemplateResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Order template not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order template not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/order-templates/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1072,9 +1071,9 @@ public class B2BController {
             tags = {"B2B - Order Templates"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Order template deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Order template not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order template deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order template not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @DeleteMapping("/order-templates/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1096,14 +1095,14 @@ public class B2BController {
             tags = {"B2B - Order Templates"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Order created from template successfully",
                     content = @Content(schema = @Schema(implementation = com.vendo.order.dto.response.OrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Order template not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid template or missing data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order template not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid template or missing data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/order-templates/{id}/apply")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1133,13 +1132,13 @@ public class B2BController {
             tags = {"B2B - Price Lists"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Price list created successfully",
                     content = @Content(schema = @Schema(implementation = PriceListResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/price-lists")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1165,12 +1164,12 @@ public class B2BController {
             tags = {"B2B - Price Lists"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Price lists retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/price-lists")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1208,13 +1207,13 @@ public class B2BController {
             tags = {"B2B - Price Lists"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Price list retrieved successfully",
                     content = @Content(schema = @Schema(implementation = PriceListResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Price list not found for account"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Price list not found for account"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/price-lists/account/{businessAccountId}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1235,14 +1234,14 @@ public class B2BController {
             tags = {"B2B - Price Lists"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Price list updated successfully",
                     content = @Content(schema = @Schema(implementation = PriceListResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Price list not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Price list not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PutMapping("/price-lists/{id}")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1266,13 +1265,13 @@ public class B2BController {
             tags = {"B2B - Price Lists"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Price list assigned successfully",
                     content = @Content(schema = @Schema(implementation = PriceListResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Price list or business account not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Price list or business account not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/price-lists/{id}/assign")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1304,13 +1303,13 @@ public class B2BController {
             tags = {"B2B - Bulk Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Bulk order created from file successfully",
                     content = @Content(schema = @Schema(implementation = BulkOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid file format or data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file format or data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping(value = "/bulk-orders/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1347,13 +1346,13 @@ public class B2BController {
             tags = {"B2B - Bulk Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "201",
                     description = "Bulk order created successfully",
                     content = @Content(schema = @Schema(implementation = BulkOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/bulk-orders")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1379,13 +1378,13 @@ public class B2BController {
             tags = {"B2B - Bulk Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Bulk order validated successfully",
                     content = @Content(schema = @Schema(implementation = BulkOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Bulk order not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Bulk order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/bulk-orders/{id}/validate")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1408,14 +1407,14 @@ public class B2BController {
             tags = {"B2B - Bulk Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Bulk order processed successfully",
                     content = @Content(schema = @Schema(implementation = BulkOrderResponse.class))
             ),
-            @ApiResponse(responseCode = "404", description = "Bulk order not found"),
-            @ApiResponse(responseCode = "400", description = "Bulk order not validated or invalid state"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Bulk order not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bulk order not validated or invalid state"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @PostMapping("/bulk-orders/{id}/process")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")
@@ -1440,12 +1439,12 @@ public class B2BController {
             tags = {"B2B - Bulk Orders"}
     )
     @ApiResponses(value = {
-            @ApiResponse(
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "Bulk orders retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
     })
     @GetMapping("/bulk-orders")
     @PreAuthorize("hasRole('BUSINESS') or hasRole('ADMIN')")

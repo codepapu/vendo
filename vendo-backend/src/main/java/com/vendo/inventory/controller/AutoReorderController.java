@@ -38,7 +38,7 @@ public class AutoReorderController {
     
     @PostMapping("/process")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<String>> processAutoReorder(
+    public ResponseEntity<ApiResponse<Void>> processAutoReorder(
             @RequestParam(required = false) Long retailerId,
             @RequestParam(required = false) Long warehouseId) {
         autoReorderService.processAutoReorder(retailerId, warehouseId);

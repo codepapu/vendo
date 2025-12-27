@@ -279,11 +279,9 @@ public class AuthService {
     
     @Transactional
     public void forgotPassword(String email) {
-        passwordResetService.forgotPassword(
-            com.vendo.user.dto.request.ForgotPasswordRequest.builder()
-                .email(email)
-                .build()
-        );
+        com.vendo.user.dto.request.ForgotPasswordRequest request = new com.vendo.user.dto.request.ForgotPasswordRequest();
+        request.setEmail(email);
+        passwordResetService.forgotPassword(request);
         log.info("Password reset email sent to: {}", email);
     }
     

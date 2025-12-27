@@ -27,7 +27,7 @@ public class TwoFactorAuthController {
     public ResponseEntity<ApiResponse<TwoFactorAuthResponse>> enable2FA(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         TwoFactorAuthResponse response = twoFactorAuthService.enable2FA(userId);
-        return ResponseEntity.ok(ApiResponse.success(response, "2FA setup initiated. Scan the QR code with your authenticator app."));
+        return ResponseEntity.ok(ApiResponse.success("2FA setup initiated. Scan the QR code with your authenticator app.", response));
     }
     
     @PostMapping("/verify")
@@ -39,7 +39,7 @@ public class TwoFactorAuthController {
     ) {
         Long userId = Long.parseLong(authentication.getName());
         TwoFactorAuthResponse response = twoFactorAuthService.verify2FACode(userId, request);
-        return ResponseEntity.ok(ApiResponse.success(response, "2FA verified and enabled successfully"));
+        return ResponseEntity.ok(ApiResponse.success("2FA verified and enabled successfully", response));
     }
     
     @PostMapping("/disable")
@@ -48,7 +48,7 @@ public class TwoFactorAuthController {
     public ResponseEntity<ApiResponse<Void>> disable2FA(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         twoFactorAuthService.disable2FA(userId);
-        return ResponseEntity.ok(ApiResponse.success(null, "2FA disabled successfully"));
+        return ResponseEntity.ok(ApiResponse.success("2FA disabled successfully"));
     }
     
     @PostMapping("/backup-codes")
@@ -57,7 +57,7 @@ public class TwoFactorAuthController {
     public ResponseEntity<ApiResponse<TwoFactorAuthResponse>> generateBackupCodes(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         TwoFactorAuthResponse response = twoFactorAuthService.generateBackupCodes(userId);
-        return ResponseEntity.ok(ApiResponse.success(response, "New backup codes generated. Save them in a safe place."));
+        return ResponseEntity.ok(ApiResponse.success("New backup codes generated. Save them in a safe place.", response));
     }
     
     @GetMapping("/status")

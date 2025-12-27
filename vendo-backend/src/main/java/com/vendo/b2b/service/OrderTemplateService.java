@@ -10,7 +10,7 @@ import com.vendo.b2b.repository.OrderTemplateRepository;
 import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
 import com.vendo.order.dto.request.CreateOrderRequest;
-import com.vendo.order.dto.request.OrderItemRequest;
+import com.vendo.order.dto.request.CreateOrderRequest;
 import com.vendo.order.dto.response.OrderResponse;
 import com.vendo.order.service.OrderService;
 import com.vendo.product.entity.Product;
@@ -177,8 +177,8 @@ public class OrderTemplateService {
                 .orElseThrow(() -> new ResourceNotFoundException("OrderTemplate", "id", templateId));
         
         // Build order request from template
-        List<OrderItemRequest> orderItems = template.getTemplateItems().stream()
-                .map(item -> OrderItemRequest.builder()
+        List<CreateOrderRequest.OrderItemRequest> orderItems = template.getTemplateItems().stream()
+                .map(item -> CreateOrderRequest.OrderItemRequest.builder()
                         .productId(item.getProduct() != null ? item.getProduct().getId() : null)
                         .quantity(item.getQuantity())
                         .build())

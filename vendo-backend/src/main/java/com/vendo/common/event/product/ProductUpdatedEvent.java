@@ -16,7 +16,6 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ProductUpdatedEvent extends BaseEvent {
     

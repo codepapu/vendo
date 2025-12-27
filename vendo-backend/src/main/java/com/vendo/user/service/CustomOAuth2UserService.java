@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +34,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     userRequest.getClientRegistration().getRegistrationId());
         } catch (Exception e) {
             log.error("Error processing OAuth2 user", e);
-            throw new OAuth2AuthenticationException("Failed to process OAuth2 user", e);
+            OAuth2Error oauth2Error = new OAuth2Error("oauth2_processing_error", "Failed to process OAuth2 user: " + e.getMessage(), null);
+            throw new OAuth2AuthenticationException(oauth2Error, e.getCause() != null ? e.getCause() : e);
         }
         
         return oauth2User;

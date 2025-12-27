@@ -40,35 +40,40 @@ public class OrderResponse {
     private AddressResponse billingAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-}
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OrderItemResponse {
-    private Long id;
-    private Long productId;
-    private Long retailerId; // For marketplace orders
-    private String productName;
-    private String productSku;
-    private Integer quantity;
-    private BigDecimal price;
-    private BigDecimal total;
-    private BigDecimal commissionAmount; // Platform commission for marketplace orders
-}
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AddressResponse {
-    private String name;
-    private String phone;
-    private String email;
-    private String address;
-    private String city;
-    private String state;
-    private String zipCode;
-    private String country;
+    
+    // Alias for code field
+    public String getOrderNumber() {
+        return code;
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderItemResponse {
+        private Long id;
+        private Long productId;
+        private Long retailerId; // For marketplace orders
+        private String productName;
+        private String productSku;
+        private Integer quantity;
+        private BigDecimal price;
+        private BigDecimal total;
+        private BigDecimal commissionAmount; // Platform commission for marketplace orders
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AddressResponse {
+        private String name;
+        private String phone;
+        private String email;
+        private String address;
+        private String city;
+        private String state;
+        private String zipCode;
+        private String country;
+    }
 }

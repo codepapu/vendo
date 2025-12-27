@@ -165,9 +165,6 @@ public class PaystackGatewayService implements PaymentGatewayService {
         }
     }
     
-    @Value("${payment.paystack.webhook-secret:}")
-    private String paystackWebhookSecret;
-    
     private String extractChargeIdFromPayload(String payload) {
         // Simplified - in production use proper JSON parsing
         if (payload.contains("reference") || payload.contains("transaction_id")) {
