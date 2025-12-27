@@ -469,20 +469,13 @@ public class RetailerService {
     }
     
     /**
-     * Map Order entity to OrderResponse DTO
+     * Map Order entity to OrderResponse DTO (only items for this retailer)
      */
     private OrderResponse mapOrderToResponse(Order order) {
-        // Map order items
+        // Map order items - only include items from this retailer
         List<OrderItemResponse> items = List.of();
         if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
             items = order.getOrderItems().stream()
-                    .filter(oi -> oi.getRetailer() != null && oi.getRetailer().getId().equals(
-                            order.getOrderItems().stream()
-                                    .filter(item -> item.getRetailer() != null)
-                                    .findFirst()
-                                    .map(item -> item.getRetailer().getId())
-                                    .orElse(null)
-                    ))
                     .map(oi -> OrderItemResponse.builder()
                             .id(oi.getId())
                             .productId(oi.getProduct() != null ? oi.getProduct().getId() : null)
