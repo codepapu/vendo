@@ -34,6 +34,18 @@ export default function RootLayout() {
         <Stack.Screen name="orders" />
         <Stack.Screen name="orders/[id]" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="b2b" />
+        <Stack.Screen name="b2b/products" />
+        <Stack.Screen name="b2b/orders" />
+        <Stack.Screen name="b2b/orders/[id]" />
+        <Stack.Screen name="b2b/invoices" />
+        <Stack.Screen name="b2b/invoices/[id]" />
+        <Stack.Screen name="retailer" />
+        <Stack.Screen name="retailer/dashboard" />
+        <Stack.Screen name="retailer/products" />
+        <Stack.Screen name="retailer/orders" />
+        <Stack.Screen name="retailer/orders/[id]" />
+        <Stack.Screen name="retailer/analytics" />
       </Stack>
     </QueryClientProvider>
   );
