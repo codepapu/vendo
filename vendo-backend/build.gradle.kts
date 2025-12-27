@@ -72,6 +72,11 @@ dependencies {
     implementation("com.itextpdf:itext7-core:8.0.2")
     implementation("com.itextpdf:html2pdf:5.0.3")
     
+    // Excel/CSV Processing
+    implementation("org.apache.poi:poi:5.2.5")
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
+    implementation("com.opencsv:opencsv:5.9")
+    
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
