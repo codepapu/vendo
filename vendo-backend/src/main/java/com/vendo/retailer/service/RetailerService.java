@@ -22,6 +22,8 @@ import com.vendo.user.entity.User;
 import com.vendo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -208,6 +210,9 @@ public class RetailerService {
         Retailer updatedRetailer = retailerRepository.save(retailer);
         log.info("Retailer updated with ID: {}", updatedRetailer.getId());
         
+        // Evict dashboard cache when retailer is updated
+        evictDashboardCache(updatedRetailer.getId());
+        
         return mapToResponse(updatedRetailer);
     }
     
@@ -255,6 +260,9 @@ public class RetailerService {
         log.info("Retailer status updated: ID={}, OldStatus={}, NewStatus={}", 
                 updatedRetailer.getId(), currentStatus, status);
         
+        // Evict dashboard cache when retailer status is updated
+        evictDashboardCache(updatedRetailer.getId());
+        
         return mapToResponse(updatedRetailer);
     }
     
@@ -268,7 +276,9 @@ public class RetailerService {
     
     /**
      * Get retailer dashboard with aggregated data
+     * Results are cached for 5 minutes using Redis.
      */
+    @Cacheable(value = "retailerDashboard", key = "'dashboard_' + #retailerId")
     @Transactional(readOnly = true)
     public RetailerDashboardResponse getRetailerDashboard(Long retailerId) {
         Retailer retailer = retailerRepository.findById(retailerId)
@@ -404,12 +414,39 @@ public class RetailerService {
     
     /**
      * Get retailer dashboard by user ID
+     * Results are cached for 5 minutes using Redis.
      */
+    @Cacheable(value = "retailerDashboard", key = "'dashboard_user_' + #userId")
     @Transactional(readOnly = true)
     public RetailerDashboardResponse getRetailerDashboardByUserId(Long userId) {
         Retailer retailer = retailerRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Retailer", "userId", userId));
         return getRetailerDashboard(retailer.getId());
+    }
+    
+    /**
+     * Evict retailer dashboard cache for a specific retailer
+     * Call this when retailer data, orders, or products are updated
+     */
+    @CacheEvict(value = "retailerDashboard", key = "'dashboard_' + #retailerId")
+    public void evictDashboardCache(Long retailerId) {
+        log.debug("Evicting retailer dashboard cache for retailer: {}", retailerId);
+    }
+    
+    /**
+     * Evict retailer dashboard cache by user ID
+     */
+    @CacheEvict(value = "retailerDashboard", key = "'dashboard_user_' + #userId")
+    public void evictDashboardCacheByUserId(Long userId) {
+        log.debug("Evicting retailer dashboard cache for user: {}", userId);
+    }
+    
+    /**
+     * Evict all retailer dashboard cache
+     */
+    @CacheEvict(value = "retailerDashboard", allEntries = true)
+    public void evictAllDashboardCache() {
+        log.debug("Evicting all retailer dashboard cache");
     }
     
     /**

@@ -9,6 +9,7 @@ import com.vendo.order.entity.OrderHistory;
 import com.vendo.order.repository.OrderRepository;
 import com.vendo.order.repository.OrderHistoryRepository;
 import com.vendo.common.notification.NotificationService;
+import com.vendo.retailer.service.RetailerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ public class OrderStatusService {
     private final OrderHistoryRepository orderHistoryRepository;
     private final EventPublisher eventPublisher;
     private final NotificationService notificationService;
+    private final RetailerService retailerService;
     
     /**
      * Update order status with validation
@@ -88,6 +90,21 @@ public class OrderStatusService {
         
         Order savedOrder = orderRepository.save(order);
         log.info("Order status updated: Order ID={}, {} -> {}", orderId, currentStatus, newStatus);
+        
+        // Evict retailer dashboard cache if order has retailer items
+        if (savedOrder.getOrderItems() != null && !savedOrder.getOrderItems().isEmpty()) {
+            savedOrder.getOrderItems().stream()
+                    .filter(item -> item.getRetailer() != null)
+                    .map(item -> item.getRetailer().getId())
+                    .distinct()
+                    .forEach(retailerId -> {
+                        try {
+                            retailerService.evictDashboardCache(retailerId);
+                        } catch (Exception e) {
+                            log.warn("Failed to evict dashboard cache for retailer {}: {}", retailerId, e.getMessage());
+                        }
+                    });
+        }
         
         // Publish event
         OrderUpdatedEvent event = new OrderUpdatedEvent(

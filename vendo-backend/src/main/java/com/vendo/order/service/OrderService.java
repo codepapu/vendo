@@ -12,6 +12,7 @@ import com.vendo.order.entity.*;
 import com.vendo.order.repository.*;
 import com.vendo.order.service.ShippingMethodService;
 import com.vendo.retailer.service.CommissionService;
+import com.vendo.retailer.service.RetailerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,7 @@ public class OrderService {
     private final ShippingMethodService shippingMethodService;
     private final CommissionService commissionService;
     private final EventPublisher eventPublisher;
+    private final RetailerService retailerService;
     
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(Long userId, String status, Pageable pageable) {
@@ -297,6 +299,19 @@ public class OrderService {
             try {
                 commissionService.createCommissionRecordsForOrder(savedOrder.getId());
                 log.info("Commissions calculated for order: {}", savedOrder.getId());
+                
+                // Evict retailer dashboard cache for affected retailers
+                savedOrder.getOrderItems().stream()
+                        .filter(item -> item.getRetailer() != null)
+                        .map(item -> item.getRetailer().getId())
+                        .distinct()
+                        .forEach(retailerId -> {
+                            try {
+                                retailerService.evictDashboardCache(retailerId);
+                            } catch (Exception e) {
+                                log.warn("Failed to evict dashboard cache for retailer {}: {}", retailerId, e.getMessage());
+                            }
+                        });
             } catch (Exception e) {
                 log.error("Failed to calculate commissions for order {}: {}", savedOrder.getId(), e.getMessage(), e);
                 // Don't fail order creation if commission calculation fails

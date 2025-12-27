@@ -13,6 +13,7 @@ import com.vendo.product.entity.*;
 import com.vendo.product.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -144,6 +145,9 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
         log.info("Product created with ID: {}", savedProduct.getId());
         
+        // Evict products cache when new product is created
+        evictProductsCache();
+        
         // Publish ProductCreatedEvent
         Long categoryId = savedProduct.getCategories() != null && !savedProduct.getCategories().isEmpty() ?
                 savedProduct.getCategories().get(0).getId() : null;
@@ -274,6 +278,9 @@ public class ProductService {
             b2BPricingService.evictPricingCacheForProduct(updatedProduct.getId());
         }
         
+        // Evict products cache when product is updated
+        evictProductsCache();
+        
         // Publish ProductUpdatedEvent
         if (!updatedFields.isEmpty()) {
             ProductUpdatedEvent productUpdatedEvent = new ProductUpdatedEvent(
@@ -309,6 +316,18 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         productRepository.delete(product);
         log.info("Product deleted with ID: {}", id);
+        
+        // Evict products cache when product is deleted
+        evictProductsCache();
+    }
+    
+    /**
+     * Evict all products cache
+     * Called when products are created, updated, or deleted
+     */
+    @CacheEvict(value = "products", allEntries = true)
+    public void evictProductsCache() {
+        log.debug("Evicting products cache");
     }
     
     @Transactional(readOnly = true)

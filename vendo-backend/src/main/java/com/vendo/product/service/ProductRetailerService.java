@@ -10,6 +10,7 @@ import com.vendo.product.repository.ProductRepository;
 import com.vendo.product.repository.ProductRetailerRepository;
 import com.vendo.retailer.entity.Retailer;
 import com.vendo.retailer.repository.RetailerRepository;
+import com.vendo.retailer.service.RetailerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class ProductRetailerService {
     private final ProductRetailerRepository productRetailerRepository;
     private final ProductRepository productRepository;
     private final RetailerRepository retailerRepository;
+    private final RetailerService retailerService;
     
     @Transactional(readOnly = true)
     public Page<ProductRetailerResponse> getProductsByRetailer(Long retailerId, Boolean isActive, Pageable pageable) {
@@ -100,6 +102,11 @@ public class ProductRetailerService {
         ProductRetailer savedProductRetailer = productRetailerRepository.save(productRetailer);
         log.info("ProductRetailer created with ID: {}", savedProductRetailer.getId());
         
+        // Evict retailer dashboard cache when product is added
+        if (savedProductRetailer.getRetailer() != null) {
+            retailerService.evictDashboardCache(savedProductRetailer.getRetailer().getId());
+        }
+        
         return mapToResponse(savedProductRetailer);
     }
     
@@ -130,6 +137,11 @@ public class ProductRetailerService {
         ProductRetailer updatedProductRetailer = productRetailerRepository.save(productRetailer);
         log.info("ProductRetailer updated with ID: {}", updatedProductRetailer.getId());
         
+        // Evict retailer dashboard cache when product-retailer is updated (affects active products, low stock)
+        if (updatedProductRetailer.getRetailer() != null) {
+            retailerService.evictDashboardCache(updatedProductRetailer.getRetailer().getId());
+        }
+        
         return mapToResponse(updatedProductRetailer);
     }
     
@@ -138,8 +150,15 @@ public class ProductRetailerService {
         ProductRetailer productRetailer = productRetailerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ProductRetailer", "id", id));
         
+        Long retailerId = productRetailer.getRetailer() != null ? productRetailer.getRetailer().getId() : null;
+        
         productRetailerRepository.delete(productRetailer);
         log.info("ProductRetailer deleted with ID: {}", id);
+        
+        // Evict retailer dashboard cache when product-retailer is deleted
+        if (retailerId != null) {
+            retailerService.evictDashboardCache(retailerId);
+        }
     }
     
     private ProductRetailerResponse mapToResponse(ProductRetailer productRetailer) {

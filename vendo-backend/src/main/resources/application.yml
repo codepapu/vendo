@@ -23,6 +23,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
+        # Query performance monitoring
+        session:
+          events:
+            log:
+              LOG_QUERIES_SLOWER_THAN_MS: 1000
     open-in-view: false
   
   flyway:
@@ -46,7 +51,7 @@ spring:
     type: redis
     redis:
       time-to-live: 600000 # 10 minutes default (in milliseconds)
-    cache-names: users,products,orders,categories,b2bPricing
+    cache-names: users,products,orders,categories,b2bPricing,retailerDashboard
   
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
@@ -203,6 +208,15 @@ app:
   # Two-Factor Authentication Configuration
   2fa:
     issuer: ${2FA_ISSUER:Vendo}
+  
+  # Rate Limiting Configuration
+  rate-limit:
+    authenticated:
+      limit: ${RATE_LIMIT_AUTHENTICATED:1000}  # 1000 requests per hour
+      window-seconds: ${RATE_LIMIT_AUTHENTICATED_WINDOW:3600}  # 1 hour
+    unauthenticated:
+      limit: ${RATE_LIMIT_UNAUTHENTICATED:100}  # 100 requests per hour
+      window-seconds: ${RATE_LIMIT_UNAUTHENTICATED_WINDOW:3600}  # 1 hour
 
 # Tax API Configuration
 tax:

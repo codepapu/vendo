@@ -6,10 +6,12 @@ import com.vendo.product.entity.Category;
 import com.vendo.product.entity.Product;
 import com.vendo.product.entity.ProductCollection;
 import com.vendo.product.entity.ProductTag;
+import com.vendo.product.projection.ProductSummaryProjection;
 import com.vendo.product.repository.ProductRepository;
 import com.vendo.product.repository.ProductReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -34,6 +36,7 @@ public class ProductCatalogService {
     
     /**
      * Get paginated list of products with filtering and sorting support.
+     * Results are cached for 1 hour using Redis.
      * 
      * @param status Product status filter (default: "published")
      * @param categoryId Filter by category ID (optional)
@@ -47,6 +50,7 @@ public class ProductCatalogService {
      * @param size Page size
      * @return Paginated list of ProductResponse
      */
+    @Cacheable(value = "products", key = "#status + '_' + (#categoryId != null ? #categoryId : 'null') + '_' + (#brandId != null ? #brandId : 'null') + '_' + (#minPrice != null ? #minPrice : 'null') + '_' + (#maxPrice != null ? #maxPrice : 'null') + '_' + (#minRating != null ? #minRating : 'null') + '_' + #sortBy + '_' + #sortDir + '_' + #page + '_' + #size")
     @Transactional(readOnly = true)
     public Page<ProductResponse> getProducts(
             String status,
@@ -81,10 +85,12 @@ public class ProductCatalogService {
     
     /**
      * Get a single product by ID with rating information.
+     * Results are cached for 1 hour using Redis.
      * 
      * @param id Product ID
      * @return ProductResponse with rating details
      */
+    @Cacheable(value = "products", key = "'product_' + #id")
     @Transactional(readOnly = true)
     public ProductResponse getProduct(Long id) {
         Product product = productRepository.findById(id)
@@ -94,6 +100,7 @@ public class ProductCatalogService {
     
     /**
      * Search products with keyword and filters.
+     * Results are cached for 1 hour using Redis.
      * 
      * @param keyword Search keyword
      * @param status Product status filter (default: "published")
@@ -108,6 +115,7 @@ public class ProductCatalogService {
      * @param size Page size
      * @return Paginated list of ProductResponse
      */
+    @Cacheable(value = "products", key = "'search_' + (#keyword != null ? #keyword : 'null') + '_' + #status + '_' + (#categoryId != null ? #categoryId : 'null') + '_' + (#brandId != null ? #brandId : 'null') + '_' + (#minPrice != null ? #minPrice : 'null') + '_' + (#maxPrice != null ? #maxPrice : 'null') + '_' + (#minRating != null ? #minRating : 'null') + '_' + #sortBy + '_' + #sortDir + '_' + #page + '_' + #size")
     @Transactional(readOnly = true)
     public Page<ProductResponse> searchProducts(
             String keyword,
@@ -147,6 +155,7 @@ public class ProductCatalogService {
     
     /**
      * Get products by category with filtering and sorting.
+     * Results are cached for 1 hour using Redis.
      * 
      * @param categoryId Category ID
      * @param status Product status filter (default: "published")
@@ -160,6 +169,7 @@ public class ProductCatalogService {
      * @param size Page size
      * @return Paginated list of ProductResponse
      */
+    @Cacheable(value = "products", key = "'category_' + #categoryId + '_' + #status + '_' + (#brandId != null ? #brandId : 'null') + '_' + (#minPrice != null ? #minPrice : 'null') + '_' + (#maxPrice != null ? #maxPrice : 'null') + '_' + (#minRating != null ? #minRating : 'null') + '_' + #sortBy + '_' + #sortDir + '_' + #page + '_' + #size")
     @Transactional(readOnly = true)
     public Page<ProductResponse> getProductsByCategory(
             Long categoryId,
@@ -188,18 +198,23 @@ public class ProductCatalogService {
     
     /**
      * Get featured products.
+     * Results are cached for 1 hour using Redis.
+     * Uses projection to reduce data transfer.
      * 
      * @param status Product status filter (default: "published")
      * @param limit Maximum number of products to return (optional, default: all)
      * @return List of ProductResponse
      */
+    @Cacheable(value = "products", key = "'featured_' + #status + '_' + (#limit != null ? #limit : 'all')")
     @Transactional(readOnly = true)
     public List<ProductResponse> getFeaturedProducts(String status, Integer limit) {
         String productStatus = (status != null && !status.isEmpty()) ? status : "published";
-        List<Product> products = productRepository.findFeaturedProducts(productStatus);
         
-        List<ProductResponse> responses = products.stream()
-                .map(this::mapToResponseWithRating)
+        // Use projection for reduced data transfer
+        List<ProductSummaryProjection> productSummaries = productRepository.findFeaturedProductSummaries(productStatus);
+        
+        List<ProductResponse> responses = productSummaries.stream()
+                .map(this::mapProjectionToResponse)
                 .collect(Collectors.toList());
         
         // Apply limit if specified
@@ -208,6 +223,66 @@ public class ProductCatalogService {
         }
         
         return responses;
+    }
+    
+    /**
+     * Get product summaries using projection for reduced data transfer.
+     * This method uses projection DTOs to only fetch necessary fields from the database.
+     * 
+     * @param status Product status filter (default: "published")
+     * @param categoryId Filter by category ID (optional)
+     * @param brandId Filter by brand ID (optional)
+     * @param minPrice Minimum price filter (optional)
+     * @param maxPrice Maximum price filter (optional)
+     * @param minRating Minimum average rating filter (optional, 1-5)
+     * @param page Page number (0-indexed)
+     * @param size Page size
+     * @return Paginated list of ProductSummaryProjection
+     */
+    @Cacheable(value = "products", key = "'summary_' + #status + '_' + (#categoryId != null ? #categoryId : 'null') + '_' + (#brandId != null ? #brandId : 'null') + '_' + (#minPrice != null ? #minPrice : 'null') + '_' + (#maxPrice != null ? #maxPrice : 'null') + '_' + (#minRating != null ? #minRating : 'null') + '_' + #page + '_' + #size")
+    @Transactional(readOnly = true)
+    public Page<ProductSummaryProjection> getProductSummaries(
+            String status,
+            Long categoryId,
+            Long brandId,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Double minRating,
+            int page,
+            int size) {
+        
+        String productStatus = (status != null && !status.isEmpty()) ? status : "published";
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        
+        // Use projection-based query for reduced data transfer
+        if (categoryId != null || brandId != null || minPrice != null || maxPrice != null || minRating != null) {
+            return productRepository.findProductSummariesWithFilters(
+                    productStatus, categoryId, brandId, minPrice, maxPrice, minRating, pageable);
+        } else {
+            return productRepository.findProductSummaries(productStatus, pageable);
+        }
+    }
+    
+    /**
+     * Map ProductSummaryProjection to ProductResponse
+     */
+    private ProductResponse mapProjectionToResponse(ProductSummaryProjection projection) {
+        return ProductResponse.builder()
+                .id(projection.getId())
+                .name(projection.getName())
+                .description(projection.getDescription())
+                .status(projection.getStatus())
+                .images(projection.getImages())
+                .sku(projection.getSku())
+                .isFeatured(projection.getIsFeatured())
+                .brandId(projection.getBrandId())
+                .brandName(projection.getBrandName())
+                .price(projection.getPrice())
+                .salePrice(projection.getSalePrice())
+                .averageRating(projection.getAverageRating() != null ? projection.getAverageRating() : 0.0)
+                .reviewCount(projection.getReviewCount() != null ? projection.getReviewCount() : 0L)
+                .createdAt(projection.getCreatedAt())
+                .build();
     }
     
     /**

@@ -55,6 +55,9 @@ public class RedisCacheConfig {
         // Users cache - 30 minutes TTL
         cacheConfigurations.put("users", defaultConfig.entryTtl(Duration.ofMinutes(30)));
         
+        // Retailer dashboard cache - 5 minutes TTL as per requirements
+        cacheConfigurations.put("retailerDashboard", defaultConfig.entryTtl(Duration.ofMinutes(5)));
+        
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigurations)

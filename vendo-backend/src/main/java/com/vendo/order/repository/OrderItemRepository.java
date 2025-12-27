@@ -16,18 +16,19 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     
     List<OrderItem> findByProductId(Long productId);
     
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.order.id = :orderId AND oi.product.id = :productId")
+    @Query("SELECT oi FROM OrderItem oi LEFT JOIN FETCH oi.product LEFT JOIN FETCH oi.retailer LEFT JOIN FETCH oi.order WHERE oi.order.id = :orderId AND oi.product.id = :productId")
     Optional<OrderItem> findByOrderIdAndProductId(@Param("orderId") Long orderId, @Param("productId") Long productId);
     
-    @Query("SELECT oi FROM OrderItem oi JOIN oi.order o WHERE o.user.id = :userId AND oi.product.id = :productId AND o.status IN ('CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED')")
+    @Query("SELECT DISTINCT oi FROM OrderItem oi LEFT JOIN FETCH oi.product LEFT JOIN FETCH oi.order o WHERE o.user.id = :userId AND oi.product.id = :productId AND o.status IN ('CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED')")
     List<OrderItem> findPurchasedItemsByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);
     
     // Marketplace/retailer queries
-    List<OrderItem> findByRetailerId(Long retailerId);
+    @Query("SELECT DISTINCT oi FROM OrderItem oi LEFT JOIN FETCH oi.product LEFT JOIN FETCH oi.order WHERE oi.retailer.id = :retailerId")
+    List<OrderItem> findByRetailerId(@Param("retailerId") Long retailerId);
     
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.order.id = :orderId AND oi.retailer.id = :retailerId")
+    @Query("SELECT DISTINCT oi FROM OrderItem oi LEFT JOIN FETCH oi.product LEFT JOIN FETCH oi.retailer LEFT JOIN FETCH oi.order WHERE oi.order.id = :orderId AND oi.retailer.id = :retailerId")
     List<OrderItem> findByOrderIdAndRetailerId(@Param("orderId") Long orderId, @Param("retailerId") Long retailerId);
     
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.retailer.id = :retailerId AND oi.order.status = :status")
+    @Query("SELECT DISTINCT oi FROM OrderItem oi LEFT JOIN FETCH oi.product LEFT JOIN FETCH oi.order o WHERE oi.retailer.id = :retailerId AND o.status = :status")
     List<OrderItem> findByRetailerIdAndOrderStatus(@Param("retailerId") Long retailerId, @Param("status") String status);
 }
