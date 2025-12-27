@@ -28,6 +28,8 @@
     "react-native-gesture-handler": "~2.14.0",
     "@react-native-async-storage/async-storage": "1.21.0",
     "expo-constants": "~15.4.0",
+    "expo-notifications": "~0.27.0",
+    "@expo/vector-icons": "^14.0.0",
     "@vendo/shared": "*"
   },
   "devDependencies": {

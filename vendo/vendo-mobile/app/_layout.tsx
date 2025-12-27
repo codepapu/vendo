@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
 import '../src/lib/api';
 
 const queryClient = new QueryClient({
@@ -14,6 +15,9 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
+  // Initialize push notifications
+  usePushNotifications();
+
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="auto" />
@@ -26,6 +30,10 @@ export default function RootLayout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="product/[id]" />
+        <Stack.Screen name="checkout" />
+        <Stack.Screen name="orders" />
+        <Stack.Screen name="orders/[id]" />
+        <Stack.Screen name="settings" />
       </Stack>
     </QueryClientProvider>
   );

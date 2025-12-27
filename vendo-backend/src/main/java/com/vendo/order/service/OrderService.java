@@ -78,6 +78,7 @@ public class OrderService {
     
     /**
      * Create order for authenticated user
+     * Supports B2C, B2B, and Retailer order types
      */
     @Transactional
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
@@ -177,12 +178,22 @@ public class OrderService {
             businessAccount = businessAccountRepository.findById(request.getBusinessAccountId()).orElse(null);
         }
         
+        // Determine initial status based on order type
+        String initialStatus = "PENDING";
+        if (orderType.equals("B2B")) {
+            // B2B orders start as PENDING and require PO approval
+            initialStatus = "PENDING";
+        } else if (orderType.equals("RETAILER")) {
+            // Retailer orders may require split payment processing
+            initialStatus = "PENDING";
+        }
+        
         Order order = Order.builder()
                 .orderNumber(orderCode)
                 .user(user)
                 .businessAccount(businessAccount)
                 .orderType(orderType)
-                .status("PENDING")
+                .status(initialStatus)
                 .paymentStatus("PENDING")
                 .subtotal(subTotal)
                 .taxAmount(taxAmount)

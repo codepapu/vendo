@@ -27,8 +27,22 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#3b82f6"
+        }
+      ]
     ],
-    "scheme": "vendo"
+    "scheme": "vendo",
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#3b82f6",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "#{unread_notifications} new notifications"
+    }
   }
 }
