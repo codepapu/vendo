@@ -15,6 +15,65 @@ export interface ShippingMethodResponse {
   estimatedDays?: number;
   isActive: boolean;
   createdAt: string; // ISO date string
+  calculatedCost?: number; // Calculated cost based on weight
+  totalWeight?: number; // Total weight used for calculation
+}
+
+/**
+ * Shipping estimate request
+ */
+export interface ShippingEstimateRequest {
+  address?: {
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  totalWeight?: number;
+  addressWeights?: Array<{
+    address: {
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+    };
+    weight: number;
+  }>;
+}
+
+/**
+ * Shipping estimate response
+ */
+export interface ShippingEstimateResponse {
+  availableMethods: ShippingMethodResponse[];
+  totalWeight: number;
+  shippingAddress?: {
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  addressEstimates?: Array<{
+    address: {
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+    };
+    weight: number;
+    availableMethods: ShippingMethodResponse[];
+  }>;
+}
+
+/**
+ * Select shipping method request
+ */
+export interface SelectShippingMethodRequest {
+  shippingMethodId: number;
+  addressShippingMethods?: Array<{
+    addressId: number;
+    shippingMethodId: number;
+  }>;
 }
 
 /**
@@ -23,48 +82,15 @@ export interface ShippingMethodResponse {
  */
 class ShippingApiService {
   /**
-   * Get available shipping methods
-   * Note: This endpoint may need to be created in the backend
-   * For now, we'll use a placeholder endpoint
+   * Get all available shipping methods
+   * GET /api/v1/shipping-methods
    */
   async getAvailableShippingMethods(): Promise<ShippingMethodResponse[]> {
     try {
-      // TODO: Update this endpoint when shipping methods API is available
-      // For now, return default shipping methods
-      const defaultMethods: ShippingMethodResponse[] = [
-        {
-          id: 1,
-          name: 'Standard Shipping',
-          code: 'STANDARD',
-          description: 'Standard shipping (5-7 business days)',
-          baseCost: 5.99,
-          estimatedDays: 7,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          name: 'Express Shipping',
-          code: 'EXPRESS',
-          description: 'Express shipping (2-3 business days)',
-          baseCost: 12.99,
-          estimatedDays: 3,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          name: 'Overnight Shipping',
-          code: 'OVERNIGHT',
-          description: 'Overnight shipping (1 business day)',
-          baseCost: 24.99,
-          estimatedDays: 1,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      
-      return defaultMethods;
+      const response = await apiClient.get<ApiResponse<ShippingMethodResponse[]>>(
+        '/api/v1/shipping-methods'
+      );
+      return response.data.data || [];
     } catch (error) {
       handleApiError(error, 'Failed to fetch shipping methods');
       return [];
@@ -72,30 +98,144 @@ class ShippingApiService {
   }
 
   /**
-   * Calculate shipping cost
-   * Note: This would typically calculate based on weight, distance, etc.
+   * Get available shipping methods based on address and weight
+   * GET /api/v1/shipping-methods/available?city={city}&state={state}&postalCode={postalCode}&country={country}&weight={weight}
+   */
+  async getAvailableShippingMethodsForAddress(
+    address: {
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+    },
+    weight: number
+  ): Promise<ShippingMethodResponse[]> {
+    try {
+      const params = new URLSearchParams({
+        city: address.city,
+        state: address.state,
+        postalCode: address.postalCode,
+        country: address.country,
+        weight: weight.toString(),
+      });
+
+      const response = await apiClient.get<ApiResponse<ShippingMethodResponse[]>>(
+        `/api/v1/shipping-methods/available?${params.toString()}`
+      );
+      return response.data.data || [];
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch shipping methods for address');
+      return [];
+    }
+  }
+
+  /**
+   * Calculate shipping cost for a specific method and weight
+   * GET /api/v1/shipping-methods/{id}/calculate?weight={weight}
    */
   async calculateShippingCost(
     shippingMethodId: number,
-    weight?: number
+    weight: number
   ): Promise<number> {
     try {
-      const methods = await this.getAvailableShippingMethods();
-      const method = methods.find((m) => m.id === shippingMethodId);
-      
-      if (!method) {
-        return 0;
-      }
-      
-      let cost = method.baseCost;
-      if (method.costPerKg && weight) {
-        cost += method.costPerKg * weight;
-      }
-      
-      return cost;
+      const response = await apiClient.get<ApiResponse<number>>(
+        `/api/v1/shipping-methods/${shippingMethodId}/calculate?weight=${weight}`
+      );
+      return response.data.data || 0;
     } catch (error) {
       handleApiError(error, 'Failed to calculate shipping cost');
       return 0;
+    }
+  }
+
+  /**
+   * Calculate shipping cost by method code
+   * GET /api/v1/shipping-methods/calculate?code={code}&weight={weight}
+   */
+  async calculateShippingCostByCode(
+    code: string,
+    weight: number
+  ): Promise<number> {
+    try {
+      const response = await apiClient.get<ApiResponse<number>>(
+        `/api/v1/shipping-methods/calculate?code=${code}&weight=${weight}`
+      );
+      return response.data.data || 0;
+    } catch (error) {
+      handleApiError(error, 'Failed to calculate shipping cost');
+      return 0;
+    }
+  }
+
+  /**
+   * Select shipping method
+   * POST /api/v1/shipping-methods/select
+   */
+  async selectShippingMethod(
+    request: SelectShippingMethodRequest,
+    weight?: number
+  ): Promise<ShippingMethodResponse> {
+    try {
+      const params = weight ? `?weight=${weight}` : '';
+      const response = await apiClient.post<ApiResponse<ShippingMethodResponse>>(
+        `/api/v1/shipping-methods/select${params}`,
+        request
+      );
+      return response.data.data!;
+    } catch (error) {
+      handleApiError(error, 'Failed to select shipping method');
+      throw error;
+    }
+  }
+
+  /**
+   * Get shipping estimates
+   * POST /api/v1/shipping-methods/estimates
+   */
+  async getShippingEstimates(
+    request: ShippingEstimateRequest
+  ): Promise<ShippingEstimateResponse> {
+    try {
+      const response = await apiClient.post<ApiResponse<ShippingEstimateResponse>>(
+        '/api/v1/shipping-methods/estimates',
+        request
+      );
+      return response.data.data!;
+    } catch (error) {
+      handleApiError(error, 'Failed to get shipping estimates');
+      throw error;
+    }
+  }
+
+  /**
+   * Get shipping estimates (simple GET version)
+   * GET /api/v1/shipping-methods/estimates?city={city}&state={state}&postalCode={postalCode}&country={country}&weight={weight}
+   */
+  async getShippingEstimatesSimple(
+    address: {
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+    },
+    weight: number
+  ): Promise<ShippingEstimateResponse> {
+    try {
+      const params = new URLSearchParams({
+        city: address.city,
+        state: address.state,
+        postalCode: address.postalCode,
+        country: address.country,
+        weight: weight.toString(),
+      });
+
+      const response = await apiClient.get<ApiResponse<ShippingEstimateResponse>>(
+        `/api/v1/shipping-methods/estimates?${params.toString()}`
+      );
+      return response.data.data!;
+    } catch (error) {
+      handleApiError(error, 'Failed to get shipping estimates');
+      throw error;
     }
   }
 }

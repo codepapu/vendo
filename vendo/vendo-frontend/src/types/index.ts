@@ -878,6 +878,71 @@ export interface NotificationResponse {
 }
 
 /**
+ * Notification type enum
+ */
+export enum NotificationType {
+  // Order-related notifications
+  ORDER_CONFIRMED = 'ORDER_CONFIRMED',
+  ORDER_SHIPPED = 'ORDER_SHIPPED',
+  ORDER_DELIVERED = 'ORDER_DELIVERED',
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
+  ORDER_REFUNDED = 'ORDER_REFUNDED',
+  
+  // Payment notifications
+  PAYMENT_SUCCESS = 'PAYMENT_SUCCESS',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  PAYMENT_PENDING = 'PAYMENT_PENDING',
+  INVOICE_GENERATED = 'INVOICE_GENERATED',
+  
+  // Promotion and marketing
+  PROMOTION = 'PROMOTION',
+  DISCOUNT_OFFER = 'DISCOUNT_OFFER',
+  NEW_PRODUCT = 'NEW_PRODUCT',
+  PRICE_DROP = 'PRICE_DROP',
+  
+  // Account and security
+  ACCOUNT_VERIFIED = 'ACCOUNT_VERIFIED',
+  PASSWORD_CHANGED = 'PASSWORD_CHANGED',
+  SECURITY_ALERT = 'SECURITY_ALERT',
+  LOGIN_ALERT = 'LOGIN_ALERT',
+  
+  // Shipping and delivery
+  SHIPMENT_TRACKING = 'SHIPMENT_TRACKING',
+  DELIVERY_REMINDER = 'DELIVERY_REMINDER',
+  
+  // General
+  SYSTEM_UPDATE = 'SYSTEM_UPDATE',
+  MAINTENANCE_NOTICE = 'MAINTENANCE_NOTICE',
+  GENERAL = 'GENERAL',
+}
+
+/**
+ * Notification type preference response type
+ */
+export interface NotificationTypePreferenceResponse {
+  id?: number;
+  userId: number;
+  notificationType: NotificationType;
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  pushEnabled: boolean;
+  inAppEnabled: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Notification type preference request type
+ */
+export interface NotificationTypePreferenceRequest {
+  notificationType: NotificationType;
+  emailEnabled?: boolean;
+  smsEnabled?: boolean;
+  pushEnabled?: boolean;
+  inAppEnabled?: boolean;
+}
+
+/**
  * Notification preference response type
  */
 export interface NotificationPreferenceResponse {
@@ -887,6 +952,7 @@ export interface NotificationPreferenceResponse {
   smsEnabled: boolean;
   pushEnabled: boolean;
   inAppEnabled: boolean;
+  typePreferences?: NotificationTypePreferenceResponse[];
   createdAt?: string;
   updatedAt?: string;
 }

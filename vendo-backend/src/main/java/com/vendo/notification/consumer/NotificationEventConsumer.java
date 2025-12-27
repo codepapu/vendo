@@ -9,9 +9,13 @@ import com.vendo.common.event.payment.PaymentProcessedEvent;
 import com.vendo.common.event.payment.PaymentRefundedEvent;
 import com.vendo.common.event.user.UserCreatedEvent;
 import com.vendo.notification.dto.request.SendNotificationRequest;
+import com.vendo.notification.enums.NotificationType;
 import com.vendo.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -36,31 +40,23 @@ public class NotificationEventConsumer {
         try {
             log.info("Received OrderCreatedEvent: orderId={}, userId={}", event.getOrderId(), event.getUserId());
             
-            // Send order confirmation notification
+            // Send order confirmation notification via all enabled channels based on user preferences
+            Map<String, Object> orderData = new HashMap<>();
+            orderData.put("orderId", event.getOrderId());
+            orderData.put("orderNumber", event.getOrderNumber());
+            orderData.put("totalAmount", event.getTotalAmount());
+            
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                     .userId(event.getUserId())
-                    .type("in_app")
+                    .notificationType(NotificationType.ORDER_CONFIRMED)
+                    .channel("in_app") // Will also send via other enabled channels based on preferences
                     .title("Order Confirmed")
                     .message(String.format("Your order #%s has been confirmed. Total: %s", 
                             event.getOrderNumber(), event.getTotalAmount()))
-                    .data(String.format("{\"orderId\":%d,\"orderNumber\":\"%s\"}", 
-                            event.getOrderId(), event.getOrderNumber()))
+                    .data(orderData)
                     .build();
             
             notificationService.sendNotification(notificationRequest);
-            
-            // Also send email notification
-            SendNotificationRequest emailRequest = SendNotificationRequest.builder()
-                    .userId(event.getUserId())
-                    .type("email")
-                    .title("Order Confirmation - " + event.getOrderNumber())
-                    .message(String.format("Thank you for your order! Your order #%s has been confirmed.", 
-                            event.getOrderNumber()))
-                    .data(String.format("{\"orderId\":%d,\"orderNumber\":\"%s\"}", 
-                            event.getOrderId(), event.getOrderNumber()))
-                    .build();
-            
-            notificationService.sendNotification(emailRequest);
             
             acknowledgment.acknowledge();
         } catch (Exception e) {
@@ -89,14 +85,26 @@ public class NotificationEventConsumer {
                     default -> "Order Status Updated";
                 };
                 
+                NotificationType notificationType = switch (event.getNewStatus()) {
+                    case "shipped" -> NotificationType.ORDER_SHIPPED;
+                    case "cancelled" -> NotificationType.ORDER_CANCELLED;
+                    case "completed" -> NotificationType.ORDER_DELIVERED;
+                    default -> NotificationType.ORDER_CONFIRMED;
+                };
+                
+                Map<String, Object> orderData = new HashMap<>();
+                orderData.put("orderId", event.getOrderId());
+                orderData.put("orderNumber", event.getOrderNumber());
+                orderData.put("status", event.getNewStatus());
+                
                 SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                         .userId(event.getUserId())
-                        .type("in_app")
+                        .notificationType(notificationType)
+                        .channel("in_app")
                         .title(title)
                         .message(String.format("Your order #%s status has been updated to %s", 
                                 event.getOrderNumber(), event.getNewStatus()))
-                        .data(String.format("{\"orderId\":%d,\"orderNumber\":\"%s\",\"status\":\"%s\"}", 
-                                event.getOrderId(), event.getOrderNumber(), event.getNewStatus()))
+                        .data(orderData)
                         .build();
                 
                 notificationService.sendNotification(notificationRequest);
@@ -120,13 +128,18 @@ public class NotificationEventConsumer {
                     event.getOrderNumber(),
                     event.getRefundRequired() ? "A refund will be processed." : "");
             
+            Map<String, Object> orderData = new HashMap<>();
+            orderData.put("orderId", event.getOrderId());
+            orderData.put("orderNumber", event.getOrderNumber());
+            orderData.put("refundRequired", event.getRefundRequired());
+            
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                     .userId(event.getUserId())
-                    .type("in_app")
+                    .notificationType(NotificationType.ORDER_CANCELLED)
+                    .channel("in_app")
                     .title("Order Cancelled")
                     .message(message)
-                    .data(String.format("{\"orderId\":%d,\"orderNumber\":\"%s\",\"refundRequired\":%s}", 
-                            event.getOrderId(), event.getOrderNumber(), event.getRefundRequired()))
+                    .data(orderData)
                     .build();
             
             notificationService.sendNotification(notificationRequest);
@@ -145,14 +158,20 @@ public class NotificationEventConsumer {
             log.info("Received PaymentProcessedEvent: paymentId={}, orderId={}", 
                     event.getPaymentId(), event.getOrderId());
             
+            Map<String, Object> paymentData = new HashMap<>();
+            paymentData.put("paymentId", event.getPaymentId());
+            paymentData.put("orderId", event.getOrderId());
+            paymentData.put("amount", event.getAmount());
+            paymentData.put("currency", event.getCurrency());
+            
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                     .userId(event.getUserId())
-                    .type("in_app")
+                    .notificationType(NotificationType.PAYMENT_SUCCESS)
+                    .channel("in_app")
                     .title("Payment Successful")
                     .message(String.format("Your payment of %s %s has been processed successfully.", 
                             event.getAmount(), event.getCurrency()))
-                    .data(String.format("{\"paymentId\":%d,\"orderId\":%d}", 
-                            event.getPaymentId(), event.getOrderId()))
+                    .data(paymentData)
                     .build();
             
             notificationService.sendNotification(notificationRequest);
@@ -171,14 +190,20 @@ public class NotificationEventConsumer {
             log.info("Received PaymentFailedEvent: paymentId={}, orderId={}", 
                     event.getPaymentId(), event.getOrderId());
             
+            Map<String, Object> paymentData = new HashMap<>();
+            paymentData.put("paymentId", event.getPaymentId());
+            paymentData.put("orderId", event.getOrderId());
+            paymentData.put("errorCode", event.getErrorCode());
+            paymentData.put("failureReason", event.getFailureReason());
+            
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                     .userId(event.getUserId())
-                    .type("in_app")
+                    .notificationType(NotificationType.PAYMENT_FAILED)
+                    .channel("in_app")
                     .title("Payment Failed")
                     .message(String.format("Your payment failed: %s. Please try again.", 
                             event.getFailureReason()))
-                    .data(String.format("{\"paymentId\":%d,\"orderId\":%d,\"errorCode\":\"%s\"}", 
-                            event.getPaymentId(), event.getOrderId(), event.getErrorCode()))
+                    .data(paymentData)
                     .build();
             
             notificationService.sendNotification(notificationRequest);
@@ -197,14 +222,21 @@ public class NotificationEventConsumer {
             log.info("Received PaymentRefundedEvent: paymentId={}, refundAmount={}", 
                     event.getPaymentId(), event.getRefundAmount());
             
+            Map<String, Object> refundData = new HashMap<>();
+            refundData.put("paymentId", event.getPaymentId());
+            refundData.put("refundId", event.getRefundId());
+            refundData.put("orderId", event.getOrderId());
+            refundData.put("refundAmount", event.getRefundAmount());
+            refundData.put("currency", event.getCurrency());
+            
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                     .userId(event.getUserId())
-                    .type("in_app")
+                    .notificationType(NotificationType.ORDER_REFUNDED)
+                    .channel("in_app")
                     .title("Refund Processed")
                     .message(String.format("A refund of %s %s has been processed to your account.", 
                             event.getRefundAmount(), event.getCurrency()))
-                    .data(String.format("{\"paymentId\":%d,\"refundId\":%d,\"orderId\":%d}", 
-                            event.getPaymentId(), event.getRefundId(), event.getOrderId()))
+                    .data(refundData)
                     .build();
             
             notificationService.sendNotification(notificationRequest);
@@ -223,13 +255,18 @@ public class NotificationEventConsumer {
             log.info("Received UserCreatedEvent: userId={}, email={}", event.getUserId(), event.getEmail());
             
             // Send welcome notification
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("userId", event.getUserId());
+            userData.put("email", event.getEmail());
+            
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
                     .userId(event.getUserId())
-                    .type("in_app")
+                    .notificationType(NotificationType.GENERAL)
+                    .channel("in_app")
                     .title("Welcome!")
                     .message(String.format("Welcome to Nexus, %s! We're excited to have you.", 
                             event.getFirstName() != null ? event.getFirstName() : "there"))
-                    .data(String.format("{\"userId\":%d}", event.getUserId()))
+                    .data(userData)
                     .build();
             
             notificationService.sendNotification(notificationRequest);

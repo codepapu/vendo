@@ -4,13 +4,10 @@ import com.vendo.common.exception.ResourceNotFoundException;
 import com.vendo.common.notification.PushNotificationService;
 import com.vendo.common.sms.SmsService;
 import com.vendo.notification.controller.NotificationWebSocketController;
-import com.vendo.notification.dto.request.NotificationPreferenceRequest;
 import com.vendo.notification.dto.request.SendNotificationRequest;
-import com.vendo.notification.dto.response.NotificationPreferenceResponse;
 import com.vendo.notification.dto.response.NotificationResponse;
 import com.vendo.notification.entity.Notification;
-import com.vendo.notification.entity.NotificationPreference;
-import com.vendo.notification.repository.NotificationPreferenceRepository;
+import com.vendo.notification.enums.NotificationType;
 import com.vendo.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,7 +30,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
     
     private final NotificationRepository notificationRepository;
-    private final NotificationPreferenceRepository preferenceRepository;
+    private final NotificationPreferenceService preferenceService;
     private final JavaMailSender mailSender;
     private final SmsService smsService;
     private final PushNotificationService pushNotificationService;
@@ -52,20 +49,21 @@ public class NotificationService {
     
     @Transactional
     public NotificationResponse sendNotification(SendNotificationRequest request) {
-        // Check user preferences
-        NotificationPreference preference = preferenceRepository.findByUserId(request.getUserId())
-                .orElse(null);
+        NotificationType notificationType = request.getNotificationType();
+        Long userId = request.getUserId();
         
-        // Check if notification type is enabled
-        if (preference != null && !isNotificationTypeEnabled(preference, request.getType())) {
-            log.info("Notification type {} is disabled for user {}", request.getType(), request.getUserId());
+        // Determine which channels to send via
+        List<String> channelsToSend = determineChannelsToSend(request, notificationType, userId);
+        
+        if (channelsToSend.isEmpty()) {
+            log.info("No enabled channels for notification type {} for user {}", notificationType, userId);
             return null;
         }
         
-        // Create notification record
+        // Create notification record (always save in-app notification)
         Notification notification = Notification.builder()
-                .userId(request.getUserId())
-                .type(request.getType())
+                .userId(userId)
+                .type("in_app") // Store as in-app in database
                 .title(request.getTitle())
                 .message(request.getMessage())
                 .data(convertDataToString(request.getData()))
@@ -75,22 +73,86 @@ public class NotificationService {
         Notification savedNotification = notificationRepository.save(notification);
         NotificationResponse notificationResponse = mapToResponse(savedNotification);
         
-        // Send via appropriate channel
-        sendViaChannel(request);
+        // Send via all enabled channels
+        for (String channel : channelsToSend) {
+            sendViaChannel(request, channel);
+        }
         
-        // Send real-time notification via WebSocket if in-app
-        if ("in_app".equals(request.getType())) {
+        // Send real-time notification via WebSocket if in-app is enabled
+        if (channelsToSend.contains("in_app") || channelsToSend.contains("in-app")) {
             try {
-                webSocketController.sendNotificationToUser(request.getUserId(), notificationResponse);
+                webSocketController.sendNotificationToUser(userId, notificationResponse);
             } catch (Exception e) {
                 log.warn("Failed to send WebSocket notification", e);
             }
         }
         
-        log.info("Notification sent: ID={}, Type={}, UserID={}", 
-                savedNotification.getId(), request.getType(), request.getUserId());
+        log.info("Notification sent: ID={}, Type={}, Channels={}, UserID={}", 
+                savedNotification.getId(), notificationType, channelsToSend, userId);
         
         return notificationResponse;
+    }
+    
+    /**
+     * Determine which channels to send the notification via based on user preferences.
+     */
+    private List<String> determineChannelsToSend(SendNotificationRequest request, 
+                                                  NotificationType notificationType, 
+                                                  Long userId) {
+        List<String> channelsToSend = new ArrayList<>();
+        
+        // If specific channels are requested, use those (but still check preferences)
+        if (request.getChannels() != null && !request.getChannels().isEmpty()) {
+            for (String channel : request.getChannels()) {
+                if (notificationType != null) {
+                    if (preferenceService.isChannelEnabledForType(userId, notificationType, channel)) {
+                        channelsToSend.add(channel);
+                    }
+                } else {
+                    // No notification type specified, allow all requested channels
+                    channelsToSend.add(channel);
+                }
+            }
+            return channelsToSend;
+        }
+        
+        // If single channel is specified, use that (but check preferences)
+        if (request.getChannel() != null && !request.getChannel().isEmpty()) {
+            String channel = request.getChannel();
+            if (notificationType != null) {
+                if (preferenceService.isChannelEnabledForType(userId, notificationType, channel)) {
+                    channelsToSend.add(channel);
+                }
+            } else {
+                channelsToSend.add(channel);
+            }
+            return channelsToSend;
+        }
+        
+        // No channels specified - use user preferences to determine channels
+        if (notificationType != null) {
+            // Check each channel based on notification type preferences
+            if (preferenceService.isChannelEnabledForType(userId, notificationType, "email")) {
+                channelsToSend.add("email");
+            }
+            if (preferenceService.isChannelEnabledForType(userId, notificationType, "sms")) {
+                channelsToSend.add("sms");
+            }
+            if (preferenceService.isChannelEnabledForType(userId, notificationType, "push")) {
+                channelsToSend.add("push");
+            }
+            if (preferenceService.isChannelEnabledForType(userId, notificationType, "in_app")) {
+                channelsToSend.add("in_app");
+            }
+        } else {
+            // No notification type - send via all channels (default behavior)
+            channelsToSend.add("email");
+            channelsToSend.add("sms");
+            channelsToSend.add("push");
+            channelsToSend.add("in_app");
+        }
+        
+        return channelsToSend;
     }
     
     @Transactional
@@ -119,71 +181,14 @@ public class NotificationService {
         notificationRepository.saveAll(notifications);
     }
     
-    @Transactional(readOnly = true)
-    public NotificationPreferenceResponse getUserPreferences(Long userId) {
-        NotificationPreference preference = preferenceRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    // Create default preferences if not exists
-                    NotificationPreference defaultPref = NotificationPreference.builder()
-                            .userId(userId)
-                            .emailEnabled(true)
-                            .smsEnabled(false)
-                            .pushEnabled(true)
-                            .inAppEnabled(true)
-                            .build();
-                    return preferenceRepository.save(defaultPref);
-                });
-        return mapPreferenceToResponse(preference);
-    }
-    
-    @Transactional
-    public NotificationPreferenceResponse updateUserPreferences(Long userId, NotificationPreferenceRequest request) {
-        NotificationPreference preference = preferenceRepository.findByUserId(userId)
-                .orElseGet(() -> NotificationPreference.builder()
-                        .userId(userId)
-                        .emailEnabled(true)
-                        .smsEnabled(false)
-                        .pushEnabled(true)
-                        .inAppEnabled(true)
-                        .build());
-        
-        if (request.getEmailEnabled() != null) {
-            preference.setEmailEnabled(request.getEmailEnabled());
-        }
-        if (request.getSmsEnabled() != null) {
-            preference.setSmsEnabled(request.getSmsEnabled());
-        }
-        if (request.getPushEnabled() != null) {
-            preference.setPushEnabled(request.getPushEnabled());
-        }
-        if (request.getInAppEnabled() != null) {
-            preference.setInAppEnabled(request.getInAppEnabled());
-        }
-        
-        NotificationPreference savedPreference = preferenceRepository.save(preference);
-        log.info("Notification preferences updated for user: {}", userId);
-        
-        return mapPreferenceToResponse(savedPreference);
-    }
-    
-    private boolean isNotificationTypeEnabled(NotificationPreference preference, String type) {
-        return switch (type) {
-            case "email" -> preference.getEmailEnabled();
-            case "sms" -> preference.getSmsEnabled();
-            case "push" -> preference.getPushEnabled();
-            case "in_app" -> preference.getInAppEnabled();
-            default -> true;
-        };
-    }
-    
-    private void sendViaChannel(SendNotificationRequest request) {
-        switch (request.getType()) {
+    private void sendViaChannel(SendNotificationRequest request, String channel) {
+        switch (channel.toLowerCase()) {
             case "email" -> sendEmail(request);
             case "sms" -> sendSMS(request);
             case "push" -> sendPush(request);
-            case "in_app" -> // Already saved to database
+            case "in_app", "in-app" -> // Already saved to database
                     log.debug("In-app notification saved");
-            default -> log.warn("Unknown notification type: {}", request.getType());
+            default -> log.warn("Unknown notification channel: {}", channel);
         }
     }
     
@@ -260,16 +265,4 @@ public class NotificationService {
                 .build();
     }
     
-    private NotificationPreferenceResponse mapPreferenceToResponse(NotificationPreference preference) {
-        return NotificationPreferenceResponse.builder()
-                .id(preference.getId())
-                .userId(preference.getUserId())
-                .emailEnabled(preference.getEmailEnabled())
-                .smsEnabled(preference.getSmsEnabled())
-                .pushEnabled(preference.getPushEnabled())
-                .inAppEnabled(preference.getInAppEnabled())
-                .createdAt(preference.getCreatedAt())
-                .updatedAt(preference.getUpdatedAt())
-                .build();
-    }
 }

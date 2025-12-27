@@ -10,6 +10,7 @@ import com.vendo.order.dto.request.CreateOrderRequest;
 import com.vendo.order.dto.response.OrderResponse;
 import com.vendo.order.entity.*;
 import com.vendo.order.repository.*;
+import com.vendo.order.service.ShippingMethodService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,10 @@ public class OrderService {
     private final OrderAddressRepository orderAddressRepository;
     private final OrderHistoryRepository orderHistoryRepository;
     private final com.vendo.user.repository.UserRepository userRepository;
+    private final com.vendo.product.repository.ProductRepository productRepository;
+    private final com.vendo.b2b.repository.BusinessAccountRepository businessAccountRepository;
+    private final com.vendo.tax.service.TaxService taxService;
+    private final ShippingMethodService shippingMethodService;
     private final EventPublisher eventPublisher;
     
     @Transactional(readOnly = true)
@@ -77,13 +82,82 @@ public class OrderService {
         // Generate unique order code
         String orderCode = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         
-        // Calculate totals (simplified - in production, would fetch product prices)
-        BigDecimal subTotal = request.getItems().stream()
-                .map(item -> BigDecimal.valueOf(item.getQuantity()).multiply(BigDecimal.valueOf(100))) // Placeholder price
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Calculate subtotal by fetching actual product prices
+        BigDecimal subTotal = BigDecimal.ZERO;
+        List<com.vendo.tax.dto.request.TaxRequest.TaxItemRequest> taxItems = new ArrayList<>();
         
-        BigDecimal taxAmount = subTotal.multiply(BigDecimal.valueOf(0.1)); // 10% tax (placeholder)
-        BigDecimal shippingAmount = BigDecimal.valueOf(10); // Placeholder shipping
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product", "id", itemRequest.getProductId()));
+            
+            BigDecimal unitPrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+            if (product.getSalePrice() != null && product.getSalePrice().compareTo(BigDecimal.ZERO) > 0) {
+                unitPrice = product.getSalePrice();
+            }
+            
+            BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+            subTotal = subTotal.add(itemTotal);
+            
+            // Build tax items for tax calculation
+            taxItems.add(com.vendo.tax.dto.request.TaxRequest.TaxItemRequest.builder()
+                    .productId(product.getId())
+                    .productType(product.getProductType())
+                    .price(unitPrice)
+                    .quantity(itemRequest.getQuantity())
+                    .total(itemTotal)
+                    .build());
+        }
+        
+        // Calculate tax using TaxService
+        com.vendo.tax.dto.request.TaxRequest taxRequest = com.vendo.tax.dto.request.TaxRequest.builder()
+                .subTotal(subTotal)
+                .country(request.getShippingAddress().getCountry())
+                .state(request.getShippingAddress().getState())
+                .city(request.getShippingAddress().getCity())
+                .zipCode(request.getShippingAddress().getZipCode())
+                .businessType(request.getOrderType() != null ? request.getOrderType() : "B2C")
+                .businessAccountId(request.getBusinessAccountId())
+                .userId(userId)
+                .items(taxItems)
+                .build();
+        
+        com.vendo.tax.dto.response.TaxResponse taxResponse = taxService.calculateTax(taxRequest);
+        BigDecimal taxAmount = taxResponse.getTaxAmount();
+        
+        // Calculate shipping amount using ShippingMethodService
+        BigDecimal shippingAmount = BigDecimal.ZERO;
+        if (request.getShippingMethod() != null && !request.getShippingMethod().isEmpty()) {
+            try {
+                // Calculate order weight from items
+                List<ShippingMethodService.OrderItemWeightInfo> weightItems = request.getItems().stream()
+                        .map(item -> ShippingMethodService.OrderItemWeightInfo.builder()
+                                .productId(item.getProductId())
+                                .quantity(item.getQuantity())
+                                .build())
+                        .collect(Collectors.toList());
+                
+                BigDecimal totalWeight = shippingMethodService.calculateOrderWeight(weightItems);
+                
+                // Calculate shipping cost based on shipping method code and weight
+                if (totalWeight.compareTo(BigDecimal.ZERO) > 0) {
+                    shippingAmount = shippingMethodService.calculateShippingCost(
+                            request.getShippingMethod(), 
+                            totalWeight);
+                } else {
+                    // If weight is zero or not available, use base cost with minimum weight
+                    shippingAmount = shippingMethodService.calculateShippingCost(
+                            request.getShippingMethod(), 
+                            BigDecimal.ONE); // Use 1kg as default minimum
+                }
+            } catch (Exception e) {
+                log.warn("Failed to calculate shipping cost for method: {}, using default", 
+                        request.getShippingMethod(), e);
+                shippingAmount = BigDecimal.valueOf(10); // Fallback to default
+            }
+        } else {
+            shippingAmount = BigDecimal.valueOf(10); // Default shipping if no method specified
+        }
+        
         BigDecimal discountAmount = BigDecimal.ZERO; // Would calculate from coupon
         BigDecimal total = subTotal.add(taxAmount).add(shippingAmount).subtract(discountAmount);
         
@@ -98,8 +172,7 @@ public class OrderService {
         // Get business account if provided (for B2B orders)
         com.vendo.b2b.entity.BusinessAccount businessAccount = null;
         if (request.getBusinessAccountId() != null) {
-            // TODO: Inject BusinessAccountRepository when available
-            // businessAccount = businessAccountRepository.findById(request.getBusinessAccountId()).orElse(null);
+            businessAccount = businessAccountRepository.findById(request.getBusinessAccountId()).orElse(null);
         }
         
         Order order = Order.builder()
@@ -134,9 +207,8 @@ public class OrderService {
                 // TODO: Inject RetailerRepository when available
                 // retailer = retailerRepository.findById(itemRequest.getRetailerId()).orElse(null);
                 
-                com.vendo.product.entity.Product product = null;
-                // TODO: Inject ProductRepository when available
-                // product = productRepository.findById(itemRequest.getProductId()).orElse(null);
+                com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
+                        .orElse(null);
                 
                 OrderItem orderItem = OrderItem.builder()
                         .order(order)
@@ -362,13 +434,82 @@ public class OrderService {
         // Generate unique order code
         String orderCode = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         
-        // Calculate totals (simplified - in production, would fetch product prices)
-        BigDecimal subTotal = request.getItems().stream()
-                .map(item -> BigDecimal.valueOf(item.getQuantity()).multiply(BigDecimal.valueOf(100))) // Placeholder price
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Calculate subtotal by fetching actual product prices
+        BigDecimal subTotal = BigDecimal.ZERO;
+        List<com.vendo.tax.dto.request.TaxRequest.TaxItemRequest> taxItems = new ArrayList<>();
         
-        BigDecimal taxAmount = subTotal.multiply(BigDecimal.valueOf(0.1)); // 10% tax (placeholder)
-        BigDecimal shippingAmount = BigDecimal.valueOf(10); // Placeholder shipping
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product", "id", itemRequest.getProductId()));
+            
+            BigDecimal unitPrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+            if (product.getSalePrice() != null && product.getSalePrice().compareTo(BigDecimal.ZERO) > 0) {
+                unitPrice = product.getSalePrice();
+            }
+            
+            BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+            subTotal = subTotal.add(itemTotal);
+            
+            // Build tax items for tax calculation
+            taxItems.add(com.vendo.tax.dto.request.TaxRequest.TaxItemRequest.builder()
+                    .productId(product.getId())
+                    .productType(product.getProductType())
+                    .price(unitPrice)
+                    .quantity(itemRequest.getQuantity())
+                    .total(itemTotal)
+                    .build());
+        }
+        
+        // Calculate tax using TaxService
+        com.vendo.tax.dto.request.TaxRequest taxRequest = com.vendo.tax.dto.request.TaxRequest.builder()
+                .subTotal(subTotal)
+                .country(request.getShippingAddress().getCountry())
+                .state(request.getShippingAddress().getState())
+                .city(request.getShippingAddress().getCity())
+                .zipCode(request.getShippingAddress().getZipCode())
+                .businessType(request.getOrderType() != null ? request.getOrderType() : "B2C")
+                .businessAccountId(request.getBusinessAccountId())
+                .userId(null) // Guest order
+                .items(taxItems)
+                .build();
+        
+        com.vendo.tax.dto.response.TaxResponse taxResponse = taxService.calculateTax(taxRequest);
+        BigDecimal taxAmount = taxResponse.getTaxAmount();
+        
+        // Calculate shipping amount using ShippingMethodService
+        BigDecimal shippingAmount = BigDecimal.ZERO;
+        if (request.getShippingMethod() != null && !request.getShippingMethod().isEmpty()) {
+            try {
+                // Calculate order weight from items
+                List<ShippingMethodService.OrderItemWeightInfo> weightItems = request.getItems().stream()
+                        .map(item -> ShippingMethodService.OrderItemWeightInfo.builder()
+                                .productId(item.getProductId())
+                                .quantity(item.getQuantity())
+                                .build())
+                        .collect(Collectors.toList());
+                
+                BigDecimal totalWeight = shippingMethodService.calculateOrderWeight(weightItems);
+                
+                // Calculate shipping cost based on shipping method code and weight
+                if (totalWeight.compareTo(BigDecimal.ZERO) > 0) {
+                    shippingAmount = shippingMethodService.calculateShippingCost(
+                            request.getShippingMethod(), 
+                            totalWeight);
+                } else {
+                    // If weight is zero or not available, use base cost with minimum weight
+                    shippingAmount = shippingMethodService.calculateShippingCost(
+                            request.getShippingMethod(), 
+                            BigDecimal.ONE); // Use 1kg as default minimum
+                }
+            } catch (Exception e) {
+                log.warn("Failed to calculate shipping cost for method: {}, using default", 
+                        request.getShippingMethod(), e);
+                shippingAmount = BigDecimal.valueOf(10); // Fallback to default
+            }
+        } else {
+            shippingAmount = BigDecimal.valueOf(10); // Default shipping if no method specified
+        }
+        
         BigDecimal discountAmount = BigDecimal.ZERO; // Would calculate from coupon
         BigDecimal total = subTotal.add(taxAmount).add(shippingAmount).subtract(discountAmount);
         
@@ -407,9 +548,8 @@ public class OrderService {
                 // TODO: Inject RetailerRepository when available
                 // retailer = retailerRepository.findById(itemRequest.getRetailerId()).orElse(null);
                 
-                com.vendo.product.entity.Product product = null;
-                // TODO: Inject ProductRepository when available
-                // product = productRepository.findById(itemRequest.getProductId()).orElse(null);
+                com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
+                        .orElse(null);
                 
                 OrderItem orderItem = OrderItem.builder()
                         .order(order)

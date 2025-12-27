@@ -173,6 +173,19 @@ app:
     push:
       enabled: ${PUSH_ENABLED:false}
 
+# Tax API Configuration
+tax:
+  api:
+    enabled: ${TAX_API_ENABLED:false}
+    provider: ${TAX_API_PROVIDER:} # AVALARA, TAXJAR, CUSTOM
+    base-url: ${TAX_API_BASE_URL:}
+    api-key: ${TAX_API_KEY:}
+    api-secret: ${TAX_API_SECRET:}
+    company-id: ${TAX_API_COMPANY_ID:}
+    timeout: ${TAX_API_TIMEOUT:5000}
+    cache-enabled: ${TAX_API_CACHE_ENABLED:true}
+    cache-ttl: ${TAX_API_CACHE_TTL:3600}
+
 # OpenAPI/Swagger Configuration
 springdoc:
   api-docs:

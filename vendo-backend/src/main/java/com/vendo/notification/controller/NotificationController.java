@@ -2,9 +2,13 @@ package com.vendo.notification.controller;
 
 import com.vendo.common.dto.ApiResponse;
 import com.vendo.notification.dto.request.NotificationPreferenceRequest;
+import com.vendo.notification.dto.request.NotificationTypePreferenceRequest;
 import com.vendo.notification.dto.request.SendNotificationRequest;
 import com.vendo.notification.dto.response.NotificationPreferenceResponse;
 import com.vendo.notification.dto.response.NotificationResponse;
+import com.vendo.notification.dto.response.NotificationTypePreferenceResponse;
+import com.vendo.notification.enums.NotificationType;
+import com.vendo.notification.service.NotificationPreferenceService;
 import com.vendo.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
     
     private final NotificationService notificationService;
+    private final NotificationPreferenceService preferenceService;
     
     @GetMapping
     public ResponseEntity<ApiResponse<Page<NotificationResponse>>> getUserNotifications(
@@ -68,19 +73,37 @@ public class NotificationController {
     }
     
     @GetMapping("/preferences")
-    public ResponseEntity<ApiResponse<NotificationPreferenceResponse>> getUserPreferences(
+    public ResponseEntity<ApiResponse<NotificationPreferenceResponse>> getPreferences(
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        NotificationPreferenceResponse preferences = notificationService.getUserPreferences(userId);
+        NotificationPreferenceResponse preferences = preferenceService.getPreferences(userId);
         return ResponseEntity.ok(ApiResponse.success(preferences));
     }
     
     @PutMapping("/preferences")
-    public ResponseEntity<ApiResponse<NotificationPreferenceResponse>> updateUserPreferences(
-            @RequestBody NotificationPreferenceRequest request,
+    public ResponseEntity<ApiResponse<NotificationPreferenceResponse>> updatePreferences(
+            @Valid @RequestBody NotificationPreferenceRequest request,
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        NotificationPreferenceResponse preferences = notificationService.updateUserPreferences(userId, request);
+        NotificationPreferenceResponse preferences = preferenceService.updatePreferences(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Notification preferences updated", preferences));
+    }
+    
+    @GetMapping("/preferences/type/{notificationType}")
+    public ResponseEntity<ApiResponse<NotificationTypePreferenceResponse>> getPreferenceByType(
+            @PathVariable NotificationType notificationType,
+            Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        NotificationTypePreferenceResponse preference = preferenceService.getPreferenceByType(userId, notificationType);
+        return ResponseEntity.ok(ApiResponse.success(preference));
+    }
+    
+    @PutMapping("/preferences/type")
+    public ResponseEntity<ApiResponse<NotificationTypePreferenceResponse>> updateTypePreference(
+            @Valid @RequestBody NotificationTypePreferenceRequest request,
+            Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        NotificationTypePreferenceResponse preference = preferenceService.updateTypePreference(userId, request);
+        return ResponseEntity.ok(ApiResponse.success("Notification type preference updated", preference));
     }
 }
