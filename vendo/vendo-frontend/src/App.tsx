@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout } from '@/components/layout/layout';
+import { Layout } from './components/layout/layout';
 import { Toaster } from '@/components/ui/toaster';
 import { ProtectedRoute } from '@/components/protected-route';
 
@@ -15,6 +15,7 @@ const Cart = lazy(() => import('@/pages/cart').then((m) => ({ default: m.Cart })
 const Checkout = lazy(() => import('@/pages/checkout').then((m) => ({ default: m.Checkout })));
 const Login = lazy(() => import('@/pages/login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('@/pages/register').then((m) => ({ default: m.Register })));
+const ForgotPassword = lazy(() => import('@/pages/forgot-password').then((m) => ({ default: m.ForgotPassword })));
 const Profile = lazy(() => import('@/pages/profile').then((m) => ({ default: m.Profile })));
 const Addresses = lazy(() => import('@/pages/profile/addresses').then((m) => ({ default: m.Addresses })));
 const Orders = lazy(() => import('@/pages/profile/orders').then((m) => ({ default: m.Orders })));
@@ -51,10 +52,19 @@ const About = lazy(() => import('@/pages/about').then((m) => ({ default: m.About
 const Contact = lazy(() => import('@/pages/contact').then((m) => ({ default: m.Contact })));
 const Privacy = lazy(() => import('@/pages/privacy').then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => import('@/pages/terms').then((m) => ({ default: m.Terms })));
+const Careers = lazy(() => import('@/pages/careers').then((m) => ({ default: m.Careers })));
+const Press = lazy(() => import('@/pages/press').then((m) => ({ default: m.Press })));
+const CookiePolicy = lazy(() => import('@/pages/cookie-policy').then((m) => ({ default: m.CookiePolicy })));
+const Deals = lazy(() => import('@/pages/deals').then((m) => ({ default: m.Deals })));
 const FAQ = lazy(() => import('@/pages/faq').then((m) => ({ default: m.FAQ })));
 const Categories = lazy(() => import('@/pages/categories').then((m) => ({ default: m.Categories })));
 const Stores = lazy(() => import('@/pages/stores').then((m) => ({ default: m.Stores })));
 const StoreDetail = lazy(() => import('@/pages/stores/[slug]').then((m) => ({ default: m.StoreDetail })));
+const HelpCenter = lazy(() => import('@/pages/help').then((m) => ({ default: m.HelpCenter })));
+const Shipping = lazy(() => import('@/pages/shipping').then((m) => ({ default: m.Shipping })));
+const Returns = lazy(() => import('@/pages/returns').then((m) => ({ default: m.Returns })));
+const Sitemap = lazy(() => import('@/pages/sitemap').then((m) => ({ default: m.Sitemap })));
+const SearchPage = lazy(() => import('@/pages/search').then((m) => ({ default: m.default })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +110,7 @@ function App() {
               />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
                 path="/profile"
                 element={
@@ -171,9 +182,18 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/help" element={<HelpCenter />} />
+              <Route path="/shipping" element={<Shipping />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/sitemap" element={<Sitemap />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/stores" element={<Stores />} />
               <Route path="/stores/:slug" element={<StoreDetail />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/press" element={<Press />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/deals" element={<Deals />} />
               {/* Content Management Routes */}
               <Route path="/blog" element={<BlogIndex />} />
               <Route path="/blog/:slug" element={<BlogPostDetail />} />

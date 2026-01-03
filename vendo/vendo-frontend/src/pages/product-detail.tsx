@@ -1,31 +1,35 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Package, Clock, ZoomIn, X } from 'lucide-react';
 import { productApi } from '@/services/product-api';
 import { reviewApi } from '@/services/review-api';
 import { wishlistApi } from '@/services/wishlist-api';
 import { useAuthStore } from '@/stores/auth-store';
 import type { ProductResponse, ReviewResponse, ReviewRequest } from '@/types';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatPrice } from '@/lib/utils';
 import { showSuccessToast } from '@/lib/api';
-import { Link } from 'react-router-dom';
 
 /**
  * Product detail page with images, description, reviews, and add to cart
  */
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuthStore();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const [reviewData, setReviewData] = useState<ReviewRequest>({
     productId: Number(id) || 0,
     rating: 5,
@@ -42,6 +46,15 @@ export function ProductDetail() {
     },
     enabled: !!id,
   });
+
+  // Track recently viewed products
+  useEffect(() => {
+    if (product) {
+      const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      const updated = [product.id, ...recentlyViewed.filter((id: number) => id !== product.id)].slice(0, 10);
+      localStorage.setItem('recentlyViewed', JSON.stringify(updated));
+    }
+  }, [product]);
 
   // Fetch product reviews
   const { data: reviewsData } = useQuery({
@@ -170,27 +183,36 @@ export function ProductDetail() {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-lg bg-muted relative">
+            <div className="aspect-square overflow-hidden rounded-lg bg-muted relative group cursor-pointer" onClick={() => { setLightboxImageIndex(selectedImage); setLightboxOpen(true); }}>
               <img
                 src={images[selectedImage] || '/placeholder.png'}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
               {images.length > 1 && (
                 <>
                   <Button
                     variant="outline"
                     size="icon"
-                    className="absolute left-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setSelectedImage((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+                    }}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setSelectedImage((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+                    }}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -300,6 +322,18 @@ export function ProductDetail() {
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Add to Cart
+              </Button>
+              <Button 
+                size="lg" 
+                variant="default"
+                className="flex-1"
+                disabled={!product.quantity || product.quantity === 0}
+                onClick={() => {
+                  handleAddToCart();
+                  navigate('/checkout');
+                }}
+              >
+                Buy Now
               </Button>
               <Button variant="outline" size="lg" onClick={handleAddToWishlist}>
                 <Heart className="h-5 w-5" />
@@ -457,7 +491,193 @@ export function ProductDetail() {
             </div>
           )}
         </div>
+
+        {/* Related Products */}
+        {product.categoryIds && product.categoryIds.length > 0 && (
+          <div className="space-y-6 pt-8 border-t">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Related Products</h2>
+              <p className="text-muted-foreground">You might also like</p>
+            </div>
+            <RelatedProducts categoryIds={product.categoryIds} excludeProductId={product.id} />
+          </div>
+        )}
+
+        {/* Recently Viewed Products */}
+        <RecentlyViewedProducts currentProductId={product.id} />
       </motion.div>
+    </div>
+  );
+}
+
+// Related Products Component
+function RelatedProducts({ categoryIds, excludeProductId }: { categoryIds: number[]; excludeProductId: number }) {
+  const { data: relatedProducts } = useQuery({
+    queryKey: ['related-products', categoryIds[0], excludeProductId],
+    queryFn: async () => {
+      if (categoryIds.length === 0) return null;
+      const products = await productApi.getProductsByCategory(categoryIds[0], {
+        page: 0,
+        size: 4,
+      });
+      return products?.content?.filter((p) => p.id !== excludeProductId).slice(0, 4) || [];
+    },
+    enabled: categoryIds.length > 0,
+  });
+
+  if (!relatedProducts || relatedProducts.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {relatedProducts.map((product) => (
+        <Card key={product.id} className="hover:shadow-lg transition-shadow">
+          <Link to={`/products/${product.id}`}>
+            <div className="aspect-square overflow-hidden rounded-t-lg bg-muted">
+              {product.images ? (
+                <img
+                  src={typeof product.images === 'string' ? product.images.split(',')[0] : product.images}
+                  alt={product.name}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Package className="h-12 w-12 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <CardHeader>
+              <CardTitle className="line-clamp-2 text-lg">{product.name}</CardTitle>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-lg font-bold">
+                  {formatPrice(product.salePrice || product.price || 0)}
+                </span>
+                {product.averageRating && (
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm">{product.averageRating.toFixed(1)}</span>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+          </Link>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// Recently Viewed Products Component
+function RecentlyViewedProducts({ currentProductId }: { currentProductId: number }) {
+  const recentlyViewedIds = JSON.parse(localStorage.getItem('recentlyViewed') || '[]') as number[];
+  const filteredIds = recentlyViewedIds.filter((id) => id !== currentProductId).slice(0, 4);
+
+  const { data: recentlyViewedProducts } = useQuery({
+    queryKey: ['recently-viewed', filteredIds],
+    queryFn: async () => {
+      if (filteredIds.length === 0) return [];
+      const products = await Promise.all(
+        filteredIds.map((id) => productApi.getProductById(id))
+      );
+      return products.filter((p): p is ProductResponse => p !== null);
+    },
+    enabled: filteredIds.length > 0,
+  });
+
+  if (!recentlyViewedProducts || recentlyViewedProducts.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-6 pt-8 border-t">
+      <div className="flex items-center gap-2">
+        <Clock className="h-5 w-5 text-primary" />
+        <div>
+          <h2 className="text-2xl font-bold">Recently Viewed</h2>
+          <p className="text-muted-foreground">Products you've recently browsed</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {recentlyViewedProducts.map((product) => (
+          <Card key={product.id} className="hover:shadow-lg transition-shadow">
+            <Link to={`/products/${product.id}`}>
+              <div className="aspect-square overflow-hidden rounded-t-lg bg-muted">
+                {product.images ? (
+                  <img
+                    src={typeof product.images === 'string' ? product.images.split(',')[0] : product.images}
+                    alt={product.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              <CardHeader>
+                <CardTitle className="line-clamp-2 text-lg">{product.name}</CardTitle>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-lg font-bold">
+                    {formatPrice(product.salePrice || product.price || 0)}
+                  </span>
+                  {product.averageRating && (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm">{product.averageRating.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+            </Link>
+          </Card>
+        ))}
+      </div>
+
+      {/* Image Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none">
+          <div className="relative aspect-square max-h-[90vh]">
+            <img
+              src={images[lightboxImageIndex] || '/placeholder.png'}
+              alt={`${product.name} - Image ${lightboxImageIndex + 1}`}
+              className="w-full h-full object-contain"
+            />
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-white/20 text-white"
+                  onClick={() => setLightboxImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-white/20 text-white"
+                  onClick={() => setLightboxImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setLightboxImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        lightboxImageIndex === index ? 'bg-white' : 'bg-white/50'
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

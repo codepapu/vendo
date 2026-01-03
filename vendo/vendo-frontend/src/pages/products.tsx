@@ -11,6 +11,12 @@ import { useAuthStore } from '@/stores/auth-store';
 import { wishlistApi } from '@/services/wishlist-api';
 import { showSuccessToast } from '@/lib/api';
 import { productApi } from '@/services/product-api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import type { PaginatedResponse, ProductResponse } from '@/types';
 
 /**
@@ -154,18 +160,52 @@ export function Products() {
   const totalPages = paginationData?.totalPages || 0;
   const currentPage = paginationData?.number || 0;
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
   return (
-    <div className="container py-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
-      >
-        {/* Header */}
-        <div>
-          <h1 className="text-4xl font-bold mb-2">All Products</h1>
-          <p className="text-muted-foreground">Discover our complete product catalog</p>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20">
+        <div className="container">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={itemVariants}
+            className="max-w-3xl mx-auto text-center space-y-6"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+              All <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Products</span>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Discover our complete product catalog
+            </p>
+          </motion.div>
         </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-8 bg-background">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
+          >
+            {/* Breadcrumbs */}
+            <Breadcrumb
+              items={[
+                { label: 'Home', href: '/' },
+                { label: 'Products', href: categoryId ? '/products' : undefined },
+                ...(categoryId ? [{ label: 'Category' }] : []),
+              ]}
+            />
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-4">
@@ -323,7 +363,9 @@ export function Products() {
             </Button>
           </div>
         )}
-      </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }

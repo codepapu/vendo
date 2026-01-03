@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Users, Target, Award, Heart } from 'lucide-react';
+import { Users, Target, Award, Heart, Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const containerVariants = {

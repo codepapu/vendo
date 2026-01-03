@@ -3,25 +3,29 @@ import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/stores/theme-store';
 
 export function ThemeToggle() {
-  const { theme, setTheme, getEffectiveTheme } = useThemeStore();
+  const { getEffectiveTheme, setTheme } = useThemeStore();
   const effectiveTheme = getEffectiveTheme();
 
   const toggleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
-    } else {
+    if (effectiveTheme === 'dark') {
       setTheme('light');
+    } else {
+      setTheme('dark');
     }
   };
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      aria-label="Toggle theme"
+      className="relative"
+    >
       {effectiveTheme === 'dark' ? (
-        <Sun className="h-5 w-5" />
+        <Sun className="h-5 w-5 transition-all" />
       ) : (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-5 w-5 transition-all" />
       )}
     </Button>
   );

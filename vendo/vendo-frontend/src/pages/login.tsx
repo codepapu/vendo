@@ -70,6 +70,14 @@ export function Login() {
                 />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
+              <div className="flex items-center justify-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>

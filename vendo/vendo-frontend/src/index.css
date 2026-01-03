@@ -56,5 +56,18 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    /* Smooth theme transitions */
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  
+  /* Smooth transitions for theme color changes */
+  *,
+  *::before,
+  *::after {
+    transition: background-color 200ms ease, 
+                color 200ms ease, 
+                border-color 200ms ease,
+                fill 200ms ease,
+                stroke 200ms ease;
   }
 }

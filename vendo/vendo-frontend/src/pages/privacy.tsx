@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Shield, Lock, Eye, FileText } from 'lucide-react';
+import { Shield, Lock, Eye, FileText, List } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -38,42 +39,86 @@ export function Privacy() {
 
       {/* Content */}
       <section className="py-16 bg-background">
-        <div className="container max-w-4xl">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={itemVariants}
-            className="prose prose-lg dark:prose-invert max-w-none space-y-8"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Introduction
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  At Vendo, we take your privacy seriously. This Privacy Policy explains how we
-                  collect, use, disclose, and safeguard your information when you visit our
-                  website and use our services.
-                </p>
-                <p className="text-muted-foreground">
-                  Please read this privacy policy carefully. If you do not agree with the terms
-                  of this privacy policy, please do not access the site.
-                </p>
-              </CardContent>
-            </Card>
+        <div className="container max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Table of Contents */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-24">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <List className="h-5 w-5" />
+                    Table of Contents
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <a href="#introduction" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Introduction
+                  </a>
+                  <a href="#information-we-collect" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Information We Collect
+                  </a>
+                  <a href="#how-we-use" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    How We Use Your Information
+                  </a>
+                  <a href="#information-sharing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Information Sharing
+                  </a>
+                  <a href="#data-security" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Data Security
+                  </a>
+                  <a href="#your-rights" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Your Rights
+                  </a>
+                  <a href="#cookies" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Cookies and Tracking
+                  </a>
+                  <a href="#changes" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Changes to Policy
+                  </a>
+                  <a href="#contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Contact Us
+                  </a>
+                </CardContent>
+              </Card>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Eye className="h-5 w-5" />
-                  Information We Collect
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={itemVariants}
+                className="prose prose-lg dark:prose-invert max-w-none space-y-8"
+              >
+                <Card id="introduction">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Introduction
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-muted-foreground">
+                      At Vendo, we take your privacy seriously. This Privacy Policy explains how we
+                      collect, use, disclose, and safeguard your information when you visit our
+                      website and use our services.
+                    </p>
+                    <p className="text-muted-foreground">
+                      Please read this privacy policy carefully. If you do not agree with the terms
+                      of this privacy policy, please do not access the site.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card id="information-we-collect">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Eye className="h-5 w-5" />
+                      Information We Collect
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold mb-2">Personal Information</h3>
                   <p className="text-muted-foreground">
@@ -101,17 +146,17 @@ export function Privacy() {
                     <li>Referring website addresses</li>
                   </ul>
                 </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
-                  How We Use Your Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                <Card id="how-we-use">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Lock className="h-5 w-5" />
+                      How We Use Your Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                 <p className="text-muted-foreground mb-4">
                   We use the information we collect to:
                 </p>
@@ -124,14 +169,14 @@ export function Privacy() {
                   <li>Detect and prevent fraud</li>
                   <li>Comply with legal obligations</li>
                 </ul>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Information Sharing and Disclosure</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                <Card id="information-sharing">
+                  <CardHeader>
+                    <CardTitle>Information Sharing and Disclosure</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
                   We do not sell your personal information. We may share your information only in
                   the following circumstances:
@@ -143,27 +188,27 @@ export function Privacy() {
                   <li>When required by law or to protect our rights</li>
                   <li>In connection with a business transfer or merger</li>
                 </ul>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Data Security</CardTitle>
-              </CardHeader>
-              <CardContent>
+                <Card id="data-security">
+                  <CardHeader>
+                    <CardTitle>Data Security</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                 <p className="text-muted-foreground">
                   We implement appropriate technical and organizational security measures to
                   protect your personal information. However, no method of transmission over
                   the Internet is 100% secure, and we cannot guarantee absolute security.
                 </p>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Rights</CardTitle>
-              </CardHeader>
-              <CardContent>
+                <Card id="your-rights">
+                  <CardHeader>
+                    <CardTitle>Your Rights</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                 <p className="text-muted-foreground mb-4">
                   Depending on your location, you may have the following rights:
                 </p>
@@ -175,40 +220,40 @@ export function Privacy() {
                   <li>Request data portability</li>
                   <li>Withdraw consent for data processing</li>
                 </ul>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Cookies and Tracking Technologies</CardTitle>
-              </CardHeader>
-              <CardContent>
+                <Card id="cookies">
+                  <CardHeader>
+                    <CardTitle>Cookies and Tracking Technologies</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                 <p className="text-muted-foreground">
                   We use cookies and similar tracking technologies to track activity on our
                   website and store certain information. You can instruct your browser to refuse
                   all cookies or to indicate when a cookie is being sent.
                 </p>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Changes to This Privacy Policy</CardTitle>
-              </CardHeader>
-              <CardContent>
+                <Card id="changes">
+                  <CardHeader>
+                    <CardTitle>Changes to This Privacy Policy</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                 <p className="text-muted-foreground">
                   We may update our Privacy Policy from time to time. We will notify you of any
                   changes by posting the new Privacy Policy on this page and updating the
                   "Last updated" date.
                 </p>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Us</CardTitle>
-              </CardHeader>
-              <CardContent>
+                <Card id="contact">
+                  <CardHeader>
+                    <CardTitle>Contact Us</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                 <p className="text-muted-foreground">
                   If you have any questions about this Privacy Policy, please contact us at:
                 </p>
@@ -216,9 +261,11 @@ export function Privacy() {
                   <strong>Email:</strong> privacy@vendo.com<br />
                   <strong>Address:</strong> 123 Commerce Street, Business City, BC 12345
                 </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+              </motion.div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
