@@ -17,9 +17,10 @@ Thumbs.db
 .classpath
 .settings/
 
-# Backend (Spring Boot)
+# Backend (Spring Boot/Maven)
 vendo-backend/.gradle/
 vendo-backend/build/
+vendo-backend/target/
 vendo-backend/.gradle
 vendo-backend/out/
 vendo-backend/*.log

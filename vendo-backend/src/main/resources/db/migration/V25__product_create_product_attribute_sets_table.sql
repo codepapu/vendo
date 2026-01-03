@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS ec_product_attribute_sets (
     is_comparable BOOLEAN NOT NULL DEFAULT FALSE,
     is_use_in_product_listing BOOLEAN NOT NULL DEFAULT FALSE,
     status VARCHAR(60) NOT NULL DEFAULT 'published',
-    order INT NOT NULL DEFAULT 0,
+    "order" INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

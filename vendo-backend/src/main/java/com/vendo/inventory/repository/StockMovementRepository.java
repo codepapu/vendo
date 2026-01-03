@@ -22,7 +22,8 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     
     List<StockMovement> findByReferenceTypeAndReferenceId(String referenceType, Long referenceId);
     
-    List<StockMovement> findByCreatedBy(Long createdBy);
+    @Query("SELECT sm FROM StockMovement sm WHERE sm.createdBy.id = :createdBy")
+    List<StockMovement> findByCreatedBy(@Param("createdBy") Long createdBy);
     
     @Query("SELECT sm FROM StockMovement sm WHERE sm.inventory.id = :inventoryId ORDER BY sm.createdAt DESC")
     Page<StockMovement> findByInventoryId(@Param("inventoryId") Long inventoryId, Pageable pageable);

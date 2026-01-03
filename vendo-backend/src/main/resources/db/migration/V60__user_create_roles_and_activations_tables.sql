@@ -43,9 +43,11 @@ CREATE INDEX IF NOT EXISTS idx_activations_user_id ON activations(user_id);
 CREATE INDEX IF NOT EXISTS idx_activations_code ON activations(code);
 
 -- Add updated_at trigger for roles
+DROP TRIGGER IF EXISTS update_roles_updated_at ON roles;
 CREATE TRIGGER update_roles_updated_at BEFORE UPDATE ON roles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Add updated_at trigger for activations
+DROP TRIGGER IF EXISTS update_activations_updated_at ON activations;
 CREATE TRIGGER update_activations_updated_at BEFORE UPDATE ON activations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

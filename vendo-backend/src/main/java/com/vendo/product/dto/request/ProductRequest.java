@@ -3,6 +3,7 @@ package com.vendo.product.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +26,7 @@ public class ProductRequest {
     private String content;
     
     @Pattern(regexp = "^(published|draft|pending)$", message = "Status must be published, draft, or pending")
+    @Default
     private String status = "published";
     
     private String images; // JSON array of image URLs
@@ -35,26 +37,33 @@ public class ProductRequest {
     private String sku;
     
     @Min(value = 0, message = "Order must be non-negative")
+    @Default
     private Integer order = 0;
     
     @Min(value = 0, message = "Quantity must be non-negative")
     private Integer quantity;
     
+    @Default
     private Boolean allowCheckoutWhenOutOfStock = false;
     
+    @Default
     private Boolean withStorehouseManagement = false;
     
     @Pattern(regexp = "^(in_stock|out_of_stock|on_backorder)$", message = "Stock status must be in_stock, out_of_stock, or on_backorder")
+    @Default
     private String stockStatus = "in_stock";
     
+    @Default
     private Boolean isFeatured = false;
     
     private Long brandId;
     
+    @Default
     private Boolean isVariation = false;
     
     @Min(value = 0, message = "Sale type must be non-negative")
     @Max(value = 2, message = "Sale type must be 0, 1, or 2")
+    @Default
     private Integer saleType = 0;
     
     @DecimalMin(value = "0.0", message = "Price must be non-negative")

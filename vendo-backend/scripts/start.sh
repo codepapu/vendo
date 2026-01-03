@@ -22,10 +22,13 @@ if ! pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
     exit 1
 fi
 
-# Check if database exists
-if ! PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d vendo_db -c "SELECT 1;" &>/dev/null 2>&1; then
-    echo "⚠️  Database 'vendo_db' does not exist"
-    echo "Please run: ./scripts/init-databases.sh"
+# Check if database exists (using vendo_app user)
+if ! PGPASSWORD=REDACTED_DB_PASSWORD psql -h localhost -p 5432 -U vendo_app -d vendo_db -c "SELECT 1;" &>/dev/null 2>&1; then
+    echo "⚠️  Database 'vendo_db' does not exist or cannot connect"
+    echo "Please ensure:"
+    echo "  1. Database 'vendo_db' is created"
+    echo "  2. User 'vendo_app' exists with correct password"
+    echo "  3. Run: ./scripts/setup-database.sh"
     exit 1
 fi
 
@@ -36,4 +39,4 @@ echo "Starting application..."
 echo ""
 
 # Start the application
-./gradlew bootRun
+mvn spring-boot:run

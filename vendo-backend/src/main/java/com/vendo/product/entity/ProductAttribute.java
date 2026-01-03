@@ -6,13 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "product_attributes")
+@Table(name = "ec_product_attributes")
 @Data
 @Builder
 @NoArgsConstructor
@@ -28,6 +27,10 @@ public class ProductAttribute {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attribute_set_id", nullable = false)
+    private ProductAttributeSet attributeSet;
+    
     @Column(name = "attribute_name", nullable = false, length = 100)
     @jakarta.validation.constraints.NotBlank
     @jakarta.validation.constraints.Size(max = 100)
@@ -36,6 +39,10 @@ public class ProductAttribute {
     @Column(name = "attribute_value", nullable = false, columnDefinition = "TEXT")
     @jakarta.validation.constraints.NotBlank
     private String attributeValue;
+    
+    @Column(name = "order", nullable = false)
+    @Builder.Default
+    private Integer order = 0;
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

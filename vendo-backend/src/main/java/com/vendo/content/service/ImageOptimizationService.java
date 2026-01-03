@@ -1,7 +1,7 @@
 package com.vendo.content.service;
 
 import com.vendo.common.exception.ResourceNotFoundException;
-import com.vendo.common.storage.FileStorageService;
+import com.vendo.common.storage.IFileStorageService;
 import com.vendo.content.dto.response.ImageOptimizationResponse;
 import com.vendo.content.entity.MediaFile;
 import com.vendo.content.repository.MediaFileRepository;
@@ -36,7 +36,7 @@ public class ImageOptimizationService {
     private final MediaFileRepository mediaFileRepository;
     
     @Autowired(required = false)
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
     
     @Value("${file.upload.dir:./uploads}")
     private String uploadDir;

@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Service
+@Service("multiChannelNotificationService")
 @RequiredArgsConstructor
-public class NotificationService {
+public class MultiChannelNotificationService {
     
     private final EmailNotificationService emailNotificationService;
     private final SmsNotificationService smsNotificationService;

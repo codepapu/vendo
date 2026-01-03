@@ -2,10 +2,21 @@ spring:
   application:
     name: vendo
   
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java,src/main/resources
+      exclude: static/**,public/**,templates/**,META-INF/maven/**,META-INF/resources/**
+      # trigger-file removed to enable automatic restart on any file change
+    livereload:
+      enabled: true
+      port: 35729
+    add-properties: true
+  
   datasource:
     url: jdbc:postgresql://localhost:5432/vendo_db
-    username: postgres
-    password: postgres
+    username: ${DB_USERNAME:vendo_app}
+    password: ${DB_PASSWORD:REDACTED_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -16,7 +27,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
@@ -31,7 +42,7 @@ spring:
     open-in-view: false
   
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 0
@@ -48,7 +59,7 @@ spring:
           min-idle: 0
   
   cache:
-    type: redis
+    type: ${CACHE_TYPE:simple}
     redis:
       time-to-live: 600000 # 10 minutes default (in milliseconds)
     cache-names: users,products,orders,categories,b2bPricing,retailerDashboard
@@ -75,36 +86,37 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8080}
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
-            scope: openid,profile,email
-          facebook:
-            client-id: ${FACEBOOK_CLIENT_ID:}
-            client-secret: ${FACEBOOK_CLIENT_SECRET:}
-            scope: email,public_profile
-          github:
-            client-id: ${GITHUB_CLIENT_ID:}
-            client-secret: ${GITHUB_CLIENT_SECRET:}
-            scope: read:user,user:email
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-            token-uri: https://www.googleapis.com/oauth2/v4/token
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-            user-name-attribute: sub
-          facebook:
-            authorization-uri: https://www.facebook.com/v12.0/dialog/oauth
-            token-uri: https://graph.facebook.com/v12.0/oauth/access_token
-            user-info-uri: https://graph.facebook.com/v12.0/me?fields=id,name,email
-            user-name-attribute: id
-          github:
-            authorization-uri: https://github.com/login/oauth/authorize
-            token-uri: https://github.com/login/oauth/access_token
-            user-info-uri: https://api.github.com/user
-            user-name-attribute: id
+      # OAuth2 client registration - only configure if client-id is provided via environment variables
+      # client:
+      #   registration:
+      #     google:
+      #       client-id: ${GOOGLE_CLIENT_ID:}
+      #       client-secret: ${GOOGLE_CLIENT_SECRET:}
+      #       scope: openid,profile,email
+      #     facebook:
+      #       client-id: ${FACEBOOK_CLIENT_ID:}
+      #       client-secret: ${FACEBOOK_CLIENT_SECRET:}
+      #       scope: email,public_profile
+      #     github:
+      #       client-id: ${GITHUB_CLIENT_ID:}
+      #       client-secret: ${GITHUB_CLIENT_SECRET:}
+      #       scope: read:user,user:email
+      #   provider:
+      #     google:
+      #       authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+      #       token-uri: https://www.googleapis.com/oauth2/v4/token
+      #       user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+      #       user-name-attribute: sub
+      #     facebook:
+      #       authorization-uri: https://www.facebook.com/v12.0/dialog/oauth
+      #       token-uri: https://graph.facebook.com/v12.0/oauth/access_token
+      #       user-info-uri: https://graph.facebook.com/v12.0/me?fields=id,name,email
+      #       user-name-attribute: id
+      #     github:
+      #       authorization-uri: https://github.com/login/oauth/authorize
+      #       token-uri: https://github.com/login/oauth/access_token
+      #       user-info-uri: https://api.github.com/user
+      #       user-name-attribute: id
   
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
@@ -136,9 +148,31 @@ management:
     web:
       exposure:
         include: health,info,metrics
+      base-path: /actuator
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
+      enabled: true
+  health:
+    enabled: true
+    redis:
+      enabled: false  # Disable Redis health check - Redis is optional
+    db:
+      enabled: true
+    diskspace:
+      enabled: false
+    defaults:
+      enabled: true
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    circuitbreakers:
+      enabled: false
+    kafka:
+      enabled: false  # Disable Kafka health check - Kafka is optional
+    mail:
+      enabled: false  # Disable Mail health check - Mail is optional
 
 # JWT Configuration
 jwt:
@@ -152,7 +186,7 @@ app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
   storage:
-    type: ${STORAGE_TYPE:s3} # s3 or minio
+    type: ${STORAGE_TYPE:local} # local, s3, or minio
     s3:
       bucket: ${S3_BUCKET:vendo-uploads}
       region: ${S3_REGION:us-east-1}

@@ -21,7 +21,7 @@ public class ActivationService {
     
     private final UserRepository userRepository;
     private final ActivationRepository activationRepository;
-    private final EmailService emailService;
+    private final UserEmailService emailService;
     private final Random random = new Random();
     
     @Transactional

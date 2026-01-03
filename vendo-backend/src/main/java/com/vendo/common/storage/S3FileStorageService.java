@@ -16,9 +16,9 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Service("s3FileStorageService")
 @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(S3Client.class)
-public class FileStorageService {
+public class S3FileStorageService implements IFileStorageService {
     
     private final S3Client s3Client;
     
@@ -34,7 +34,7 @@ public class FileStorageService {
     @Value("${app.storage.type:s3}")
     private String storageType; // s3 or minio
     
-    public FileStorageService(S3Client s3Client) {
+    public S3FileStorageService(S3Client s3Client) {
         this.s3Client = s3Client;
     }
     

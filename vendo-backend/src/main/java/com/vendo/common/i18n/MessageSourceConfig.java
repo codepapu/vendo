@@ -18,6 +18,7 @@ public class MessageSourceConfig {
         messageSource.setBasename("messages");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setFallbackToSystemLocale(false);
+        messageSource.setUseCodeAsDefaultMessage(true); // Use code as message if bundle not found
         return messageSource;
     }
     

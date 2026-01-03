@@ -25,7 +25,7 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final UserEmailService emailService;
     
     private static final int TOKEN_EXPIRATION_HOURS = 1;
     

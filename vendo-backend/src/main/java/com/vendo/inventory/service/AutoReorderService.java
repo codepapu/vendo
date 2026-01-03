@@ -2,7 +2,7 @@ package com.vendo.inventory.service;
 
 import com.vendo.common.exception.BadRequestException;
 import com.vendo.common.exception.ResourceNotFoundException;
-import com.vendo.common.notification.NotificationService;
+import com.vendo.common.notification.MultiChannelNotificationService;
 import com.vendo.common.notification.NotificationRequest;
 import com.vendo.inventory.dto.request.AutoReorderSettingsRequest;
 import com.vendo.inventory.dto.response.AutoReorderSettingsResponse;
@@ -36,7 +36,7 @@ public class AutoReorderService {
     private final ProductRepository productRepository;
     private final RetailerRepository retailerRepository;
     private final WarehouseRepository warehouseRepository;
-    private final NotificationService notificationService;
+    private final MultiChannelNotificationService notificationService;
     
     /**
      * Setup auto reorder settings

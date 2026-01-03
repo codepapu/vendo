@@ -8,7 +8,7 @@ import com.vendo.order.entity.Order;
 import com.vendo.order.entity.OrderHistory;
 import com.vendo.order.repository.OrderRepository;
 import com.vendo.order.repository.OrderHistoryRepository;
-import com.vendo.common.notification.NotificationService;
+import com.vendo.common.notification.MultiChannelNotificationService;
 import com.vendo.common.notification.NotificationRequest;
 import com.vendo.retailer.service.RetailerService;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +58,7 @@ public class OrderStatusService {
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
     private final EventPublisher eventPublisher;
-    private final NotificationService notificationService;
+    private final MultiChannelNotificationService notificationService;
     private final RetailerService retailerService;
     
     /**

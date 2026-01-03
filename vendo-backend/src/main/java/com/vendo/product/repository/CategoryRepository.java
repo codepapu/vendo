@@ -21,10 +21,10 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     
     List<Category> findByIsFeaturedTrue();
     
-    @Query("SELECT c FROM Category c WHERE c.status = :status ORDER BY c.order ASC")
+    @Query("SELECT c FROM Category c WHERE c.status = :status ORDER BY c.sortOrder ASC")
     List<Category> findByStatusOrderByOrderAsc(String status);
     
-    @Query("SELECT c FROM Category c WHERE c.parent IS NULL AND c.status = 'published' ORDER BY c.order ASC")
+    @Query("SELECT c FROM Category c WHERE c.parent IS NULL AND c.status = 'published' ORDER BY c.sortOrder ASC")
     List<Category> findRootCategories();
     
     boolean existsByName(String name);

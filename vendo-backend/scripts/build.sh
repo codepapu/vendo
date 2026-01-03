@@ -13,7 +13,7 @@ echo "Building Vendo Application"
 echo "=========================================="
 echo ""
 
-./gradlew clean build
+mvn clean package
 
 echo ""
 echo "✅ Build complete!"

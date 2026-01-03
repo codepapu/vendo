@@ -11,7 +11,6 @@ import com.vendo.payment.dto.request.RefundPaymentRequest;
 import com.vendo.payment.dto.response.PaymentGatewayResponse;
 import com.vendo.payment.dto.response.PaymentResponse;
 import com.vendo.payment.entity.Payment;
-import com.vendo.payment.enums.PaymentStatus;
 import com.vendo.payment.factory.PaymentGatewayFactory;
 import com.vendo.payment.gateway.PaymentGatewayService;
 import com.vendo.payment.repository.PaymentRepository;
@@ -50,8 +49,7 @@ public class PaymentService {
             payments = paymentRepository.findAll(pageable);
         } else if (orderId != null && status != null) {
             // Order and status filter
-            List<Payment> paymentList = paymentRepository.findByOrderIdAndStatus(orderId, status);
-            // Convert to page (simplified - in production would use proper query)
+            // Note: Using findAll for now - in production would use proper query with findByOrderIdAndStatus
             payments = paymentRepository.findAll(pageable);
         } else if (userId != null) {
             // User filter only
@@ -392,6 +390,7 @@ public class PaymentService {
         }
     }
     
+    @SuppressWarnings("unchecked")
     private java.util.Map<String, Object> parseGatewayDataFromJson(String json) {
         if (json == null || json.isEmpty()) {
             return null;

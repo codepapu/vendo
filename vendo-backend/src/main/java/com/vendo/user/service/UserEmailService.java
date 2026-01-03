@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
  * Maintains backward compatibility with existing code
  */
 @Slf4j
-@Service
+@Service("userEmailService")
 @RequiredArgsConstructor
-public class EmailService {
+public class UserEmailService {
     
     private final JavaMailSender mailSender;
     private final com.vendo.common.email.service.EmailService commonEmailService;

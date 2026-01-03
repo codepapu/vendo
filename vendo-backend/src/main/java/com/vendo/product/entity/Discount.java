@@ -92,6 +92,10 @@ public class Discount {
     @Column(length = 400)
     private String description;
     
+    @Column(nullable = false, length = 60)
+    @Builder.Default
+    private String status = "published";
+    
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

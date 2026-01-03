@@ -1,6 +1,6 @@
 package com.vendo.inventory.service;
 
-import com.vendo.common.notification.NotificationService;
+import com.vendo.common.notification.MultiChannelNotificationService;
 import com.vendo.inventory.dto.response.LowStockAlertResponse;
 import com.vendo.inventory.entity.Inventory;
 import com.vendo.inventory.repository.InventoryRepository;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class LowStockAlertService {
     
     private final InventoryRepository inventoryRepository;
-    private final NotificationService notificationService;
+    private final MultiChannelNotificationService notificationService;
     
     /**
      * Check for low stock items

@@ -13,7 +13,7 @@ import com.vendo.order.repository.OrderRepository;
 import com.vendo.user.entity.User;
 import com.vendo.user.repository.UserRepository;
 import com.vendo.user.service.AuthService;
-import com.vendo.user.service.EmailService;
+import com.vendo.user.service.UserEmailService;
 import com.vendo.user.service.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class GuestCheckoutService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final AuthService authService;
-    private final com.vendo.user.service.EmailService emailService;
+    private final UserEmailService emailService;
     private final com.vendo.common.email.service.EmailService commonEmailService;
     private final com.vendo.user.service.EmailVerificationService emailVerificationService;
     private final PasswordEncoder passwordEncoder;

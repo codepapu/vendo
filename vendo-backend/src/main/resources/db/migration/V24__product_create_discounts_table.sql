@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS ec_discounts (
     display_at_checkout BOOLEAN NOT NULL DEFAULT FALSE,
     store_id BIGINT,
     description VARCHAR(400),
+    status VARCHAR(60) NOT NULL DEFAULT 'published',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

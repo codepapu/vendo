@@ -15,23 +15,23 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     
-    Optional<Order> findByCode(String code);
+    @Query("SELECT o FROM Order o WHERE o.orderNumber = :code")
+    Optional<Order> findByCode(@Param("code") String code);
     
     Optional<Order> findByOrderNumber(String orderNumber);
     
-    List<Order> findByUserId(Long userId);
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId")
+    List<Order> findByUserId(@Param("userId") Long userId);
     
     List<Order> findByStatus(String status);
     
-    Page<Order> findByUserId(Long userId, Pageable pageable);
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId")
+    Page<Order> findByUserId(@Param("userId") Long userId, Pageable pageable);
     
     Page<Order> findByStatus(String status, Pageable pageable);
     
-    @Query("SELECT o FROM Order o WHERE o.userId = :userId AND o.status = :status ORDER BY o.createdAt DESC")
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND o.status = :status ORDER BY o.createdAt DESC")
     List<Order> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
-    
-    @Query("SELECT o FROM Order o WHERE o.storeId = :storeId AND o.status = :status")
-    Page<Order> findByStoreIdAndStatus(@Param("storeId") Long storeId, @Param("status") String status, Pageable pageable);
     
     @Query("SELECT o FROM Order o WHERE o.createdAt BETWEEN :startDate AND :endDate")
     List<Order> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
@@ -39,7 +39,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = :status")
     Long countByStatus(@Param("status") String status);
     
-    @Query("SELECT SUM(o.amount) FROM Order o WHERE o.status = :status AND o.createdAt BETWEEN :startDate AND :endDate")
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = :status AND o.createdAt BETWEEN :startDate AND :endDate")
     Double sumAmountByStatusAndDateRange(@Param("status") String status, 
                                          @Param("startDate") LocalDateTime startDate, 
                                          @Param("endDate") LocalDateTime endDate);

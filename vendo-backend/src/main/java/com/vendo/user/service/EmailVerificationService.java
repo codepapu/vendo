@@ -21,7 +21,7 @@ public class EmailVerificationService {
     
     private final UserRepository userRepository;
     private final EmailVerificationTokenRepository tokenRepository;
-    private final EmailService emailService;
+    private final UserEmailService emailService;
     
     private static final int TOKEN_EXPIRATION_HOURS = 24;
     
