@@ -26,6 +26,14 @@ vendo-backend/*.log
 vendo-backend/.idea/
 vendo-backend/*.iml
 
+# Node modules (all locations)
+node_modules/
+**/node_modules/
+
+# Package lock files
+package-lock.json
+**/package-lock.json
+
 # Frontend (React/Vite)
 vendo-frontend/node_modules/
 vendo-frontend/dist/
