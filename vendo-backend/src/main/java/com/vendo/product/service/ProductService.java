@@ -11,6 +11,7 @@ import com.vendo.product.dto.request.ProductRequest;
 import com.vendo.product.dto.response.ProductResponse;
 import com.vendo.product.entity.*;
 import com.vendo.product.repository.*;
+import com.vendo.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,6 +40,7 @@ public class ProductService {
     private final ProductReviewRepository productReviewRepository;
     private final EventPublisher eventPublisher;
     private final B2BPricingService b2BPricingService;
+    private final SearchService searchService;
     
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(String status, Pageable pageable) {
@@ -147,6 +149,13 @@ public class ProductService {
         
         // Evict products cache when new product is created
         evictProductsCache();
+        
+        // Index product in Elasticsearch
+        try {
+            searchService.indexProduct(savedProduct.getId());
+        } catch (Exception e) {
+            log.error("Failed to index product in Elasticsearch: {}", savedProduct.getId(), e);
+        }
         
         // Publish ProductCreatedEvent
         Long categoryId = savedProduct.getCategories() != null && !savedProduct.getCategories().isEmpty() ?
@@ -281,6 +290,13 @@ public class ProductService {
         // Evict products cache when product is updated
         evictProductsCache();
         
+        // Update product index in Elasticsearch
+        try {
+            searchService.indexProduct(updatedProduct.getId());
+        } catch (Exception e) {
+            log.error("Failed to update product index in Elasticsearch: {}", updatedProduct.getId(), e);
+        }
+        
         // Publish ProductUpdatedEvent
         if (!updatedFields.isEmpty()) {
             ProductUpdatedEvent productUpdatedEvent = new ProductUpdatedEvent(
@@ -316,6 +332,13 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         productRepository.delete(product);
         log.info("Product deleted with ID: {}", id);
+        
+        // Remove product from Elasticsearch index
+        try {
+            searchService.removeProduct(id);
+        } catch (Exception e) {
+            log.error("Failed to remove product from Elasticsearch index: {}", id, e);
+        }
         
         // Evict products cache when product is deleted
         evictProductsCache();

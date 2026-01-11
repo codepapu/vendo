@@ -11,8 +11,23 @@ export default function StoreDetailScreen() {
     queryKey: ['store', slug],
     queryFn: async () => {
       if (!slug) return null;
-      // TODO: Implement getStoreBySlug API method
-      return null;
+      try {
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const response = await fetch(`${API_BASE_URL}/v1/storefronts/${slug}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          if (response.status === 404) return null;
+          throw new Error('Failed to fetch store');
+        }
+        const data = await response.json();
+        return data.data || data;
+      } catch (error) {
+        console.error('Error fetching store:', error);
+        return null;
+      }
     },
     enabled: !!slug,
   });
@@ -21,10 +36,26 @@ export default function StoreDetailScreen() {
     queryKey: ['store-products', slug],
     queryFn: async () => {
       if (!slug) return null;
-      // TODO: Implement getStoreProducts API method
-      return [];
+      try {
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const response = await fetch(`${API_BASE_URL}/v1/storefronts/${slug}/products?page=0&size=20`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          if (response.status === 404) return [];
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        // Handle paginated response (content) or direct data array
+        return data.data?.content || data.data || [];
+      } catch (error) {
+        console.error('Error fetching store products:', error);
+        return [];
+      }
     },
-    enabled: !!slug,
+    enabled: !!slug && !!store,
   });
 
   if (isLoadingStore) {

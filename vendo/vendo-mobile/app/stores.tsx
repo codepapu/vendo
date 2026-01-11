@@ -11,8 +11,21 @@ export default function StoresScreen() {
   const { data: stores, isLoading } = useQuery({
     queryKey: ['stores', 'public'],
     queryFn: async () => {
-      // TODO: Implement getPublicStores API method
-      return [];
+      try {
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const response = await fetch(`${API_BASE_URL}/v1/retailers?status=ACTIVE`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) throw new Error('Failed to fetch stores');
+        const data = await response.json();
+        // Handle paginated response (content) or direct data array
+        return data.data?.content || data.data || [];
+      } catch (error) {
+        console.error('Error fetching stores:', error);
+        return [];
+      }
     },
   });
 

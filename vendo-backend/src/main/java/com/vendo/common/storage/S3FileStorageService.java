@@ -7,11 +7,15 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class S3FileStorageService implements IFileStorageService {
     
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
     
     @Value("${app.storage.s3.bucket:vendo-uploads}")
     private String bucketName;
@@ -34,8 +39,12 @@ public class S3FileStorageService implements IFileStorageService {
     @Value("${app.storage.type:s3}")
     private String storageType; // s3 or minio
     
-    public S3FileStorageService(S3Client s3Client) {
+    @Value("${app.storage.s3.presigned-url-expiration-hours:1}")
+    private int presignedUrlExpirationHours;
+    
+    public S3FileStorageService(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
+        this.s3Presigner = s3Presigner;
     }
     
     /**
@@ -85,17 +94,79 @@ public class S3FileStorageService implements IFileStorageService {
     }
     
     /**
-     * Get presigned URL
-     * Note: For full presigned URL support, S3Presigner needs to be configured
+     * Get presigned URL for file access (GET request)
+     * 
+     * @param key Object key
+     * @param expiration URL expiration duration
+     * @return Presigned URL for GET request
      */
     public String getPresignedUrl(String key, Duration expiration) {
-        // For now, return a simple URL
-        // TODO: Implement proper presigned URL generation with S3Presigner
-        if (endpoint != null && !endpoint.isEmpty()) {
-            // MinIO endpoint
-            return endpoint + "/" + bucketName + "/" + key;
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException("Key is required");
         }
-        return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + key;
+        
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+            
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(expiration != null ? expiration : Duration.ofHours(presignedUrlExpirationHours))
+                    .getObjectRequest(getObjectRequest)
+                    .build();
+            
+            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
+            String presignedUrl = presignedRequest.url().toString();
+            
+            log.debug("Generated presigned GET URL for key: {} with expiration: {}", key, expiration);
+            return presignedUrl;
+            
+        } catch (Exception e) {
+            log.error("Error generating presigned URL for key: {}", key, e);
+            // Fallback to simple URL if presigning fails
+            if (endpoint != null && !endpoint.isEmpty()) {
+                return endpoint + "/" + bucketName + "/" + key;
+            }
+            return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + key;
+        }
+    }
+    
+    /**
+     * Get presigned URL for file upload (PUT request)
+     * 
+     * @param key Object key
+     * @param contentType Content type of the file
+     * @param expiration URL expiration duration
+     * @return Presigned URL for PUT request
+     */
+    public String getPresignedUploadUrl(String key, String contentType, Duration expiration) {
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException("Key is required");
+        }
+        
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(contentType != null ? contentType : "application/octet-stream")
+                    .build();
+            
+            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(expiration != null ? expiration : Duration.ofHours(presignedUrlExpirationHours))
+                    .putObjectRequest(putObjectRequest)
+                    .build();
+            
+            PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+            String presignedUrl = presignedRequest.url().toString();
+            
+            log.debug("Generated presigned PUT URL for key: {} with expiration: {}", key, expiration);
+            return presignedUrl;
+            
+        } catch (Exception e) {
+            log.error("Error generating presigned upload URL for key: {}", key, e);
+            throw new RuntimeException("Failed to generate presigned upload URL", e);
+        }
     }
     
     /**

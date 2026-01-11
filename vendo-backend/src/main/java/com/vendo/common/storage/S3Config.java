@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
@@ -30,6 +31,29 @@ public class S3Config {
     @Bean
     public S3Client s3Client() {
         var builder = S3Client.builder()
+                .region(Region.of(region));
+        
+        // If credentials are provided, use them
+        if (accessKey != null && !accessKey.isEmpty() && 
+            secretKey != null && !secretKey.isEmpty()) {
+            builder.credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(accessKey, secretKey)));
+        }
+        
+        // If endpoint is provided (for MinIO), use it
+        if (endpoint != null && !endpoint.isEmpty()) {
+            builder.endpointOverride(URI.create(endpoint));
+        }
+        
+        return builder.build();
+    }
+    
+    /**
+     * S3Presigner bean for generating presigned URLs
+     */
+    @Bean
+    public S3Presigner s3Presigner() {
+        var builder = S3Presigner.builder()
                 .region(Region.of(region));
         
         // If credentials are provided, use them

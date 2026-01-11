@@ -40,6 +40,7 @@ public class OrderService {
     private final com.vendo.user.repository.UserRepository userRepository;
     private final com.vendo.product.repository.ProductRepository productRepository;
     private final com.vendo.b2b.repository.BusinessAccountRepository businessAccountRepository;
+    private final com.vendo.retailer.repository.RetailerRepository retailerRepository;
     private final com.vendo.tax.service.TaxService taxService;
     private final ShippingMethodService shippingMethodService;
     private final CommissionService commissionService;
@@ -219,9 +220,8 @@ public class OrderService {
             
             if (itemRequest.getRetailerId() != null) {
                 // Create OrderItem for marketplace orders
-                com.vendo.retailer.entity.Retailer retailer = null;
-                // TODO: Inject RetailerRepository when available
-                // retailer = retailerRepository.findById(itemRequest.getRetailerId()).orElse(null);
+                com.vendo.retailer.entity.Retailer retailer = retailerRepository.findById(itemRequest.getRetailerId())
+                        .orElse(null);
                 
                 com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
                         .orElse(null);
@@ -578,9 +578,8 @@ public class OrderService {
             
             if (itemRequest.getRetailerId() != null) {
                 // Create OrderItem for marketplace orders
-                com.vendo.retailer.entity.Retailer retailer = null;
-                // TODO: Inject RetailerRepository when available
-                // retailer = retailerRepository.findById(itemRequest.getRetailerId()).orElse(null);
+                com.vendo.retailer.entity.Retailer retailer = retailerRepository.findById(itemRequest.getRetailerId())
+                        .orElse(null);
                 
                 com.vendo.product.entity.Product product = productRepository.findById(itemRequest.getProductId())
                         .orElse(null);

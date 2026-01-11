@@ -3,12 +3,18 @@ package com.vendo.cart.service;
 import com.vendo.cart.dto.request.CheckoutRequest;
 import com.vendo.cart.dto.response.CartResponse;
 import com.vendo.cart.entity.Cart;
+import com.vendo.cart.entity.CartItem;
 import com.vendo.cart.repository.CartRepository;
+import com.vendo.cart.repository.CartItemRepository;
+import com.vendo.inventory.dto.request.ReserveInventoryRequest;
+import com.vendo.inventory.dto.request.ReleaseInventoryRequest;
+import com.vendo.inventory.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -17,6 +23,8 @@ import java.util.List;
 public class CheckoutService {
     
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final InventoryService inventoryService;
     
     @Transactional
     public CartResponse processCheckout(Long userId, CheckoutRequest request) {
@@ -64,24 +72,59 @@ public class CheckoutService {
     }
     
     /**
-     * Reserve inventory for cart items.
-     * In production, would call Product Service to reserve stock.
+     * Release inventory reservations for cart items.
+     * Called when checkout fails or is cancelled.
      */
-    private void reserveInventory(Cart cart) {
-        // Parse cart content (JSON) to get items
-        // For each item:
-        //   - Call Product Service API to reserve quantity
-        //   - Store reservation ID for later release
-        log.debug("Reserving inventory for cart: {}", cart.getId());
-        // Implementation would use RestTemplate or Feign to call Product Service
+    private void releaseInventoryReservations(Cart cart, List<ReserveInventoryRequest> reservationRequests, Long userId) {
+        if (reservationRequests == null || reservationRequests.isEmpty()) {
+            return;
+        }
+        
+        log.debug("Releasing inventory reservations for cart: {}, items: {}", 
+                cart.getId(), reservationRequests.size());
+        
+        for (ReserveInventoryRequest reserveRequest : reservationRequests) {
+            try {
+                ReleaseInventoryRequest releaseRequest = ReleaseInventoryRequest.builder()
+                        .productId(reserveRequest.getProductId())
+                        .retailerId(reserveRequest.getRetailerId())
+                        .warehouseId(reserveRequest.getWarehouseId())
+                        .quantity(reserveRequest.getQuantity())
+                        .build();
+                
+                inventoryService.releaseInventory(releaseRequest, userId);
+                log.debug("Inventory released for product: {}, quantity: {}", 
+                        reserveRequest.getProductId(), reserveRequest.getQuantity());
+            } catch (Exception e) {
+                log.error("Failed to release inventory for product {}: {}", 
+                        reserveRequest.getProductId(), e.getMessage(), e);
+                // Continue releasing other items even if one fails
+            }
+        }
+        
+        log.info("Inventory reservations released for cart: {}", cart.getId());
     }
     
     /**
-     * Release inventory reservation.
-     * In production, would call Product Service to release reserved stock.
+     * Release inventory reservation for a single cart.
+     * Can be called when checkout is cancelled or order is cancelled.
      */
-    private void releaseInventoryReservation(Cart cart) {
-        log.debug("Releasing inventory reservation for cart: {}", cart.getId());
-        // Implementation would use RestTemplate or Feign to call Product Service
+    public void releaseInventoryReservation(Cart cart, Long userId) {
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        if (cartItems == null || cartItems.isEmpty()) {
+            return;
+        }
+        
+        List<ReserveInventoryRequest> reservationRequests = new ArrayList<>();
+        for (CartItem item : cartItems) {
+            reservationRequests.add(ReserveInventoryRequest.builder()
+                    .productId(item.getProduct().getId())
+                    .retailerId(item.getRetailer() != null ? item.getRetailer().getId() : null)
+                    .warehouseId(null)
+                    .quantity(item.getQuantity())
+                    .build());
+        }
+        
+        releaseInventoryReservations(cart, reservationRequests, userId);
     }
 }
