@@ -1,6 +1,10 @@
 -- Database Initialization Script for Vendo E-commerce Platform
 -- This script creates all required databases and users for Spring Boot services
 -- Run this script as PostgreSQL superuser (postgres)
+--
+-- For idempotent/non-destructive re-runs (e.g. DB already exists), use:
+--   NON_DESTRUCTIVE=1 ./scripts/setup-database.sh
+-- or run scripts/init-databases-idempotent.sql after creating vendo_db if missing.
 
 -- ============================================
 -- 1. Create Main Database

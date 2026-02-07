@@ -6,13 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "wishlists", indexes = {
+@Table(name = "ec_wish_lists", indexes = {
     @Index(name = "idx_wishlists_product_customer", columnList = "product_id,customer_id"),
     @Index(name = "idx_wishlists_customer_id", columnList = "customer_id")
 })

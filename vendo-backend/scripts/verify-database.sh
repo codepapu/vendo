@@ -57,19 +57,41 @@ else
     echo -e "${YELLOW}⚠️  No tables found. Run Flyway migrations to create tables.${NC}"
 fi
 
-# List key tables
+# Check expected tables (from Flyway migrations)
 echo ""
-echo "Checking key tables..."
-KEY_TABLES=("users" "products" "orders" "carts" "categories" "retailers" "business_accounts" "inventory" "payments" "addresses")
-
-for table in "${KEY_TABLES[@]}"; do
-    EXISTS=$(PGPASSWORD=${DB_PASSWORD} psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -tAc "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '${table}';" 2>/dev/null || echo "0")
-    if [ "$EXISTS" = "1" ]; then
-        echo -e "  ${GREEN}✅${NC} ${table}"
-    else
-        echo -e "  ${YELLOW}⚠️${NC}  ${table} (not found - may use different name or not migrated yet)"
+echo "Checking expected tables (from scripts/expected-tables.txt)..."
+EXPECTED_FILE="$(dirname "$0")/expected-tables.txt"
+FOUND=0
+MISSING_KEY=0
+if [ -f "$EXPECTED_FILE" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        [ -z "$line" ] && continue
+        [ "${line#\#}" != "$line" ] && continue
+        table="$line"
+        EXISTS=$(PGPASSWORD=${DB_PASSWORD} psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -tAc "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '${table}';" 2>/dev/null || echo "0")
+        if [ "$EXISTS" = "1" ]; then
+            ((FOUND++)) || true
+        else
+            echo -e "  ${YELLOW}⚠️${NC}  ${table} (not found)"
+            ((MISSING_KEY++)) || true
+        fi
+    done < "$EXPECTED_FILE"
+    echo "  Expected tables present: ${FOUND}"
+    if [ "$MISSING_KEY" -gt 0 ]; then
+        echo -e "  ${YELLOW}Missing: ${MISSING_KEY} tables. Run Flyway migrations. For full check use: ./scripts/verify-schema.sh${NC}"
     fi
-done
+else
+    echo "  (expected-tables.txt not found; listing key tables only)"
+    for table in users ec_products ec_orders carts categories retailers business_accounts inventory payments addresses; do
+        EXISTS=$(PGPASSWORD=${DB_PASSWORD} psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -tAc "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '${table}';" 2>/dev/null || echo "0")
+        if [ "$EXISTS" = "1" ]; then
+            echo -e "  ${GREEN}✅${NC} ${table}"
+        else
+            echo -e "  ${YELLOW}⚠️${NC}  ${table} (not found)"
+        fi
+    done
+fi
 
 # Check Flyway schema history
 echo ""
@@ -93,5 +115,9 @@ echo "Database: ${DB_NAME}"
 echo "Host: ${DB_HOST}:${DB_PORT}"
 echo "User: ${DB_USER}"
 echo "Tables: ${TABLE_COUNT}"
+echo ""
+echo "For strict schema verification (all expected tables, exit 1 if any missing):"
+echo "  ./scripts/verify-schema.sh"
+echo "  ./scripts/verify-schema.sh --columns   # also check key columns"
 echo ""
 

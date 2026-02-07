@@ -15,14 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders", indexes = {
-    @Index(name = "idx_orders_user_id", columnList = "user_id"),
-    @Index(name = "idx_orders_business_account_id", columnList = "business_account_id"),
-    @Index(name = "idx_orders_status", columnList = "status"),
-    @Index(name = "idx_orders_created_at", columnList = "created_at"),
-    @Index(name = "idx_orders_order_number", columnList = "order_number")
+@Table(name = "ec_orders", indexes = {
+    @Index(name = "idx_ec_orders_user_id", columnList = "user_id"),
+    @Index(name = "idx_ec_orders_business_account_id", columnList = "business_account_id"),
+    @Index(name = "idx_ec_orders_status", columnList = "status"),
+    @Index(name = "idx_ec_orders_created_at", columnList = "created_at"),
+    @Index(name = "idx_ec_orders_code", columnList = "code")
 }, uniqueConstraints = {
-    @UniqueConstraint(name = "uk_orders_order_number", columnNames = {"order_number"})
+    @UniqueConstraint(name = "uk_ec_orders_code", columnNames = {"code"})
 })
 @Data
 @Builder
@@ -35,10 +35,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "order_number", nullable = false, unique = true, length = 50)
-    @jakarta.validation.constraints.NotBlank
-    @jakarta.validation.constraints.Size(max = 50)
-    private String orderNumber;
+    @Column(name = "code", unique = true, length = 191)
+    @jakarta.validation.constraints.Size(max = 191)
+    private String orderNumber; // mapped to ec_orders.code
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -66,7 +65,7 @@ public class Order {
     @jakarta.validation.constraints.Size(max = 50)
     private String paymentMethod;
     
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "sub_total", nullable = false, precision = 15, scale = 2)
     @jakarta.validation.constraints.NotNull
     private BigDecimal subtotal;
     
@@ -82,16 +81,16 @@ public class Order {
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
     
-    @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
+    @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     @jakarta.validation.constraints.NotNull
-    private BigDecimal totalAmount;
+    private BigDecimal totalAmount; // mapped to ec_orders.amount
     
     @Column(nullable = false, length = 3)
     @Builder.Default
     private String currency = "USD";
     
     @Column(columnDefinition = "TEXT")
-    private String notes;
+    private String notes; // ec_orders.notes added in V66
     
     @Column(name = "cancellation_reason", columnDefinition = "TEXT")
     private String cancellationReason;

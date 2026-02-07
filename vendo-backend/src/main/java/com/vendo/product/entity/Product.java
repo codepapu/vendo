@@ -2,7 +2,6 @@ package com.vendo.product.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "products", indexes = {
-    @Index(name = "idx_products_slug", columnList = "slug"),
-    @Index(name = "idx_products_status", columnList = "status"),
-    @Index(name = "idx_products_sku", columnList = "sku"),
-    @Index(name = "idx_products_is_featured", columnList = "is_featured")
+@Table(name = "ec_products", indexes = {
+    @Index(name = "idx_ec_products_slug", columnList = "slug"),
+    @Index(name = "idx_ec_products_status", columnList = "status"),
+    @Index(name = "idx_ec_products_sku", columnList = "sku"),
+    @Index(name = "idx_ec_products_is_featured", columnList = "is_featured")
 }, uniqueConstraints = {
-    @UniqueConstraint(name = "uk_products_slug", columnNames = {"slug"}),
-    @UniqueConstraint(name = "uk_products_sku", columnNames = {"sku"})
+    @UniqueConstraint(name = "uk_ec_products_slug", columnNames = {"slug"}),
+    @UniqueConstraint(name = "uk_ec_products_sku", columnNames = {"sku"})
 })
 @Data
 @Builder
@@ -61,7 +60,7 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String images;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "video_media", columnDefinition = "TEXT")
     private String videoMedia;
     
     @Column(nullable = false, unique = true, length = 100)
@@ -84,7 +83,7 @@ public class Product {
     @Builder.Default
     private String stockStatus = "in_stock";
     
-    @Column
+    @Column(name = "\"order\"", nullable = false)
     @Builder.Default
     private Integer order = 0;
     
@@ -108,28 +107,30 @@ public class Product {
     @JoinColumn(name = "brand_id")
     private Brand brand;
     
-    @Column(nullable = false)
+    @Column(name = "is_variation", nullable = false)
     @Builder.Default
     private Boolean isVariation = false;
     
-    @Column(nullable = false)
+    @Column(name = "sale_type", nullable = false)
     @Builder.Default
     private Integer saleType = 0;
     
     @Column(precision = 15, scale = 2)
     private BigDecimal price;
     
-    @Column(precision = 15, scale = 2)
+    @Column(name = "sale_price", precision = 15, scale = 2)
     private BigDecimal salePrice;
     
+    @Column(name = "start_date")
     private LocalDateTime startDate;
-    
+
+    @Column(name = "end_date")
     private LocalDateTime endDate;
-    
+
     @Column(precision = 10, scale = 2)
     private BigDecimal length;
-    
-    @Column(precision = 10, scale = 2)
+
+    @Column(name = "wide", precision = 10, scale = 2)
     private BigDecimal wide;
     
     @Column(precision = 10, scale = 2)
@@ -138,59 +139,63 @@ public class Product {
     @Column(precision = 10, scale = 2)
     private BigDecimal weight;
     
+    @Column(name = "tax_id")
     private Long taxId;
-    
+
+    @Column(name = "store_id")
     private Long storeId;
-    
-    @Column(nullable = false)
+
+    @Column(name = "created_by_id", nullable = false)
     @Builder.Default
     private Long createdById = 0L;
-    
-    @Column(nullable = false, length = 191)
+
+    @Column(name = "created_by_type", nullable = false, length = 191)
     @Builder.Default
     private String createdByType = "User";
     
     @Builder.Default
     private Long approvedBy = 0L;
     
-    @Column(length = 191)
+    @Column(name = "image", length = 191)
     private String image;
-    
-    
-    @Column(precision = 15, scale = 2)
+
+    @Column(name = "cost_per_item", precision = 15, scale = 2)
     private BigDecimal costPerItem;
-    
-    @Column(nullable = false)
+
+    @Column(name = "generate_license_code", nullable = false)
     @Builder.Default
     private Boolean generateLicenseCode = false;
-    
-    @Column(nullable = false, length = 20)
+
+    @Column(name = "license_code_type", nullable = false, length = 20)
     @Builder.Default
     private String licenseCodeType = "auto_generate";
-    
+
+    @Column(name = "minimum_order_quantity")
     @Builder.Default
     private Integer minimumOrderQuantity = 0;
-    
+
+    @Column(name = "maximum_order_quantity")
     @Builder.Default
     private Integer maximumOrderQuantity = 0;
-    
-    @Column(nullable = false)
+
+    @Column(name = "notify_attachment_updated", nullable = false)
     @Builder.Default
     private Boolean notifyAttachmentUpdated = false;
-    
+
+    @Column(name = "specification_table_id")
     private Long specificationTableId;
-    
+
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
+
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
     @ManyToMany
     @JoinTable(
-        name = "product_category_product",
+        name = "ec_product_category_product",
         joinColumns = @JoinColumn(name = "product_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )

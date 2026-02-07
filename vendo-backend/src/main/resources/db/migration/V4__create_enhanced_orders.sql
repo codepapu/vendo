@@ -3,18 +3,20 @@
 -- Description: Adds support for multi-type orders (B2C, B2B, Retailer) with enhanced tracking
 
 -- Add columns to orders table if they don't exist
--- Handle both 'orders' and 'ec_orders' table names
+-- Handle both 'orders' and 'ec_orders' table names (skip when neither exists - they are created in later migrations)
 DO $$
 DECLARE
     table_name_var TEXT;
 BEGIN
-    -- Determine which orders table exists
+    -- Determine which orders table exists; skip this migration block if neither exists yet
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'orders')
+       AND NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ec_orders') THEN
+        RETURN;
+    END IF;
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'orders') THEN
         table_name_var := 'orders';
-    ELSIF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ec_orders') THEN
-        table_name_var := 'ec_orders';
     ELSE
-        RAISE EXCEPTION 'Neither orders nor ec_orders table exists';
+        table_name_var := 'ec_orders';
     END IF;
 
     -- Add business_account_id column if it doesn't exist
@@ -54,88 +56,21 @@ BEGIN
     END IF;
 END $$;
 
--- Create order_items table if it doesn't exist
--- Handle both 'order_items' and 'ec_order_products' table names
+-- Add columns to order_items / ec_order_products if they exist (order_items/ec_order_products created in later migrations)
 DO $$
-DECLARE
-    orders_table_name TEXT;
 BEGIN
-    -- Determine which orders table exists for foreign key reference
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'orders') THEN
-        orders_table_name := 'orders';
-    ELSIF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ec_orders') THEN
-        orders_table_name := 'ec_orders';
-    ELSE
-        orders_table_name := 'orders'; -- Default fallback
-    END IF;
-    
-    -- Create order_items table (standard name from schema)
-    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'order_items') THEN
-        -- Check if retailers table exists for foreign key
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'retailers') THEN
-            EXECUTE format('CREATE TABLE order_items (
-                id BIGSERIAL PRIMARY KEY,
-                order_id BIGINT NOT NULL,
-                product_id BIGINT,
-                retailer_id BIGINT,
-                product_name VARCHAR(255) NOT NULL,
-                sku VARCHAR(100),
-                quantity INTEGER NOT NULL,
-                unit_price DECIMAL(10,2) NOT NULL,
-                total_price DECIMAL(15,2) NOT NULL,
-                commission_amount DECIMAL(15,2) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) 
-                    REFERENCES %I(id) ON DELETE CASCADE,
-                CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) 
-                    REFERENCES products(id),
-                CONSTRAINT fk_order_items_retailer FOREIGN KEY (retailer_id) 
-                    REFERENCES retailers(id) ON DELETE SET NULL,
-                CONSTRAINT chk_order_items_quantity CHECK (quantity > 0),
-                CONSTRAINT chk_order_items_unit_price CHECK (unit_price >= 0),
-                CONSTRAINT chk_order_items_total_price CHECK (total_price >= 0),
-                CONSTRAINT chk_order_items_commission CHECK (commission_amount >= 0)
-            )', orders_table_name);
-        ELSE
-            -- Create without retailers foreign key if table doesn't exist yet
-            EXECUTE format('CREATE TABLE order_items (
-                id BIGSERIAL PRIMARY KEY,
-                order_id BIGINT NOT NULL,
-                product_id BIGINT,
-                retailer_id BIGINT,
-                product_name VARCHAR(255) NOT NULL,
-                sku VARCHAR(100),
-                quantity INTEGER NOT NULL,
-                unit_price DECIMAL(10,2) NOT NULL,
-                total_price DECIMAL(15,2) NOT NULL,
-                commission_amount DECIMAL(15,2) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) 
-                    REFERENCES %I(id) ON DELETE CASCADE,
-                CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) 
-                    REFERENCES products(id),
-                CONSTRAINT chk_order_items_quantity CHECK (quantity > 0),
-                CONSTRAINT chk_order_items_unit_price CHECK (unit_price >= 0),
-                CONSTRAINT chk_order_items_total_price CHECK (total_price >= 0),
-                CONSTRAINT chk_order_items_commission CHECK (commission_amount >= 0)
-            )', orders_table_name);
-            -- Add retailer foreign key later if retailers table is created
-        END IF;
-    ELSE
-        -- If order_items exists, add retailer_id column if missing
+    -- If order_items exists, add retailer_id and commission_amount if missing
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'order_items') THEN
         IF NOT EXISTS (
             SELECT 1 FROM information_schema.columns 
             WHERE table_name = 'order_items' AND column_name = 'retailer_id'
         ) THEN
             ALTER TABLE order_items ADD COLUMN retailer_id BIGINT;
-            -- Only add foreign key if retailers table exists
             IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'retailers') THEN
                 ALTER TABLE order_items ADD CONSTRAINT fk_order_items_retailer 
                     FOREIGN KEY (retailer_id) REFERENCES retailers(id);
             END IF;
         END IF;
-        
-        -- Add commission_amount if missing
         IF NOT EXISTS (
             SELECT 1 FROM information_schema.columns 
             WHERE table_name = 'order_items' AND column_name = 'commission_amount'
@@ -143,7 +78,7 @@ BEGIN
             ALTER TABLE order_items ADD COLUMN commission_amount DECIMAL(15,2) DEFAULT 0;
         END IF;
     END IF;
-    
+
     -- Also handle ec_order_products if it exists (add retailer_id if missing)
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ec_order_products') THEN
         IF NOT EXISTS (
@@ -167,57 +102,11 @@ BEGIN
     END IF;
 END $$;
 
--- Create shipments table if it doesn't exist
--- Handle both 'shipments' and 'ec_shipments' table names
+-- Add columns to shipments / ec_shipments if they exist (ec_shipments created in later migrations)
 DO $$
-DECLARE
-    orders_table_name TEXT;
 BEGIN
-    -- Determine which orders table exists for foreign key reference
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'orders') THEN
-        orders_table_name := 'orders';
-    ELSIF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ec_orders') THEN
-        orders_table_name := 'ec_orders';
-    ELSE
-        orders_table_name := 'orders'; -- Default fallback
-    END IF;
-    
-    -- Create shipments table (standard name from schema)
-    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'shipments') THEN
-        -- Check if shipping_methods table exists before adding foreign key
-        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'shipping_methods') THEN
-            EXECUTE format('CREATE TABLE shipments (
-                id BIGSERIAL PRIMARY KEY,
-                order_id BIGINT NOT NULL,
-                shipping_method_id BIGINT,
-                tracking_number VARCHAR(255),
-                carrier VARCHAR(100),
-                status VARCHAR(50) DEFAULT ''PENDING'',
-                shipped_at TIMESTAMP,
-                delivered_at TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT fk_shipments_order FOREIGN KEY (order_id) REFERENCES %I(id),
-                CONSTRAINT fk_shipments_shipping_method FOREIGN KEY (shipping_method_id) REFERENCES shipping_methods(id),
-                CONSTRAINT chk_shipments_status CHECK (status IN (''PENDING'', ''IN_TRANSIT'', ''DELIVERED'', ''FAILED''))
-            )', orders_table_name);
-        ELSE
-            -- Create without shipping_methods foreign key if table doesn't exist
-            EXECUTE format('CREATE TABLE shipments (
-                id BIGSERIAL PRIMARY KEY,
-                order_id BIGINT NOT NULL,
-                shipping_method_id BIGINT,
-                tracking_number VARCHAR(255),
-                carrier VARCHAR(100),
-                status VARCHAR(50) DEFAULT ''PENDING'',
-                shipped_at TIMESTAMP,
-                delivered_at TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT fk_shipments_order FOREIGN KEY (order_id) REFERENCES %I(id),
-                CONSTRAINT chk_shipments_status CHECK (status IN (''PENDING'', ''IN_TRANSIT'', ''DELIVERED'', ''FAILED''))
-            )', orders_table_name);
-        END IF;
-    ELSE
-        -- If shipments exists, add missing columns
+    -- If shipments exists, add missing columns
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'shipments') THEN
         IF NOT EXISTS (
             SELECT 1 FROM information_schema.columns 
             WHERE table_name = 'shipments' AND column_name = 'tracking_number'
@@ -336,14 +225,21 @@ BEGIN
     END IF;
 END $$;
 
-COMMENT ON TABLE order_items IS 'Order line items with support for multi-vendor marketplace orders';
-COMMENT ON COLUMN order_items.retailer_id IS 'Retailer/vendor ID for marketplace orders (NULL for direct sales)';
-COMMENT ON COLUMN order_items.commission_amount IS 'Platform commission amount for marketplace orders';
-
-COMMENT ON TABLE shipments IS 'Shipment tracking information for orders';
-COMMENT ON COLUMN shipments.tracking_number IS 'Carrier tracking number for shipment';
-COMMENT ON COLUMN shipments.carrier IS 'Shipping carrier name (e.g., FedEx, UPS, DHL)';
-COMMENT ON COLUMN shipments.status IS 'Shipment status: PENDING, IN_TRANSIT, DELIVERED, FAILED';
+-- Comments for order_items and shipments (only when tables exist)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'order_items') THEN
+        EXECUTE 'COMMENT ON TABLE order_items IS ''Order line items with support for multi-vendor marketplace orders''';
+        EXECUTE 'COMMENT ON COLUMN order_items.retailer_id IS ''Retailer/vendor ID for marketplace orders (NULL for direct sales)''';
+        EXECUTE 'COMMENT ON COLUMN order_items.commission_amount IS ''Platform commission amount for marketplace orders''';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'shipments') THEN
+        EXECUTE 'COMMENT ON TABLE shipments IS ''Shipment tracking information for orders''';
+        EXECUTE 'COMMENT ON COLUMN shipments.tracking_number IS ''Carrier tracking number for shipment''';
+        EXECUTE 'COMMENT ON COLUMN shipments.carrier IS ''Shipping carrier name (e.g., FedEx, UPS, DHL)''';
+        EXECUTE 'COMMENT ON COLUMN shipments.status IS ''Shipment status: PENDING, IN_TRANSIT, DELIVERED, FAILED''';
+    END IF;
+END $$;
 
 -- Add missing foreign key constraints if dependent tables were created after this migration
 DO $$

@@ -120,11 +120,30 @@ To run migrations manually:
 mvn flyway:migrate
 ```
 
-### 3. Verify Database Connection
+### 3. Verify Schema (Tables and Columns)
+
+After migrations, verify that all expected tables exist:
+
+```bash
+# Quick check (connection, table count, expected tables from expected-tables.txt)
+./scripts/verify-database.sh
+
+# Strict check: exit 1 if any expected table is missing (e.g. for CI)
+./scripts/verify-schema.sh
+
+# Also verify key columns on critical tables
+./scripts/verify-schema.sh --columns
+```
+
+Expected tables are listed in `scripts/expected-tables.txt` (one per line). Update that file when adding new migrations.
+
+### 4. Verify Database Connection
 
 ```bash
 psql -h localhost -U vendo_user -d vendo -c "SELECT version();"
 ```
+
+(If using default setup: database `vendo_db`, user `vendo_app`; see `scripts/verify-database.sh`.)
 
 ## Application Configuration
 

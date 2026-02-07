@@ -80,25 +80,36 @@ echo ""
 echo "=========================================="
 echo "Step 1: Creating database and users"
 echo "=========================================="
-# Connect to 'postgres' database first (it always exists) or use template1
-# When using -h localhost, we must specify a database that exists
-if [ -n "$POSTGRES_PASSWORD" ]; then
-    PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
-        # Try template1 if postgres doesn't exist
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
-            echo -e "${YELLOW}⚠️  Some operations may have failed if database/user already exists${NC}"
-            echo "   This is normal if running the script multiple times"
-        }
+NON_DESTRUCTIVE="${NON_DESTRUCTIVE:-0}"
+if [ "$NON_DESTRUCTIVE" = "1" ] || [ "$NON_DESTRUCTIVE" = "true" ]; then
+    echo "Non-destructive mode: skipping DROP, creating database and users only if missing"
+    run_psql() {
+        if [ -n "$POSTGRES_PASSWORD" ]; then
+            PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d "$1" "${@:2}"
+        else
+            psql -U ${POSTGRES_USER} -d "$1" "${@:2}" 2>/dev/null || psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d "$1" "${@:2}"
+        fi
     }
+    DB_EXISTS=$(run_psql postgres -tAc "SELECT 1 FROM pg_database WHERE datname='vendo_db'" 2>/dev/null || echo "0")
+    if [ "$DB_EXISTS" != "1" ]; then
+        run_psql postgres -c "CREATE DATABASE vendo_db WITH ENCODING 'UTF8' LC_COLLATE 'en_US.UTF-8' LC_CTYPE 'en_US.UTF-8' TEMPLATE = template0;" 2>/dev/null || \
+        run_psql template1 -c "CREATE DATABASE vendo_db WITH ENCODING 'UTF8' LC_COLLATE 'en_US.UTF-8' LC_CTYPE 'en_US.UTF-8' TEMPLATE = template0;"
+    fi
+    run_psql postgres -f "$SCRIPT_DIR/init-databases-idempotent.sql" 2>&1 || run_psql template1 -f "$SCRIPT_DIR/init-databases-idempotent.sql" 2>&1 || true
 else
-    # Try without -h first (Unix socket, better for peer auth)
-    psql -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
-        # Fallback to TCP/IP with template1
-        psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
-            echo -e "${YELLOW}⚠️  Some operations may have failed if database/user already exists${NC}"
-            echo "   This is normal if running the script multiple times"
+    if [ -n "$POSTGRES_PASSWORD" ]; then
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+            PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+                echo -e "${YELLOW}⚠️  Some operations may have failed if database/user already exists${NC}"
+            }
         }
-    }
+    else
+        psql -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+                echo -e "${YELLOW}⚠️  Some operations may have failed if database/user already exists${NC}"
+            }
+        }
+    fi
 fi
 echo -e "${GREEN}✅ Database and users created${NC}"
 echo ""

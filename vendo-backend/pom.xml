@@ -39,6 +39,10 @@
         <zxing.version>3.5.2</zxing.version>
         <thumbnailator.version>0.4.20</thumbnailator.version>
         <testcontainers.version>1.19.3</testcontainers.version>
+        <!-- Flyway Maven plugin defaults (override with -Dflyway.url=... etc.) -->
+        <flyway.url>jdbc:postgresql://localhost:5432/vendo_db</flyway.url>
+        <flyway.user>vendo_app</flyway.user>
+        <flyway.password>REDACTED_DB_PASSWORD</flyway.password>
     </properties>
 
     <dependencies>
@@ -390,6 +394,21 @@
                 <version>3.2.2</version>
                 <configuration>
                     <useJUnitPlatform>true</useJUnitPlatform>
+                </configuration>
+            </plugin>
+
+            <!-- Flyway Maven Plugin (run migrations without starting the app) -->
+            <!-- Override with: mvn flyway:migrate -Dflyway.url=... -Dflyway.user=... -Dflyway.password=... -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>10.22.0</version>
+                <configuration>
+                    <url>${flyway.url}</url>
+                    <user>${flyway.user}</user>
+                    <password>${flyway.password}</password>
+                    <locations>classpath:db/migration</locations>
+                    <baselineOnMigrate>true</baselineOnMigrate>
                 </configuration>
             </plugin>
         </plugins>

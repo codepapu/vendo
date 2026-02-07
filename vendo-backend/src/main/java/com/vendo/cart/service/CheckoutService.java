@@ -37,26 +37,51 @@ public class CheckoutService {
         }
         
         // Reserve inventory for cart items
-        // In production, would call Product Service to reserve inventory
-        // For now, log the reservation step
-        log.info("Reserving inventory for checkout - user: {}", userId);
-        // TODO: Implement actual inventory reservation via Product Service
-        // This would:
-        // 1. Get cart items
-        // 2. For each item, call Product Service to reserve quantity
-        // 3. If any item is out of stock, throw exception and release reservations
-        // 4. If successful, proceed with order creation
+        List<ReserveInventoryRequest> reservationRequests = new ArrayList<>();
+        List<CartItem> cartItems = cart.getItems();
+        
+        for (CartItem item : cartItems) {
+            ReserveInventoryRequest reserveRequest = ReserveInventoryRequest.builder()
+                    .productId(item.getProduct().getId())
+                    .retailerId(item.getRetailer() != null ? item.getRetailer().getId() : null)
+                    .warehouseId(null) // Can be specified if needed
+                    .quantity(item.getQuantity())
+                    .build();
+            reservationRequests.add(reserveRequest);
+        }
+        
+        // Reserve inventory for all items
+        List<ReserveInventoryRequest> reservedItems = new ArrayList<>();
+        try {
+            for (ReserveInventoryRequest reserveRequest : reservationRequests) {
+                inventoryService.reserveInventory(reserveRequest, userId);
+                reservedItems.add(reserveRequest);
+                log.info("Reserved inventory for product {} (quantity {})", 
+                        reserveRequest.getProductId(), reserveRequest.getQuantity());
+            }
+        } catch (Exception e) {
+            log.error("Failed to reserve inventory during checkout for user {}: {}", userId, e.getMessage(), e);
+            // Release any reservations that were made before the failure
+            releaseInventoryReservations(cart, reservedItems, userId);
+            throw new com.vendo.common.exception.BadRequestException(
+                    "Failed to reserve inventory: " + e.getMessage());
+        }
         
         // Process checkout
         // In production, this would:
-        // 1. Validate inventory (done above)
+        // 1. Validate inventory (done above) ✅
         // 2. Calculate totals (tax, shipping, discounts)
         // 3. Create order via Order Service
         // 4. Process payment via Payment Service
         // 5. Clear cart
-        // 6. Release inventory reservation on success, or keep reserved until order completion
+        // 6. Commit inventory reservation on success, or keep reserved until order completion
         
-        log.info("Checkout processed for user: {}", userId);
+        log.info("Checkout processed for user: {} (inventory reserved)", userId);
+        
+        // TODO: In production, integrate with OrderService and PaymentService
+        // For now, return success response
+        // Note: Inventory reservations will remain until order is created and payment is processed
+        // In a real system, reservations would be committed when order is confirmed
         
         // Return cart response (in production, would return order response)
         return CartResponse.builder()
