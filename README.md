@@ -45,6 +45,17 @@ vendo/
 └── README.md
 ```
 
+## 📚 Documentation
+
+All project documentation lives in the [`docs/`](docs/) folder:
+
+- [Setup](docs/setup/SETUP.md)
+- [Architecture](docs/architecture/ARCHITECTURE.md) and [database schema](docs/architecture/DATABASE_SCHEMA.md)
+- [Backend](docs/backend/README.md) (configuration, deployment, devtools, Maven migration)
+- [Deployment](docs/deployment/DEPLOYMENT.md)
+- [Frontend](docs/frontend/README.md) and [Mobile](docs/mobile/README.md)
+- [Implementation progress](docs/progress/IMPLEMENTATION_PROGRESS.md) and [status](docs/progress/IMPLEMENTATION_STATUS.md)
+
 ## 🚀 Quick Start
 
 ### Prerequisites

@@ -59,7 +59,7 @@ Vendo is a multi-tenant e-commerce platform consisting of:
 
 ## Backend Deployment
 
-See [vendo-backend/DEPLOYMENT.md](../vendo-backend/DEPLOYMENT.md) for detailed backend deployment instructions.
+See [backend deployment guide](../backend/DEPLOYMENT.md) for detailed backend deployment instructions.
 
 ### Quick Start
 
