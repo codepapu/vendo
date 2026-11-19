@@ -31,9 +31,7 @@ vendo-backend/*.iml
 node_modules/
 **/node_modules/
 
-# Package lock files
-package-lock.json
-**/package-lock.json
+# NOTE: package-lock.json is intentionally NOT ignored (reproducible installs)
 
 # Frontend (React/Vite)
 vendo-frontend/node_modules/
@@ -49,8 +47,9 @@ vendo-frontend/.env.production
 *.sqlite
 *.sqlite3
 *.sql
-# Allow migration files
+# Allow migration files and DB scripts
 !vendo-backend/src/main/resources/db/migration/*.sql
+!vendo-backend/scripts/*.sql
 
 # Logs
 *.log
@@ -66,3 +65,11 @@ logs/
 *.bak
 *.swp
 *~
+
+# Spring DevTools reload trigger
+vendo-backend/src/main/resources/.reloadtrigger
+
+# Mobile / build output
+vendo/**/dist/
+vendo/**/.expo/
+vendo/**/coverage/
