@@ -1,4 +1,6 @@
 #!/bin/bash
+: "${DB_PASSWORD:?Set DB_PASSWORD to the vendo_app database password}"
+: "${DB_READONLY_PASSWORD:?Set DB_READONLY_PASSWORD to the vendo_readonly password}"
 
 # Database Initialization Script
 # This script initializes PostgreSQL databases and users for Vendo E-commerce Platform
@@ -49,18 +51,18 @@ echo "Connecting to local PostgreSQL at ${POSTGRES_HOST}:${POSTGRES_PORT} as ${P
 echo "Creating database and users..."
 # Connect to 'postgres' database first (it always exists) or use template1
 if [ -n "$POSTGRES_PASSWORD" ]; then
-    PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
+    PGPASSWORD=${POSTGRES_PASSWORD} psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
         # Try template1 if postgres doesn't exist
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
             echo "⚠️  Note: Some operations may have failed if database/user already exists"
             echo "This is normal if running the script multiple times"
         }
     }
 else
     # Try without -h first (Unix socket, better for peer auth)
-    psql -U ${POSTGRES_USER} -d postgres -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
+    psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -U ${POSTGRES_USER} -d postgres -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
         # Fallback to TCP/IP with template1
-        psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
+        psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$(dirname "$0")/init-databases.sql" 2>&1 || {
             echo "⚠️  Note: Some operations may have failed if database/user already exists"
             echo "This is normal if running the script multiple times"
         }
@@ -98,9 +100,9 @@ echo "   - vendo_db (main database)"
 echo ""
 echo "✅ Users created:"
 echo "   - vendo_app (application user)"
-echo "     Password: REDACTED_DB_PASSWORD"
+echo "     Password: (value of DB_PASSWORD)"
 echo "   - vendo_readonly (read-only user for reporting)"
-echo "     Password: REDACTED_DB_PASSWORD"
+echo "     Password: (value of DB_READONLY_PASSWORD)"
 echo ""
 echo "📋 Next steps:"
 echo "   1. Update application.yml with database credentials"
@@ -110,5 +112,5 @@ echo ""
 echo "💡 Database connection details:"
 echo "   URL: jdbc:postgresql://localhost:5432/vendo_db"
 echo "   Username: vendo_app"
-echo "   Password: REDACTED_DB_PASSWORD"
+echo "   Password: (value of DB_PASSWORD)"
 echo ""

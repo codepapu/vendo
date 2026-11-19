@@ -42,7 +42,7 @@
         <!-- Flyway Maven plugin defaults (override with -Dflyway.url=... etc.) -->
         <flyway.url>jdbc:postgresql://localhost:5432/vendo_db</flyway.url>
         <flyway.user>vendo_app</flyway.user>
-        <flyway.password>REDACTED_DB_PASSWORD</flyway.password>
+        <flyway.password>${env.DB_PASSWORD}</flyway.password>
     </properties>
 
     <dependencies>

@@ -28,9 +28,9 @@ CREATE DATABASE vendo_db
 DROP USER IF EXISTS vendo_app;
 
 -- Create application user with secure password
--- Password: REDACTED_DB_PASSWORD
+-- Password: (passed as psql variable app_password)
 CREATE USER vendo_app WITH 
-    PASSWORD 'REDACTED_DB_PASSWORD'
+    PASSWORD :'app_password'
     CREATEDB
     NOSUPERUSER
     NOCREATEROLE
@@ -59,9 +59,9 @@ GRANT CREATE ON DATABASE vendo_db TO vendo_app;
 DROP USER IF EXISTS vendo_readonly;
 
 -- Create read-only user
--- Password: REDACTED_DB_PASSWORD
+-- Password: (passed as psql variable readonly_password)
 CREATE USER vendo_readonly WITH 
-    PASSWORD 'REDACTED_DB_PASSWORD'
+    PASSWORD :'readonly_password'
     NOCREATEDB
     NOSUPERUSER
     NOCREATEROLE
@@ -78,9 +78,9 @@ GRANT CONNECT ON DATABASE vendo_db TO vendo_readonly;
 -- ============================================
 -- Database: vendo_db
 -- Application User: vendo_app
--- Application Password: REDACTED_DB_PASSWORD
+-- Application Password: (passed as psql variable app_password)
 -- Read-Only User: vendo_readonly
--- Read-Only Password: REDACTED_DB_PASSWORD
+-- Read-Only Password: (passed as psql variable readonly_password)
 --
 -- Next Steps:
 -- 1. Run init-databases-schema.sql to grant schema privileges

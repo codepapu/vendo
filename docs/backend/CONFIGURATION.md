@@ -7,7 +7,7 @@ The backend is configured to connect to PostgreSQL database `vendo_db` with the 
 - **Database**: `vendo_db`
 - **Host**: `localhost:5432`
 - **Username**: `vendo_app`
-- **Password**: `REDACTED_DB_PASSWORD`
+- **Password**: value of `DB_PASSWORD` (never commit it)
 
 ### Configuration File
 The database configuration is in `src/main/resources/application.yml`:
@@ -17,7 +17,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/vendo_db
     username: ${DB_USERNAME:vendo_app}
-    password: ${DB_PASSWORD:REDACTED_DB_PASSWORD}
+    password: ${DB_PASSWORD}
 ```
 
 ### Environment Variables
@@ -25,7 +25,7 @@ You can override database settings using environment variables:
 
 ```bash
 export DB_USERNAME=vendo_app
-export DB_PASSWORD=REDACTED_DB_PASSWORD
+export DB_PASSWORD=<your-db-password>
 export DB_HOST=localhost
 export DB_PORT=5432
 ```
@@ -126,7 +126,7 @@ The following key tables should exist:
 
 ### Required (with defaults)
 - `DB_USERNAME` - Database username (default: vendo_app)
-- `DB_PASSWORD` - Database password (default: REDACTED_DB_PASSWORD)
+- `DB_PASSWORD` - Database password (no default; must be set)
 - `JWT_SECRET` - JWT signing secret (default: insecure, change for production)
 
 ### Optional

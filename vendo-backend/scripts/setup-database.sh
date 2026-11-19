@@ -1,4 +1,6 @@
 #!/bin/bash
+: "${DB_PASSWORD:?Set DB_PASSWORD to the vendo_app database password}"
+: "${DB_READONLY_PASSWORD:?Set DB_READONLY_PASSWORD to the vendo_readonly password}"
 
 # Comprehensive Database Setup Script for Vendo E-commerce Platform
 # This script sets up the complete database infrastructure including:
@@ -98,14 +100,14 @@ if [ "$NON_DESTRUCTIVE" = "1" ] || [ "$NON_DESTRUCTIVE" = "true" ]; then
     run_psql postgres -f "$SCRIPT_DIR/init-databases-idempotent.sql" 2>&1 || run_psql template1 -f "$SCRIPT_DIR/init-databases-idempotent.sql" 2>&1 || true
 else
     if [ -n "$POSTGRES_PASSWORD" ]; then
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
-            PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+            PGPASSWORD=${POSTGRES_PASSWORD} psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
                 echo -e "${YELLOW}⚠️  Some operations may have failed if database/user already exists${NC}"
             }
         }
     else
-        psql -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
-            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+        psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -U ${POSTGRES_USER} -d postgres -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
+            psql -v app_password="$DB_PASSWORD" -v readonly_password="$DB_READONLY_PASSWORD" -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d template1 -f "$SCRIPT_DIR/init-databases.sql" 2>&1 || {
                 echo -e "${YELLOW}⚠️  Some operations may have failed if database/user already exists${NC}"
             }
         }
@@ -187,7 +189,7 @@ fi
 
 # Test connection with application user
 echo "Testing connection with application user..."
-PGPASSWORD='REDACTED_DB_PASSWORD' psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U vendo_app -d vendo_db -c "SELECT version();" > /dev/null 2>&1 && {
+PGPASSWORD="$DB_PASSWORD" psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U vendo_app -d vendo_db -c "SELECT version();" > /dev/null 2>&1 && {
     echo -e "${GREEN}✅ Application user can connect to database${NC}"
 } || {
     echo -e "${RED}❌ Application user cannot connect to database${NC}"
@@ -208,11 +210,11 @@ echo "  Port: ${POSTGRES_PORT}"
 echo ""
 echo "Application User:"
 echo "  Username: vendo_app"
-echo "  Password: REDACTED_DB_PASSWORD"
+echo "  Password: (value of DB_PASSWORD)"
 echo ""
 echo "Read-Only User (for reporting/analytics):"
 echo "  Username: vendo_readonly"
-echo "  Password: REDACTED_DB_PASSWORD"
+echo "  Password: (value of DB_READONLY_PASSWORD)"
 echo ""
 echo "Connection String:"
 echo "  jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/vendo_db"
@@ -227,6 +229,6 @@ echo "  cd $PROJECT_ROOT"
 echo "  ./gradlew bootRun"
 echo ""
 echo "To verify tables after migration:"
-echo "  PGPASSWORD='REDACTED_DB_PASSWORD' psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U vendo_app -d vendo_db -c '\\dt'"
+echo "  PGPASSWORD="$DB_PASSWORD" psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U vendo_app -d vendo_db -c '\\dt'"
 echo ""
 

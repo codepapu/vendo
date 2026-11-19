@@ -1,4 +1,5 @@
 #!/bin/bash
+: "${DB_PASSWORD:?Set DB_PASSWORD to the vendo_app database password}"
 
 # Start Vendo Application
 # Simple script to start the monolithic Spring Boot application
@@ -23,7 +24,7 @@ if ! pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
 fi
 
 # Check if database exists (using vendo_app user)
-if ! PGPASSWORD=REDACTED_DB_PASSWORD psql -h localhost -p 5432 -U vendo_app -d vendo_db -c "SELECT 1;" &>/dev/null 2>&1; then
+if ! PGPASSWORD="$DB_PASSWORD" psql -h localhost -p 5432 -U vendo_app -d vendo_db -c "SELECT 1;" &>/dev/null 2>&1; then
     echo "⚠️  Database 'vendo_db' does not exist or cannot connect"
     echo "Please ensure:"
     echo "  1. Database 'vendo_db' is created"
