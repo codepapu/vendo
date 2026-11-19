@@ -1,6 +1,6 @@
 # Vendo E-commerce Platform
 
-**Author:** code.papu@gmail.com  
+**Author:** Papu Sahu (code.papu@gmail.com)  
 **Version:** 1.0.0-SNAPSHOT  
 **Framework:** Spring Boot 3.4.0
 
@@ -193,7 +193,7 @@ If you're migrating from the microservices version, see `MONOLITHIC_MIGRATION.md
 
 ## Author
 
-**code.papu@gmail.com**
+**Papu Sahu** (code.papu@gmail.com)
 
 ---
 
