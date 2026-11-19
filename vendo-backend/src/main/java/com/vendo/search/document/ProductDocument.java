@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -81,9 +83,12 @@ public class ProductDocument {
     private LocalDateTime updatedAt;
     
     // Additional fields for faceted search
-    @Field(type = FieldType.Text, fields = {
-        @Field(type = FieldType.Keyword, name = "keyword")
-    })
+    @MultiField(
+        mainField = @Field(type = FieldType.Text),
+        otherFields = {
+            @InnerField(suffix = "keyword", type = FieldType.Keyword)
+        }
+    )
     private List<String> tags;
 }
 
