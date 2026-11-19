@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Clock, RefreshCw, Download, Copy } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, RefreshCw, Copy } from 'lucide-react';
 import { PaymentResponse } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { RefundPaymentForm } from './refund-payment-form';

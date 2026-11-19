@@ -5,24 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+Dialog,
+DialogContent,
+DialogDescription,
+DialogFooter,
+DialogHeader,
+DialogTitle,
+DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useRetailerStore } from '@/stores/retailer-store';
-import { useAuthStore } from '@/stores/auth-store';
 import { retailerApi } from '@/services/retailer-api';
 import { productApi } from '@/services/product-api';
 import type { ProductResponse } from '@/types';
 import type { ProductListingRequest } from '@/types/retailer';
 
 export default function RetailerProducts() {
-  const { user } = useAuthStore();
   const { currentRetailer, products, loadProducts, updateProduct, isLoadingProducts } = useRetailerStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(undefined);

@@ -34,14 +34,14 @@ export interface SearchResponse {
 
 class SearchApiService {
   async searchProducts(request: SearchRequest): Promise<SearchResponse> {
-    const response = await apiClient.get<SearchResponse>('/api/v1/search/products', {
+    const response = await apiClient.get<SearchResponse>('/v1/search/products', {
       params: request,
     });
     return response.data;
   }
 
   async getSuggestions(query: string, limit: number = 10): Promise<string[]> {
-    const response = await apiClient.get<string[]>('/api/v1/search/suggestions', {
+    const response = await apiClient.get<string[]>('/v1/search/suggestions', {
       params: { query, limit },
     });
     return response.data;

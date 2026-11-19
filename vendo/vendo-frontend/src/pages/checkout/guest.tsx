@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,12 +12,11 @@ import { couponApi } from '@/services/coupon-api';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MapPin, Truck, CreditCard, Tag, UserPlus } from 'lucide-react';
-import type { ShippingMethod, PaymentMethod, CouponResponse } from '@/types';
+import type { PaymentMethod, CouponResponse } from '@/types';
 
 export function GuestCheckout() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -105,10 +104,11 @@ export function GuestCheckout() {
   // Guest checkout mutation
   const guestCheckoutMutation = useMutation({
     mutationFn: (data: GuestOrderRequest) => guestCheckoutApi.processGuestCheckout(data),
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       if (response) {
-        // Store session token
+        // Store session token (and email, used on the confirmation page)
         localStorage.setItem('guestSessionToken', response.sessionToken);
+        localStorage.setItem('guestEmail', variables.email);
         localStorage.removeItem('guestCart'); // Clear guest cart
         
         // Navigate to confirmation
@@ -169,13 +169,6 @@ export function GuestCheckout() {
       return;
     }
 
-    const selectedShippingMethod = shippingMethods.find((m) => m.code === formData.shippingMethod);
-    const shippingCost = selectedShippingMethod?.baseCost || 0;
-    const subtotal = calculateSubtotal();
-    const tax = subtotal * 0.1;
-    const shipping = shippingCost;
-    const discount = appliedCoupon?.calculatedDiscount || 0;
-
     const orderData: GuestOrderRequest = {
       items: cartItems.map((item: any) => ({
         productId: item.productId,
@@ -218,7 +211,7 @@ export function GuestCheckout() {
       lastName: formData.lastName,
       phone: formData.phone,
       shippingMethod: formData.shippingMethod,
-      couponCode: appliedCoupon?.code || null,
+      couponCode: appliedCoupon?.code || undefined,
       notes: formData.notes,
       createAccount: formData.createAccount || undefined,
       password: formData.createAccount ? formData.password : undefined,

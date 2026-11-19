@@ -1,14 +1,11 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuthStore } from '@/stores/auth-store';
 import { useB2BStore } from '@/stores/b2b-store';
-import { cartApi, type CartPricingResponse } from '@/services/cart-api';
+import { type CartPricingResponse } from '@/services/cart-api';
 import { b2bApi } from '@/services/b2b-api';
 import { orderApi } from '@/services/order-api';
 import { addressApi } from '@/services/address-api';
@@ -16,7 +13,6 @@ import { shippingApi } from '@/services/shipping-api';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Building2, CreditCard, MapPin, FileText, Truck } from 'lucide-react';
-import type { AddressResponse, ShippingMethod } from '@/types';
 
 interface B2BCheckoutProps {
   cart: CartPricingResponse;
@@ -24,7 +20,6 @@ interface B2BCheckoutProps {
 }
 
 export function B2BCheckout({ cart, onComplete }: B2BCheckoutProps) {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentBusinessAccount, loadBusinessAccount } = useB2BStore();
@@ -72,7 +67,7 @@ export function B2BCheckout({ cart, onComplete }: B2BCheckoutProps) {
   const createOrderMutation = useMutation({
     mutationFn: (orderData: any) => orderApi.createOrder(orderData),
     onSuccess: async (order) => {
-      if (order && order.id) {
+      if (order && order.id && currentBusinessAccount) {
         // After order is created, create PO
         createPOMutation.mutate({
           orderId: order.id,

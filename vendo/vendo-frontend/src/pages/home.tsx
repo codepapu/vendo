@@ -5,9 +5,7 @@ import { ShoppingBag, TrendingUp, Shield, Zap, Star, Quote, ArrowRight, Mail } f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
-import { productApi } from '@/services/product-api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 

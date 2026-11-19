@@ -1,43 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+Select,
+SelectContent,
+SelectItem,
+SelectTrigger,
+SelectValue,
 } from '@/components/ui/select';
 import { analyticsApi } from '@/services/analytics-api';
 import { reportingApi } from '@/services/reporting-api';
 import type {
-  AnalyticsDashboard,
-  SalesAnalytics,
-  UserAnalytics,
-  ProductAnalytics,
-  ConversionRateMetrics,
-  TopCustomer,
-  RevenueByCategory,
+AnalyticsDashboard,ConversionRateMetrics,
+TopCustomer,
+RevenueByCategory
 } from '@/types';
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
+LineChart,
+Line,
+BarChart,
+Bar,
+PieChart,
+Pie,
+Cell,
+XAxis,
+YAxis,
+CartesianGrid,
+Tooltip,
+Legend,
+ResponsiveContainer,
+AreaChart,
+Area,
 } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -373,7 +369,7 @@ export default function AnalyticsDashboard() {
                     fill="#8884d8"
                     dataKey="revenue"
                   >
-                    {revenueByCategory.map((entry, index) => (
+                    {revenueByCategory.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

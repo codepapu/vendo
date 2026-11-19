@@ -1,33 +1,29 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useRetailerStore } from '@/stores/retailer-store';
-import { useAuthStore } from '@/stores/auth-store';
-import { retailerApi } from '@/services/retailer-api';
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
+LineChart,
+Line,
+BarChart,
+Bar,
+PieChart,
+Pie,
+Cell,
+XAxis,
+YAxis,
+CartesianGrid,
+Tooltip,
+Legend,
+ResponsiveContainer,
 } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function RetailerAnalytics() {
-  const { user } = useAuthStore();
   const { currentRetailer, analytics, loadAnalytics, isLoadingAnalytics } = useRetailerStore();
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
@@ -242,7 +238,7 @@ export default function RetailerAnalytics() {
                     fill="#8884d8"
                     dataKey="revenue"
                   >
-                    {analytics.revenueByCategory.map((entry, index) => (
+                    {analytics.revenueByCategory.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

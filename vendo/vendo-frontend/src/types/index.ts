@@ -46,6 +46,7 @@ export interface UserDto {
   emailVerifiedAt?: string; // ISO date string
   isActive: boolean;
   userType: string;
+  avatarUrl?: string;
 }
 
 /**
@@ -400,9 +401,10 @@ export type OrderStatus =
   | 'REFUNDED';
 
 /**
- * Payment status enum
+ * Order-level payment status enum
+ * (not to be confused with the gateway `PaymentStatus` below)
  */
-export type PaymentStatus = 
+export type OrderPaymentStatus = 
   | 'PENDING' 
   | 'PAID' 
   | 'PARTIAL' 
@@ -425,7 +427,7 @@ export interface Order {
   businessAccountId?: number;
   orderType: OrderType;
   status: OrderStatus;
-  paymentStatus?: PaymentStatus;
+  paymentStatus?: OrderPaymentStatus;
   paymentMethod?: string;
   subtotal: number;
   taxAmount: number;

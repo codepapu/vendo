@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,13 +7,9 @@ import { CheckCircle, Package, Loader2, Home, ShoppingBag, UserPlus, CreditCard 
 import { orderApi } from '@/services/order-api';
 import { guestCheckoutApi } from '@/services/guest-checkout-api';
 import { formatPrice } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import type { OrderResponse } from '@/types';
 
 export function OrderConfirmation() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const orderId = searchParams.get('orderId');
   const orderCode = searchParams.get('orderCode');
   const isGuest = searchParams.get('guest') === 'true';
@@ -219,7 +214,7 @@ export function OrderConfirmation() {
                 </p>
                 <div className="flex gap-4">
                   <Button asChild>
-                    <Link to={`/register?email=${order?.shippingAddress?.email || ''}&redirect=/profile/orders`}>
+                    <Link to={`/register?email=${encodeURIComponent(localStorage.getItem('guestEmail') || '')}&redirect=/profile/orders`}>
                       Create Account
                     </Link>
                   </Button>

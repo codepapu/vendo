@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Newspaper, Mail, FileText, Download, Calendar, User } from 'lucide-react';
+import { Newspaper, Mail, FileText, Download, Calendar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PaymentGateway, PaymentMethod, PaymentResponse, ProcessPaymentRequest } from '@/types';
+import { PaymentGateway, PaymentMethod, PaymentResponse } from '@/types';
 import { StripePaymentForm } from './stripe-payment-form';
 import { PayPalPaymentButton } from './paypal-payment-button';
 import { RazorpayCheckout } from './razorpay-checkout';

@@ -1,17 +1,16 @@
 import { apiClient, handleApiError, showSuccessToast } from '@/lib/api';
 import type {
-  Retailer,
-  RetailerProduct,
-  RetailerDashboard,
-  RetailerOrder,
-  RetailerRegistrationRequest,
-  ProductListingRequest,
-  UpdateProductListingRequest,
-  RetailerAnalytics,
-  ApiResponse,
-  PaginatedResponse,
+Retailer,
+RetailerProduct,
+RetailerDashboard,
+RetailerOrder,
+RetailerRegistrationRequest,
+ProductListingRequest,
+UpdateProductListingRequest,
+RetailerAnalytics,
+ApiResponse,
+PaginatedResponse,
 } from '@/types';
-import type { RetailerResponse, RetailerDashboardResponse, RetailerAnalyticsResponse } from '@/types/retailer';
 
 /**
  * Retailer API service

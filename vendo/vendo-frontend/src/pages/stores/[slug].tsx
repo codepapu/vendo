@@ -2,12 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Store, Star, Package, MapPin, Verified, ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { retailerApi } from '@/services/retailer-api';
 import { ProductGrid } from '@/components/product-grid';
+import type { ProductResponse } from '@/types';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -47,7 +47,7 @@ export function StoreDetail() {
     enabled: !!slug,
   });
 
-  const { data: products, isLoading: isLoadingProducts } = useQuery({
+  const { data: products, isLoading: isLoadingProducts } = useQuery<ProductResponse[] | null>({
     queryKey: ['store-products', slug],
     queryFn: async () => {
       if (!slug) return null;

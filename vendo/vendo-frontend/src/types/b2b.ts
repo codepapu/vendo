@@ -132,6 +132,12 @@ export interface PurchaseOrderResponse extends PurchaseOrder {
     id: number;
     orderNumber: string;
     totalAmount: number;
+    items?: Array<{
+      id: number;
+      productName: string;
+      quantity: number;
+      totalPrice: number;
+    }>;
   };
 }
 

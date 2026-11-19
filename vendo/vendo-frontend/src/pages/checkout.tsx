@@ -1,16 +1,15 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ProtectedRoute } from '@/components/protected-route';
 import { B2BCheckout } from '@/components/checkout/B2BCheckout';
 import { useAuthStore } from '@/stores/auth-store';
 import { useB2BStore } from '@/stores/b2b-store';
-import { cartApi, type CartPricingResponse } from '@/services/cart-api';
+import { cartApi } from '@/services/cart-api';
 import { addressApi } from '@/services/address-api';
 import { shippingApi } from '@/services/shipping-api';
 import { couponApi } from '@/services/coupon-api';
@@ -18,8 +17,8 @@ import { orderApi } from '@/services/order-api';
 import { userApi } from '@/services/user-api';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, X, MapPin, Truck, CreditCard, Tag, Store, Receipt } from 'lucide-react';
-import type { AddressResponse, ShippingMethod, PaymentMethod, CouponResponse } from '@/types';
+import { Loader2, X, MapPin, Truck, CreditCard, Tag, Store, Receipt } from 'lucide-react';
+import type { PaymentMethod, CouponResponse } from '@/types';
 
 export function Checkout() {
   const navigate = useNavigate();
@@ -224,20 +223,7 @@ export function Checkout() {
       return;
     }
 
-    // Calculate totals - use cartPricing if available for accurate totals
-    const subtotal = cartPricing?.subtotal || cart.subtotal;
-    const tax = cartPricing?.tax || cart.tax || subtotal * 0.1;
-    let shipping = 0;
-    if (isMultiVendor && cartPricing) {
-      // For multi-vendor, sum up shipping from all retailers
-      shipping = cartPricing.shipping || 0;
-    } else {
-      const selectedShippingMethod = shippingMethods.find((m) => m.id === selectedShippingMethodId);
-      shipping = selectedShippingMethod?.baseCost || 0;
-    }
-    const discount = appliedCoupon?.calculatedDiscount || 0;
-    const total = subtotal + tax + shipping - discount;
-
+    // Totals (subtotal, tax, shipping, discount) are calculated server-side from the order data.
     const userEmail = userProfile?.email || useAuthStore.getState().user?.email || '';
 
     const orderData = {

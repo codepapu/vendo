@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NotificationBadge } from './notification-badge';
 import { NotificationCenter } from './notification-center';
@@ -8,7 +8,7 @@ import { NotificationResponse } from '@/types';
 import { useAuthStore } from '@/stores/auth-store';
 
 interface NotificationProviderProps {
-  onNotificationClick?: (notification: NotificationResponse) => void;
+  onNotificationClick?: (_notification: NotificationResponse) => void;
 }
 
 /**
@@ -29,14 +29,14 @@ export function NotificationProvider({ onNotificationClick }: NotificationProvid
   });
 
   // Handle incoming WebSocket notifications
-  const handleNotificationReceived = (notification: NotificationResponse) => {
+  const handleNotificationReceived = (_notification: NotificationResponse) => {
     // Invalidate queries to refresh notification list and count
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
     queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
   };
 
   // WebSocket connection for real-time notifications
-  const { isConnected } = useNotificationWebSocket(
+  useNotificationWebSocket(
     handleNotificationReceived,
     isAuthenticated
   );

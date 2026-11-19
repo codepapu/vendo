@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api';
+import type { ShippingMethod } from '@/types';
 
 export interface CalculateShippingRequest {
   weight: number;
@@ -42,26 +43,37 @@ export interface ShippingResponse {
 
 class ShippingApiService {
   async calculateShipping(request: CalculateShippingRequest): Promise<ShippingResponse> {
-    const response = await apiClient.post<ShippingResponse>('/api/v1/shipping/calculate', request);
+    const response = await apiClient.post<ShippingResponse>('/v1/shipping/calculate', request);
     return response.data;
   }
 
+  /**
+   * Get all active shipping methods available at checkout
+   * Backend: GET /api/v1/shipping-methods
+   */
+  async getAvailableShippingMethods(): Promise<ShippingMethod[]> {
+    const response = await apiClient.get<{ data: ShippingMethod[] }>('/v1/shipping-methods');
+    return response.data.data ?? [];
+  }
+
   async getShippingMethods(): Promise<ShippingResponse['availableMethods']> {
-    const response = await apiClient.get<ShippingResponse['availableMethods']>('/api/v1/shipping/methods');
+    const response = await apiClient.get<ShippingResponse['availableMethods']>('/v1/shipping/methods');
     return response.data;
   }
 
   async trackShipment(trackingNumber: string, carrier?: string): Promise<any> {
-    const response = await apiClient.get(`/api/v1/shipping/track/${trackingNumber}`, {
+    const response = await apiClient.get(`/v1/shipping/track/${trackingNumber}`, {
       params: { carrier },
     });
     return response.data;
   }
 
   async createShipmentLabel(request: CreateShipmentLabelRequest): Promise<ShippingResponse> {
-    const response = await apiClient.post<ShippingResponse>('/api/v1/shipping/label', request);
+    const response = await apiClient.post<ShippingResponse>('/v1/shipping/label', request);
     return response.data;
   }
 }
 
 export const shippingApi = new ShippingApiService();
+
+export default shippingApi;

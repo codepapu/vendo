@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Tag, Percent, Clock, TrendingDown, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,8 +46,6 @@ const featuredDeals = [
 ];
 
 export function Deals() {
-  const [selectedDeal, setSelectedDeal] = useState<string>('all');
-
   const searchParams = {
     status: 'published',
     page: 0,
@@ -96,7 +93,7 @@ export function Deals() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {featuredDeals.map((deal, index) => (
+            {featuredDeals.map((deal) => (
               <motion.div
                 key={deal.id}
                 variants={itemVariants}

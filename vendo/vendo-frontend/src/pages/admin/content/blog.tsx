@@ -5,7 +5,7 @@ import { Plus, Edit, Trash2, Eye, EyeOff, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { contentApi, type BlogPost, type BlogPostRequest } from '@/services/content-api';
+import { contentApi } from '@/services/content-api';
 import { formatDate } from '@/lib/utils';
 
 /**

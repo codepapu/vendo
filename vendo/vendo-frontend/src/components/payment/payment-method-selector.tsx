@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreditCard, Wallet, Smartphone, Building2 } from 'lucide-react';
 import { PaymentGateway, PaymentMethod } from '@/types';

@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { useNavigate } from 'react-router-dom';
 import { useRetailerStore } from '@/stores/retailer-store';
 import { useAuthStore } from '@/stores/auth-store';
-import { retailerApi } from '@/services/retailer-api';
 import { useQuery } from '@tanstack/react-query';
 import RetailerDashboard from '../dashboard';
 

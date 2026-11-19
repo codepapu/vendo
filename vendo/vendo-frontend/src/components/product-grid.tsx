@@ -17,6 +17,12 @@ interface ProductGridProps {
     minPrice?: number;
     maxPrice?: number;
   };
+  /** Render a pre-fetched list of products instead of querying the API */
+  products?: ProductResponse[];
+  /** Maximum number of products to fetch/display */
+  limit?: number;
+  /** When true, only featured products are shown */
+  featured?: boolean;
   onAddToCart?: (productId: number) => void;
   onAddToWishlist?: (productId: number) => void;
 }
@@ -25,10 +31,34 @@ interface ProductGridProps {
  * ProductGrid component for displaying a grid of products
  * Uses TanStack Query for data fetching
  */
-export function ProductGrid({ searchParams, onAddToCart, onAddToWishlist }: ProductGridProps) {
+export function ProductGrid({
+  searchParams,
+  products,
+  limit,
+  featured,
+  onAddToCart,
+  onAddToWishlist,
+}: ProductGridProps) {
   const { data, isLoading, error } = useQuery<PaginatedResponse<ProductResponse> | null>({
-    queryKey: ['products', searchParams],
+    queryKey: ['products', searchParams, limit, featured],
     queryFn: async () => {
+      if (featured) {
+        const featuredProducts = await productApi.getFeaturedProducts(searchParams?.status);
+        if (!featuredProducts) return null;
+        const content = limit ? featuredProducts.slice(0, limit) : featuredProducts;
+        return {
+          content,
+          totalElements: featuredProducts.length,
+          totalPages: 1,
+          size: content.length,
+          number: 0,
+          first: true,
+          last: true,
+          numberOfElements: content.length,
+          empty: content.length === 0,
+        };
+      }
+
       if (searchParams?.keyword) {
         return await productApi.searchProducts({
           keyword: searchParams.keyword,
@@ -73,13 +103,36 @@ export function ProductGrid({ searchParams, onAddToCart, onAddToWishlist }: Prod
       return await productApi.getAllProducts({
         status: searchParams?.status,
         page: searchParams?.page,
-        size: searchParams?.size,
+        size: searchParams?.size ?? limit,
         sortBy: searchParams?.sortBy,
         sortDir: searchParams?.sortDir,
       });
     },
-    enabled: true,
+    enabled: !products,
   });
+
+  if (products) {
+    if (products.length === 0) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          No products found.
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products.map((product, index) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            index={index}
+            onAddToCart={onAddToCart}
+            onAddToWishlist={onAddToWishlist}
+          />
+        ))}
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

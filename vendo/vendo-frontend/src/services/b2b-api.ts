@@ -1,14 +1,9 @@
 import { apiClient } from '@/lib/api';
 import {
-  BusinessAccount,
-  BusinessAccountRequest,
-  BusinessAccountResponse,
-  B2BPricing,
-  PurchaseOrder,
-  PurchaseOrderRequest,
-  PurchaseOrderResponse,
-  Invoice,
-  InvoiceResponse,
+BusinessAccountRequest,
+BusinessAccountResponse,
+B2BPricing,PurchaseOrderRequest,
+PurchaseOrderResponse,InvoiceResponse
 } from '@/types/b2b';
 
 class B2BApiService {
@@ -17,7 +12,7 @@ class B2BApiService {
    */
   async createAccount(data: BusinessAccountRequest): Promise<BusinessAccountResponse> {
     try {
-      const response = await apiClient.post<BusinessAccountResponse>('/api/v1/b2b/accounts', data);
+      const response = await apiClient.post<BusinessAccountResponse>('/v1/b2b/accounts', data);
       return response.data;
     } catch (error: any) {
       console.error('Failed to create business account:', error);
@@ -31,8 +26,8 @@ class B2BApiService {
   async getAccount(accountId?: number): Promise<BusinessAccountResponse | null> {
     try {
       const endpoint = accountId 
-        ? `/api/v1/b2b/accounts/${accountId}`
-        : '/api/v1/b2b/accounts/me';
+        ? `/v1/b2b/accounts/${accountId}`
+        : '/v1/b2b/accounts/me';
       const response = await apiClient.get<BusinessAccountResponse>(endpoint);
       return response.data;
     } catch (error: any) {
@@ -50,7 +45,7 @@ class B2BApiService {
   async getPricing(productId: number, quantity: number): Promise<B2BPricing> {
     try {
       const response = await apiClient.get<B2BPricing>(
-        `/api/v1/b2b/pricing/${productId}`,
+        `/v1/b2b/pricing/${productId}`,
         { params: { quantity } }
       );
       return response.data;
@@ -66,7 +61,7 @@ class B2BApiService {
   async createPurchaseOrder(data: PurchaseOrderRequest): Promise<PurchaseOrderResponse> {
     try {
       const response = await apiClient.post<PurchaseOrderResponse>(
-        '/api/v1/b2b/purchase-orders',
+        '/v1/b2b/purchase-orders',
         data
       );
       return response.data;
@@ -89,7 +84,7 @@ class B2BApiService {
       if (status) params.status = status;
       
       const response = await apiClient.get<{ content: PurchaseOrderResponse[]; totalElements: number }>(
-        '/api/v1/b2b/purchase-orders',
+        '/v1/b2b/purchase-orders',
         { params }
       );
       return response.data;
@@ -105,7 +100,7 @@ class B2BApiService {
   async getPurchaseOrder(poId: number): Promise<PurchaseOrderResponse> {
     try {
       const response = await apiClient.get<PurchaseOrderResponse>(
-        `/api/v1/b2b/purchase-orders/${poId}`
+        `/v1/b2b/purchase-orders/${poId}`
       );
       return response.data;
     } catch (error: any) {
@@ -127,7 +122,7 @@ class B2BApiService {
       if (status) params.status = status;
       
       const response = await apiClient.get<{ content: InvoiceResponse[]; totalElements: number }>(
-        '/api/v1/b2b/invoices',
+        '/v1/b2b/invoices',
         { params }
       );
       return response.data;
@@ -143,7 +138,7 @@ class B2BApiService {
   async getInvoice(invoiceId: number): Promise<InvoiceResponse> {
     try {
       const response = await apiClient.get<InvoiceResponse>(
-        `/api/v1/b2b/invoices/${invoiceId}`
+        `/v1/b2b/invoices/${invoiceId}`
       );
       return response.data;
     } catch (error: any) {
@@ -158,7 +153,7 @@ class B2BApiService {
   async markInvoicePaid(invoiceId: number, paymentMethod: string): Promise<InvoiceResponse> {
     try {
       const response = await apiClient.post<InvoiceResponse>(
-        `/api/v1/b2b/invoices/${invoiceId}/mark-paid`,
+        `/v1/b2b/invoices/${invoiceId}/mark-paid`,
         { paymentMethod }
       );
       return response.data;

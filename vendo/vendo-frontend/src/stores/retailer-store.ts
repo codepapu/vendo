@@ -1,12 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
-  Retailer,
-  RetailerProduct,
-  RetailerDashboard,
-  RetailerOrder,
-  RetailerAnalytics,
-  PaginatedResponse,
+Retailer,
+RetailerProduct,
+RetailerDashboard,
+RetailerOrder,
+RetailerAnalytics
 } from '@/types';
 import { retailerApi } from '@/services/retailer-api';
 

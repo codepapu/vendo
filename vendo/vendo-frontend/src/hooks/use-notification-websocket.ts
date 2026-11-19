@@ -64,7 +64,6 @@ export function useNotificationWebSocket(
           // Parse STOMP message frame
           const message = event.data;
           if (message.startsWith('MESSAGE')) {
-            const lines = message.split('\n');
             const bodyIndex = message.indexOf('\n\n');
             if (bodyIndex !== -1) {
               const body = message.substring(bodyIndex + 2).replace(/\x00/g, '');

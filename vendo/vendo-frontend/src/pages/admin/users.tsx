@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, Trash2, Search, UserX, UserCheck, Shield } from 'lucide-react';
+import { Edit, Trash2, Search, UserX, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adminApi, type AdminUserResponse } from '@/services/admin-api';
 import { formatDate } from '@/lib/utils';
-import type { OrderResponse } from '@/types';
 
 /**
  * Admin page for managing users
@@ -27,7 +26,6 @@ export function AdminUsers() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUserResponse | null>(null);
-  const [userOrders, setUserOrders] = useState<OrderResponse[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -54,7 +52,7 @@ export function AdminUsers() {
   });
 
   // Fetch user details
-  const { data: userDetails } = useQuery({
+  useQuery({
     queryKey: ['admin-user-details', viewingUser?.id],
     queryFn: () => adminApi.getUserById(viewingUser!.id),
     enabled: !!viewingUser,

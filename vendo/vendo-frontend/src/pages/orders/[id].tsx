@@ -3,51 +3,49 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+Card,
+CardContent,
+CardDescription,
+CardHeader,
+CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+Dialog,
+DialogContent,
+DialogDescription,
+DialogFooter,
+DialogHeader,
+DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+Select,
+SelectContent,
+SelectItem,
+SelectTrigger,
+SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ProtectedRoute } from '@/components/protected-route';
 import { orderApi } from '@/services/order-api';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Loader2,
-  Package,
-  MapPin,
-  CreditCard,
-  Truck,
-  Calendar,
-  X,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
+Loader2,
+Package,
+MapPin,
+CreditCard,
+Truck,
+Calendar,
+X,
+AlertTriangle,
+CheckCircle,
+Clock,
 } from 'lucide-react';
 import type {
-  OrderResponse,
-  CancellationReason,
-  CancelOrderRequest,
+CancellationReason,
+CancelOrderRequest
 } from '@/types';
 
 const statusColors: Record<string, string> = {
@@ -72,7 +70,6 @@ const statusIcons: Record<string, React.ReactNode> = {
 
 export function OrderDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showCancelDialog, setShowCancelDialog] = useState(false);

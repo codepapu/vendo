@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { userApi } from '@/services/user-api';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,6 @@ export function Settings() {
   const { user, logout } = useAuthStore();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Fetch user profile

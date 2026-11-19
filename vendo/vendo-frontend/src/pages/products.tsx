@@ -11,11 +11,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { wishlistApi } from '@/services/wishlist-api';
 import { showSuccessToast } from '@/lib/api';
 import { productApi } from '@/services/product-api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
+import { cartApi } from '@/services/cart-api';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import type { PaginatedResponse, ProductResponse } from '@/types';
 
@@ -98,9 +94,13 @@ export function Products() {
     await wishlistApi.addToWishlist(productId);
   };
 
-  const handleAddToCart = (productId: number) => {
-    // TODO: Implement cart functionality
-    showSuccessToast('Product added to cart');
+  const handleAddToCart = async (productId: number) => {
+    if (!isAuthenticated) {
+      showSuccessToast('Please login to add items to your cart');
+      return;
+    }
+    // cartApi shows its own success/error toast
+    await cartApi.addItemToCart({ productId, quantity: 1 });
   };
 
   const clearFilters = () => {

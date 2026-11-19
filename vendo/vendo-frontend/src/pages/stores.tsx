@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Store, Star, MapPin, ArrowRight, Search } from 'lucide-react';
+import { Store, Star, ArrowRight, Search } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { retailerApi } from '@/services/retailer-api';
 import { useState } from 'react';
 
 const itemVariants = {
@@ -106,7 +105,7 @@ export function Stores() {
             </div>
           ) : filteredStores.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredStores.map((store, index) => (
+              {filteredStores.map((store) => (
                 <motion.div
                   key={store.id}
                   initial="hidden"

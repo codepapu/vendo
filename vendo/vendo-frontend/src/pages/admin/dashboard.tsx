@@ -1,16 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Store,
-  Clock,
-  TrendingUp,
-  FileText,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
+DollarSign,
+ShoppingCart,
+Users,
+Store,
+Clock,
+TrendingUp,
+FileText,
+CheckCircle,AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,21 +16,20 @@ import { Badge } from '@/components/ui/badge';
 import { adminApi } from '@/services/admin-api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
+Line,
+BarChart,
+Bar,
+PieChart,
+Pie,
+Cell,
+XAxis,
+YAxis,
+CartesianGrid,
+Tooltip,
+Legend,
+ResponsiveContainer,
+AreaChart,
+Area
 } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -82,7 +79,7 @@ export function AdminDashboard() {
   const navigate = useNavigate();
 
   // Fetch dashboard data
-  const { data: dashboard, isLoading } = useQuery({
+  const { data: dashboard, isLoading } = useQuery<AdminDashboard | null>({
     queryKey: ['admin-dashboard'],
     queryFn: () => adminApi.getAdminDashboard(),
   });
@@ -338,7 +335,7 @@ export function AdminDashboard() {
                   fill="#8884d8"
                   dataKey="revenue"
                 >
-                  {revenueByTypeData.map((entry, index) => (
+                  {revenueByTypeData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

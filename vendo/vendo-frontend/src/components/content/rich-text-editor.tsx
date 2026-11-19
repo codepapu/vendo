@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Bold, Italic, Underline, List, Link, Image, Eye, Edit } from 'lucide-react';
+import { Bold, Italic, Underline, List, Link, Eye, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';

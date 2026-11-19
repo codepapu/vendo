@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -46,7 +45,7 @@ export default function ReturnsPage() {
   });
 
   const generateLabelMutation = useMutation({
-    mutationFn: (returnId: number) => {
+    mutationFn: () => {
       // Generate return label via shipping service
       return shippingApi.createShipmentLabel({
         orderId: selectedOrder!,
@@ -54,7 +53,7 @@ export default function ReturnsPage() {
         carrier: 'DEFAULT',
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: 'Success',
         description: 'Return label generated',
@@ -100,7 +99,7 @@ export default function ReturnsPage() {
             <SelectContent>
               {orders?.content.map((o) => (
                 <SelectItem key={o.id} value={o.id.toString()}>
-                  {o.orderNumber} - ${o.totalAmount.toFixed(2)}
+                  {o.code} - ${o.amount.toFixed(2)}
                 </SelectItem>
               ))}
             </SelectContent>

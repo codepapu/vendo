@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { useRetailerStore } from '@/stores/retailer-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { retailerApi } from '@/services/retailer-api';
-import { productApi } from '@/services/product-api';
 import { useQuery } from '@tanstack/react-query';
 import RetailerProducts from '../products';
 
@@ -235,11 +234,9 @@ describe('ProductManagement (RetailerProducts)', () => {
       await user.click(productItem);
     }
 
-    await waitFor(() => {
-      const priceInput = screen.getByLabelText(/price/i);
-      await user.clear(priceInput);
-      await user.type(priceInput, '150');
-    });
+    const priceInput = await screen.findByLabelText(/price/i);
+    await user.clear(priceInput);
+    await user.type(priceInput, '150');
 
     const addProductButton = screen.getByRole('button', { name: /add product/i });
     await user.click(addProductButton);

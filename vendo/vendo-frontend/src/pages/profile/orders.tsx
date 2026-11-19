@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Package, Calendar, DollarSign, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { OrderResponse, OrderStatus } from '@/types';
 
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',

@@ -81,7 +81,7 @@ export function PayPalPaymentButton({
           shape: 'rect',
           label: 'paypal',
         },
-        createOrder: async (data: any, actions: any) => {
+        createOrder: async () => {
           try {
             // Create payment on backend first
             const paymentData: ProcessPaymentRequest = {
@@ -118,7 +118,7 @@ export function PayPalPaymentButton({
             throw err;
           }
         },
-        onApprove: async (data: any, actions: any) => {
+        onApprove: async (_data: any, actions: any) => {
           try {
             setLoading(true);
             // Capture the payment

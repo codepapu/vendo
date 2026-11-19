@@ -13,8 +13,6 @@ export function usePaymentWebhook(
   enabled: boolean = true
 ) {
   const eventSourceRef = useRef<EventSource | null>(null);
-  const retryCountRef = useRef(0);
-  const maxRetries = 3;
 
   useEffect(() => {
     if (!chargeId || !enabled) return;

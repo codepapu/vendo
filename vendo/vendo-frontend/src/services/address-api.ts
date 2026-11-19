@@ -1,8 +1,7 @@
 import { apiClient, handleApiError, showSuccessToast } from '@/lib/api';
 import type {
-  AddressResponse,
-  ApiResponse,
-  Address,
+AddressResponse,
+ApiResponse
 } from '@/types';
 
 /**

@@ -15,7 +15,7 @@ export default function B2BProducts() {
 
   const { data: products } = useQuery({
     queryKey: ['products'],
-    queryFn: () => productApi.getProducts(),
+    queryFn: () => productApi.getAllProducts(),
   });
 
   const handleGetPricing = async (productId: number) => {

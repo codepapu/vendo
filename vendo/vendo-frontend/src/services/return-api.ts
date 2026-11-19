@@ -30,38 +30,48 @@ export interface ReturnResponse {
     quantity: number;
     price: number;
     refundAmount: number;
+    reason?: string;
+    condition?: string;
   }>;
+  history?: ReturnHistoryEntry[];
+}
+
+export interface ReturnHistoryEntry {
+  id: number;
+  status: string;
+  description?: string;
+  createdAt: string;
 }
 
 class ReturnApiService {
   async createReturnRequest(data: ReturnRequest): Promise<ReturnResponse> {
-    const response = await apiClient.post<ReturnResponse>('/api/v1/returns', data);
+    const response = await apiClient.post<ReturnResponse>('/v1/returns', data);
     return response.data;
   }
 
   async getReturnById(id: number): Promise<ReturnResponse> {
-    const response = await apiClient.get<ReturnResponse>(`/api/v1/returns/${id}`);
+    const response = await apiClient.get<ReturnResponse>(`/v1/returns/${id}`);
     return response.data;
   }
 
   async getReturnByCode(code: string): Promise<ReturnResponse> {
-    const response = await apiClient.get<ReturnResponse>(`/api/v1/returns/code/${code}`);
+    const response = await apiClient.get<ReturnResponse>(`/v1/returns/code/${code}`);
     return response.data;
   }
 
   async getReturnsByOrderId(orderId: number): Promise<ReturnResponse[]> {
-    const response = await apiClient.get<ReturnResponse[]>(`/api/v1/returns/order/${orderId}`);
+    const response = await apiClient.get<ReturnResponse[]>(`/v1/returns/order/${orderId}`);
     return response.data;
   }
 
   async getReturnHistory(): Promise<ReturnResponse[]> {
-    const response = await apiClient.get<ReturnResponse[]>('/api/v1/returns/history');
+    const response = await apiClient.get<ReturnResponse[]>('/v1/returns/history');
     return response.data;
   }
 
   async approveReturn(id: number, notes?: string): Promise<ReturnResponse> {
     const response = await apiClient.post<ReturnResponse>(
-      `/api/v1/returns/${id}/approve`,
+      `/v1/returns/${id}/approve`,
       null,
       { params: { notes } }
     );
@@ -70,7 +80,7 @@ class ReturnApiService {
 
   async rejectReturn(id: number, reason?: string): Promise<ReturnResponse> {
     const response = await apiClient.post<ReturnResponse>(
-      `/api/v1/returns/${id}/reject`,
+      `/v1/returns/${id}/reject`,
       null,
       { params: { reason } }
     );
@@ -78,13 +88,13 @@ class ReturnApiService {
   }
 
   async processRefund(id: number): Promise<ReturnResponse> {
-    const response = await apiClient.post<ReturnResponse>(`/api/v1/returns/${id}/refund`);
+    const response = await apiClient.post<ReturnResponse>(`/v1/returns/${id}/refund`);
     return response.data;
   }
 
   async getReturnsByStatus(status?: string): Promise<ReturnResponse[]> {
     const response = await apiClient.get<ReturnResponse[]>(
-      `/api/v1/returns/status/${status || 'PENDING'}`
+      `/v1/returns/status/${status || 'PENDING'}`
     );
     return response.data;
   }

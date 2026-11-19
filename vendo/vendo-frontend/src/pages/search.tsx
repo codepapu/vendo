@@ -254,7 +254,27 @@ export default function SearchPage() {
                       </Badge>
                     )}
                   </div>
-                  <ProductGrid products={searchResults.products || []} />
+                  <ProductGrid
+                    products={(searchResults.products || []).map((p) => ({
+                      id: p.id,
+                      name: p.name,
+                      description: p.description,
+                      images: p.imageUrl,
+                      price: p.price,
+                      salePrice: p.salePrice,
+                      averageRating: p.rating,
+                      reviewCount: p.reviewCount,
+                      brandName: p.brand,
+                      categoryNames: p.category ? [p.category] : [],
+                      status: 'PUBLISHED',
+                      sku: p.slug,
+                      isFeatured: false,
+                      isVariation: false,
+                      saleType: 0,
+                      createdAt: '',
+                      updatedAt: '',
+                    }))}
+                  />
                 </motion.div>
               ) : query ? (
                 <Card>

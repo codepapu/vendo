@@ -1,11 +1,9 @@
 import { apiClient, handleApiError } from '@/lib/api';
 import type {
-  AnalyticsDashboard,
-  AnalyticsDashboardResponse,
-  TrackEventRequest,
-  AnalyticsEventType,
-  AnalyticsEventProperties,
-  ApiResponse,
+AnalyticsDashboard,TrackEventRequest,
+AnalyticsEventType,
+AnalyticsEventProperties,
+ApiResponse
 } from '@/types';
 
 /**

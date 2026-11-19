@@ -9,7 +9,6 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { PaymentMethodSelector } from '@/components/payment/payment-method-selector';
 import { PaymentGatewayAdapter } from '@/components/payment/payment-gateway-adapter';
 import { PaymentConfirmation } from '@/components/payment/payment-confirmation';
-import { PaymentStatus } from '@/components/payment/payment-status';
 import { PaymentErrorBoundary } from '@/components/payment/payment-error-boundary';
 import { orderApi } from '@/services/order-api';
 import { userApi } from '@/services/user-api';
@@ -30,7 +29,6 @@ export function PaymentPage() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [payment, setPayment] = useState<PaymentResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
 
   // Fetch order details
   const { data: order, isLoading: orderLoading } = useQuery({
@@ -119,8 +117,9 @@ export function PaymentPage() {
     );
   }
 
-  const amount = order.totalAmount || 0;
-  const currency = order.currency || 'USD';
+  const amount = order.amount || 0;
+  const currency = 'USD';
+  const profileName = [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ');
 
   const handlePaymentSuccess = (paymentResponse: PaymentResponse) => {
     setPayment(paymentResponse);
@@ -153,9 +152,9 @@ export function PaymentPage() {
         orderId,
         amount,
         currency,
-        customerEmail: userProfile?.email || order.customerEmail,
-        customerName: userProfile?.name || order.customerName,
-        customerPhone: userProfile?.phone || order.customerPhone,
+        customerEmail: userProfile?.email,
+        customerName: profileName || order.shippingAddress?.contactName,
+        customerPhone: userProfile?.phone || order.shippingAddress?.phone,
         paymentMethod: selectedMethod,
         onSuccess: handlePaymentSuccess,
         onError: handlePaymentError,
@@ -207,21 +206,21 @@ export function PaymentPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatPrice(order.subtotal || 0, currency)}</span>
+                  <span>{formatPrice(order.subTotal || 0, currency)}</span>
                 </div>
-                {order.shippingCost && order.shippingCost > 0 && (
+                {order.shippingAmount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{formatPrice(order.shippingCost, currency)}</span>
+                    <span>{formatPrice(order.shippingAmount, currency)}</span>
                   </div>
                 )}
-                {order.taxAmount && order.taxAmount > 0 && (
+                {order.taxAmount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
                     <span>{formatPrice(order.taxAmount, currency)}</span>
                   </div>
                 )}
-                {order.discountAmount && order.discountAmount > 0 && (
+                {order.discountAmount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount</span>
                     <span>-{formatPrice(order.discountAmount, currency)}</span>
@@ -240,7 +239,6 @@ export function PaymentPage() {
             selectedMethod={selectedMethod}
             onGatewaySelect={setSelectedGateway}
             onMethodSelect={setSelectedMethod}
-            disabled={processing}
           />
         </div>
 

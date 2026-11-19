@@ -1,4 +1,4 @@
-import { api } from '../lib/api';
+import api from '../lib/api';
 
 export interface IntegrationConfig {
   id: number;
@@ -91,76 +91,78 @@ export interface ERPIntegrationResponse {
 export const integrationApi = {
   // Configuration Management
   getAllConfigurations: async (page = 0, size = 20) => {
-    const response = await api.get(`/integrations?page=${page}&size=${size}`);
+    const response = await api.get(`/v1/integrations?page=${page}&size=${size}`);
     return response.data;
   },
 
   getConfigurationById: async (id: number) => {
-    const response = await api.get(`/integrations/${id}`);
+    const response = await api.get(`/v1/integrations/${id}`);
     return response.data;
   },
 
   getConfigurationsByType: async (type: 'ACCOUNTING' | 'CRM' | 'ERP', page = 0, size = 20) => {
-    const response = await api.get(`/integrations/type/${type}?page=${page}&size=${size}`);
+    const response = await api.get(`/v1/integrations/type/${type}?page=${page}&size=${size}`);
     return response.data;
   },
 
   createConfiguration: async (config: IntegrationConfigRequest) => {
-    const response = await api.post('/integrations', config);
+    const response = await api.post('/v1/integrations', config);
     return response.data;
   },
 
   updateConfiguration: async (id: number, config: IntegrationConfigRequest) => {
-    const response = await api.put(`/integrations/${id}`, config);
+    const response = await api.put(`/v1/integrations/${id}`, config);
     return response.data;
   },
 
   deleteConfiguration: async (id: number) => {
-    const response = await api.delete(`/integrations/${id}`);
+    const response = await api.delete(`/v1/integrations/${id}`);
     return response.data;
   },
 
   enableConfiguration: async (id: number) => {
-    const response = await api.post(`/integrations/${id}/enable`);
+    const response = await api.post(`/v1/integrations/${id}/enable`);
     return response.data;
   },
 
   disableConfiguration: async (id: number) => {
-    const response = await api.post(`/integrations/${id}/disable`);
+    const response = await api.post(`/v1/integrations/${id}/disable`);
     return response.data;
   },
 
   // Accounting Integration
   syncToAccounting: async (id: number): Promise<AccountingIntegrationResponse> => {
-    const response = await api.post(`/integrations/accounting/${id}/sync`);
+    const response = await api.post(`/v1/integrations/accounting/${id}/sync`);
     return response.data.data;
   },
 
   syncFromAccounting: async (id: number): Promise<AccountingIntegrationResponse> => {
-    const response = await api.post(`/integrations/accounting/${id}/sync/inbound`);
+    const response = await api.post(`/v1/integrations/accounting/${id}/sync/inbound`);
     return response.data.data;
   },
 
   // CRM Integration
   syncToCRM: async (id: number): Promise<CRMIntegrationResponse> => {
-    const response = await api.post(`/integrations/crm/${id}/sync`);
+    const response = await api.post(`/v1/integrations/crm/${id}/sync`);
     return response.data.data;
   },
 
   syncFromCRM: async (id: number): Promise<CRMIntegrationResponse> => {
-    const response = await api.post(`/integrations/crm/${id}/sync/inbound`);
+    const response = await api.post(`/v1/integrations/crm/${id}/sync/inbound`);
     return response.data.data;
   },
 
   // ERP Integration
   syncToERP: async (id: number): Promise<ERPIntegrationResponse> => {
-    const response = await api.post(`/integrations/erp/${id}/sync`);
+    const response = await api.post(`/v1/integrations/erp/${id}/sync`);
     return response.data.data;
   },
 
   syncFromERP: async (id: number): Promise<ERPIntegrationResponse> => {
-    const response = await api.post(`/integrations/erp/${id}/sync/inbound`);
+    const response = await api.post(`/v1/integrations/erp/${id}/sync/inbound`);
     return response.data.data;
   },
 };
 
+
+export default integrationApi;

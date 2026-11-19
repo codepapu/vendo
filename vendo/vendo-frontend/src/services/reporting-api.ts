@@ -1,12 +1,10 @@
 import { apiClient, handleApiError, showSuccessToast } from '@/lib/api';
 import type {
-  ReportRequest,
-  ReportResponse,
-  ReportType,
-  ReportFormat,
-  ScheduledReportConfig,
-  ScheduledReportResponse,
-  ApiResponse,
+ReportRequest,
+ReportResponse,ReportFormat,
+ScheduledReportConfig,
+ScheduledReportResponse,
+ApiResponse
 } from '@/types';
 
 /**
@@ -182,7 +180,7 @@ class ReportingApiService {
     filename?: string
   ): Promise<boolean> {
     try {
-      const response = await apiClient.post<ApiResponse<ReportResponse>>(
+      const response = await apiClient.post<ApiResponse<ReportResponse['data']>>(
         '/v1/reports/generate',
         request
       );

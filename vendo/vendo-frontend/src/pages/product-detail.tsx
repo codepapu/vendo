@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Package, Clock, ZoomIn, X } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Package, Clock, ZoomIn } from 'lucide-react';
 import { productApi } from '@/services/product-api';
 import { reviewApi } from '@/services/review-api';
 import { wishlistApi } from '@/services/wishlist-api';
@@ -24,7 +24,7 @@ export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -506,6 +506,51 @@ export function ProductDetail() {
         {/* Recently Viewed Products */}
         <RecentlyViewedProducts currentProductId={product.id} />
       </motion.div>
+
+      {/* Image Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none">
+          <div className="relative aspect-square max-h-[90vh]">
+            <img
+              src={images[lightboxImageIndex] || '/placeholder.png'}
+              alt={`${product.name} - Image ${lightboxImageIndex + 1}`}
+              className="w-full h-full object-contain"
+            />
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-white/20 text-white"
+                  onClick={() => setLightboxImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-white/20 text-white"
+                  onClick={() => setLightboxImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setLightboxImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        lightboxImageIndex === index ? 'bg-white' : 'bg-white/50'
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -633,51 +678,6 @@ function RecentlyViewedProducts({ currentProductId }: { currentProductId: number
           </Card>
         ))}
       </div>
-
-      {/* Image Lightbox */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none">
-          <div className="relative aspect-square max-h-[90vh]">
-            <img
-              src={images[lightboxImageIndex] || '/placeholder.png'}
-              alt={`${product.name} - Image ${lightboxImageIndex + 1}`}
-              className="w-full h-full object-contain"
-            />
-            {images.length > 1 && (
-              <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-white/20 text-white"
-                  onClick={() => setLightboxImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-white/20 text-white"
-                  onClick={() => setLightboxImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                  {images.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setLightboxImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        lightboxImageIndex === index ? 'bg-white' : 'bg-white/50'
-                      }`}
-                      aria-label={`Go to image ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

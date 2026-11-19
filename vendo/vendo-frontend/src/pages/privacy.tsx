@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, FileText, List } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },

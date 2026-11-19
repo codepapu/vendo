@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useRetailerStore } from '@/stores/retailer-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { retailerApi } from '@/services/retailer-api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 export default function RetailerDashboard() {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export default function RetailerDashboard() {
     }
   }, [user?.id]);
 
-  const { data: dashboard, refetch: refetchDashboard } = useQuery({
+  const { data: dashboard } = useQuery({
     queryKey: ['retailer-dashboard'],
     queryFn: () => retailerApi.getDashboard(),
     enabled: !!user?.id,
@@ -101,7 +101,7 @@ export default function RetailerDashboard() {
   }
 
   // Prepare chart data from recent orders or sales data
-  const salesChartData = dashboardInfo.recentOrders?.slice(0, 7).map((order, index) => ({
+  const salesChartData = dashboardInfo.recentOrders?.slice(0, 7).map((order) => ({
     date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     sales: order.totalAmount,
     orders: 1,

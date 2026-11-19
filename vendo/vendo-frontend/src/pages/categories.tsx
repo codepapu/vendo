@@ -5,7 +5,6 @@ import { Grid3x3, Package, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { productApi } from '@/services/product-api';
 import type { CategoryResponse } from '@/types';
 
 const itemVariants = {
@@ -68,7 +67,7 @@ export function Categories() {
             </div>
           ) : categories && categories.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category, index) => (
+              {categories.map((category) => (
                 <motion.div
                   key={category.id}
                   initial="hidden"

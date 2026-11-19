@@ -1,9 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Eye, ArrowLeft, Share2, Facebook, Twitter, Linkedin, Link as LinkIcon, Copy, Check } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Share2, Facebook, Twitter, Linkedin, Link as LinkIcon, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,12 +41,10 @@ export function BlogPostDetail() {
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const shareTitle = post?.title || '';
-  const shareText = post?.excerpt || '';
 
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(currentUrl);
     const title = encodeURIComponent(shareTitle);
-    const text = encodeURIComponent(shareText);
 
     let shareUrl = '';
     switch (platform) {

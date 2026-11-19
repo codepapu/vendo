@@ -35,7 +35,13 @@ export type AnalyticsEventType =
  * Analytics event properties
  */
 export interface AnalyticsEventProperties {
-  [key: string]: string | number | boolean | null | undefined;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | object; // nested JSON-serializable values (arrays, objects)
 }
 
 /**

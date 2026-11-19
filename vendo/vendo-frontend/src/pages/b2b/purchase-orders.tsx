@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useB2BStore } from '@/stores/b2b-store';
 import { b2bApi } from '@/services/b2b-api';
 import { orderApi } from '@/services/order-api';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +12,6 @@ export default function PurchaseOrders() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [createPOModalOpen, setCreatePOModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-  const { loadPurchaseOrders } = useB2BStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -68,7 +66,7 @@ export default function PurchaseOrders() {
                   <SelectContent>
                     {availableOrders?.content.map((order) => (
                       <SelectItem key={order.id} value={order.id.toString()}>
-                        {order.orderNumber} - ${order.totalAmount.toFixed(2)}
+                        {order.code} - ${order.amount.toFixed(2)}
                       </SelectItem>
                     ))}
                   </SelectContent>
